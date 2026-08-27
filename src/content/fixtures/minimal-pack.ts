@@ -1,0 +1,56 @@
+export const minimalPack = {
+  manifest: {
+    schemaVersion: 1,
+    contentVersion: '1.0.0',
+    packId: 'fixture-pack',
+    title: { zh: '测试包', en: 'Fixture Pack' },
+    primaryAnswerLanguage: 'zh',
+    expectedEntityCounts: { region: 1, place: 1 },
+    capabilities: [
+      'locate_region',
+      'identify_region',
+      'associate_capital',
+      'locate_place',
+      'identify_place',
+    ],
+    defaultViewport: { center: [121.47, 31.23], scale: 9000 },
+    distributionStatus: 'development-only',
+    checksums: {
+      entities: '0'.repeat(64),
+      topology: '1'.repeat(64),
+      sources: '2'.repeat(64),
+    },
+  },
+  entities: [
+    {
+      id: 'region-a',
+      kind: 'region',
+      names: { zh: '甲区', en: 'Region A' },
+      aliases: [],
+      capitalId: 'city-a',
+    },
+    {
+      id: 'city-a',
+      kind: 'place',
+      names: { zh: '甲城', en: 'City A' },
+      aliases: [],
+      coordinate: [121.47, 31.23],
+    },
+  ],
+  topologyObjectIds: ['region-a'],
+  sources: [
+    {
+      id: 'fixture',
+      organization: 'Test',
+      url: 'https://example.invalid',
+      retrievedAt: '2026-08-27',
+      license: 'test-only',
+      sha256: '0'.repeat(64),
+      coordinateReferenceSystem: 'EPSG:4326',
+      processing: [],
+      simplification: null,
+      quantization: null,
+      reviewIdentifier: null,
+    },
+  ],
+};
