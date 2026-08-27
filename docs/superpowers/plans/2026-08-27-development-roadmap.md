@@ -20,6 +20,87 @@
 - TypeScript uses `strict`; no unexplained `any`, non-null assertion, SQL in React, or learning rules in Rust commands.
 - All feature work follows red-green-refactor, includes keyboard/reduced-motion coverage, and ends with a focused commit.
 
+## Frozen cross-task contracts
+
+The following decisions remove ambiguity between independently implemented tasks. Later task examples are subordinate to these contracts when their abbreviated snippets omit a field.
+
+### Learning events and retry debt
+
+```ts
+export type AttemptEvent = Readonly<{
+  attemptId: string;
+  sessionId: string;
+  learnerId: string;
+  packId: string;
+  entityId: string;
+  skill: Skill;
+  questionKind: Question['kind'];
+  mode: SessionRequest['mode'];
+  scheduledReview: boolean;
+  delayedRetry: boolean;
+  answerAttemptCount: 1 | 2;
+  correct: boolean;
+  independentCorrect: boolean;
+  usedHint: boolean;
+  responseMs: number;
+  completedAt: string;
+}>;
+
+export type RetryDebt = Readonly<{
+  entityId: string;
+  skill: Skill;
+  sourceQuestionKind: Question['kind'];
+  createdAt: string;
+  priority: 'immediate';
+}>;
+```
+
+`independentCorrect` means correct on the first answer without a hint and outside placement mode. `scheduledReview` is captured when the question is presented and is true only when the prior mastery record was due at that instant. Fragile calculations and summaries consume persisted `AttemptEvent` values, never reconstruct these facts from mutable mastery snapshots. `PracticeSession` stores `carryoverRetryDebts: readonly RetryDebt[]`; the earlier abbreviated `carryoverRetryEntityIds` field is not used.
+
+### Session requests and cap denominators
+
+```ts
+export type SessionRequest =
+  | Readonly<{ mode: 'smart'; packId: string }>
+  | Readonly<{ mode: 'placement'; packId: string }>
+  | Readonly<{
+      mode: 'custom';
+      packId: string;
+      questionCount: number;
+      entityIds: readonly [string, ...string[]];
+      skills: readonly [Skill, ...Skill[]];
+      statuses: readonly ('new' | 'learning' | 'weak' | 'familiar' | 'solid' | 'mastered' | 'fragile')[];
+    }>;
+```
+
+Smart and placement sessions always have 12 base questions. Custom question count is runtime-validated to 1–50. The 50% question-kind cap and 25% fragile cap use the 12 smart-session base questions as their denominator; introductions and delayed retries are excluded. Therefore the fixed smart caps are six questions of one kind and three fragile questions.
+
+### Question presentation
+
+Every question is a discriminated union with an explicit `presentation: 'map' | 'choice' | 'text'`. `locate_region` and `locate_place` always use `map` and never carry choices. The other three kinds carry either `presentation: 'choice'` with four candidate entity IDs or `presentation: 'text'` with an `AnswerSpec`. Prompts and display labels are derived from entity IDs and the pack language at the UI boundary, so persisted questions remain stable across copy changes.
+
+### Mastery timing
+
+- An independent correct answer promotes one stage and schedules the promoted stage's base interval.
+- An independent correct answer already at `mastered` doubles the previous scheduled interval, with a 21-day floor and 90-day cap.
+- A correct answer after a hint or retry keeps the stage and schedules `min(current-stage interval, 1 day)`; the in-session retry remains independently scheduled.
+- A fully failed question demotes one stage, schedules 10 minutes, and creates delayed retry debt.
+- Only `scheduledReview` events count toward fragile marking or clearing. Placement events never count as failures and initialize no higher than `familiar`.
+
+### Content and map authority
+
+`manifest.json` includes SHA-256 values for `entities.json`, `map.topojson` and `sources.json`. Source entries include coordinate reference system, simplification/quantization parameters, processing steps, license/use terms and optional review or standard-map identifiers. Validation issue codes additionally include `checksum_mismatch`, `invalid_topology`, `point_outside_region`, `source_metadata` and `coordinate_mismatch`.
+
+`entities.json.coordinate` is the authoritative learning coordinate. A matching TopoJSON point may exist for rendering, but when present it must match within `1e-6` degrees. Task 3 exposes both `list_content_pack_ids` and `read_content_resource`; `TauriContentSource.readPackIds()` uses the former.
+
+### Backup settings semantics
+
+Merge import leaves current settings unchanged unless the preview screen explicitly selects “同时导入设置”. Replace import always replaces learning data, sessions and settings after the required destructive warning.
+
+### User-test content gate
+
+Task 15 may produce a personal user-test build once all automated source, count, relationship, geometry and hash checks pass and the pack is visibly marked `distributionStatus: 'development-only'`. Public-distribution approval remains unchecked until a named human completes the actual-render and statutory review; this does not block local user testing.
+
 ---
 
 ## Planned file map
@@ -135,13 +216,31 @@ export const minimalPack = {
     expectedEntityCounts: { region: 1, place: 1 },
     capabilities: ['locate_region', 'identify_region', 'associate_capital', 'locate_place', 'identify_place'],
     defaultViewport: { center: [121.47, 31.23], scale: 9000 },
+    distributionStatus: 'development-only',
+    checksums: {
+      entities: '0'.repeat(64),
+      topology: '1'.repeat(64),
+      sources: '2'.repeat(64),
+    },
   },
   entities: [
     { id: 'region-a', kind: 'region', names: { zh: '甲区', en: 'Region A' }, aliases: [], capitalId: 'city-a' },
     { id: 'city-a', kind: 'place', names: { zh: '甲城', en: 'City A' }, aliases: [], coordinate: [121.47, 31.23] },
   ],
   topologyObjectIds: ['region-a'],
-  sources: [{ id: 'fixture', organization: 'Test', url: 'https://example.invalid', retrievedAt: '2026-08-27', license: 'test-only', sha256: '0'.repeat(64), processing: [] }],
+  sources: [{
+    id: 'fixture',
+    organization: 'Test',
+    url: 'https://example.invalid',
+    retrievedAt: '2026-08-27',
+    license: 'test-only',
+    sha256: '0'.repeat(64),
+    coordinateReferenceSystem: 'EPSG:4326',
+    processing: [],
+    simplification: null,
+    quantization: null,
+    reviewIdentifier: null,
+  }],
 };
 ```
 
@@ -159,7 +258,7 @@ Expected: FAIL because `validatePack` is absent.
 
 ```ts
 export type PackValidationIssue = Readonly<{
-  code: 'schema' | 'duplicate_id' | 'missing_reference' | 'count_mismatch' | 'missing_geometry' | 'capability_mismatch';
+  code: 'schema' | 'duplicate_id' | 'missing_reference' | 'count_mismatch' | 'missing_geometry' | 'capability_mismatch' | 'checksum_mismatch' | 'invalid_topology' | 'point_outside_region' | 'source_metadata' | 'coordinate_mismatch';
   path: string;
   message: string;
 }>;
@@ -192,7 +291,7 @@ git commit -m "feat: define versioned content pack contract"
 
 **Interfaces:**
 - Consumes: `validatePack` from Task 2.
-- Produces: `ContentSource.readPackIds()`, `ContentSource.readJson(packId, fileName)`, `loadAvailablePacks(source)`, `migrateContentProgress` and Tauri command `read_content_resource`.
+- Produces: `ContentSource.readPackIds()`, `ContentSource.readJson(packId, fileName)`, `loadAvailablePacks(source)`, `migrateContentProgress` and Tauri commands `list_content_pack_ids`, `read_content_resource`.
 
 - [ ] **Step 1: Write loader isolation tests**
 
@@ -217,7 +316,7 @@ The loader combines the four resources, extracts TopoJSON object IDs, validates 
 
 - [ ] **Step 4: Implement the narrow Rust resource command**
 
-`read_content_resource(pack_id, file_name)` must accept only the four allow-listed filenames, reject path separators and resolve within Tauri's bundled `resources/content` directory. Return a structured `{ code, message }` error; never expose an arbitrary filesystem path capability.
+`list_content_pack_ids()` enumerates only direct child directories containing a manifest and returns sorted stable IDs. `read_content_resource(pack_id, file_name)` must accept only the four allow-listed filenames, reject path separators and resolve within Tauri's bundled `resources/content` directory. Return a structured `{ code, message }` error; never expose an arbitrary filesystem path capability.
 
 - [ ] **Step 5: Implement and test conservative content migration**
 
@@ -246,7 +345,7 @@ git commit -m "feat: load and isolate bundled content packs"
 
 **Interfaces:**
 - Consumes: entity/skill IDs from Task 2.
-- Produces: `MasteryRecord`, `AttemptOutcome`, `updateMastery(record, outcome, now)`, `isFragile(history, now)`.
+- Produces: `MasteryRecord`, `AttemptOutcome`, `AttemptEvent`, `updateMastery(record, outcome, now)`, `isFragile(history, now)`.
 
 - [ ] **Step 1: Encode the stage and interval table in tests**
 
@@ -330,11 +429,14 @@ Expected: FAIL because the modules are absent.
 
 ```ts
 export type Question =
-  | Readonly<{ kind: 'locate_region'; entityId: string; promptName: string }>
-  | Readonly<{ kind: 'identify_region'; entityId: string; answer: AnswerSpec; choices?: readonly string[] }>
-  | Readonly<{ kind: 'associate_capital'; entityId: string; capitalId: string; choices?: readonly string[] }>
-  | Readonly<{ kind: 'locate_place'; entityId: string; coordinate: readonly [number, number]; choices: readonly string[] }>
-  | Readonly<{ kind: 'identify_place'; entityId: string; answer: AnswerSpec; choices?: readonly string[] }>;
+  | Readonly<{ kind: 'locate_region'; presentation: 'map'; entityId: string }>
+  | Readonly<{ kind: 'identify_region'; presentation: 'choice'; entityId: string; candidateEntityIds: readonly [string, string, string, string] }>
+  | Readonly<{ kind: 'identify_region'; presentation: 'text'; entityId: string; answer: AnswerSpec }>
+  | Readonly<{ kind: 'associate_capital'; presentation: 'choice'; entityId: string; capitalId: string; candidateEntityIds: readonly [string, string, string, string] }>
+  | Readonly<{ kind: 'associate_capital'; presentation: 'text'; entityId: string; capitalId: string; answer: AnswerSpec }>
+  | Readonly<{ kind: 'locate_place'; presentation: 'map'; entityId: string; coordinate: readonly [number, number] }>
+  | Readonly<{ kind: 'identify_place'; presentation: 'choice'; entityId: string; candidateEntityIds: readonly [string, string, string, string] }>
+  | Readonly<{ kind: 'identify_place'; presentation: 'text'; entityId: string; answer: AnswerSpec }>;
 ```
 
 Question generation must refuse capability/entity combinations that lack required geometry or relationships.
@@ -371,13 +473,17 @@ export interface RandomSource {
   next(): number;
 }
 
-export type SessionRequest = Readonly<{
-  mode: 'smart' | 'custom' | 'placement';
-  packId: string;
-  questionCount: number;
-  entityIds?: readonly string[];
-  skills?: readonly Skill[];
-}>;
+export type SessionRequest =
+  | Readonly<{ mode: 'smart'; packId: string }>
+  | Readonly<{ mode: 'placement'; packId: string }>
+  | Readonly<{
+      mode: 'custom';
+      packId: string;
+      questionCount: number;
+      entityIds: readonly [string, ...string[]];
+      skills: readonly [Skill, ...Skill[]];
+      statuses: readonly ('new' | 'learning' | 'weak' | 'familiar' | 'solid' | 'mastered' | 'fragile')[];
+    }>;
 
 export type PracticeSession = Readonly<{
   sessionId: string;
@@ -388,7 +494,7 @@ export type PracticeSession = Readonly<{
   introductionCursor: number;
   questions: readonly Question[];
   questionCursor: number;
-  carryoverRetryEntityIds: readonly string[];
+  carryoverRetryDebts: readonly RetryDebt[];
   startedAt: string;
   accumulatedPauseMs: number;
 }>;
@@ -439,7 +545,7 @@ export type AppSettings = Readonly<{ audio: AudioSettings }>;
 
 export interface ProgressRepository {
   loadSnapshot(learnerId: string, packId: string): Promise<readonly MasteryRecord[]>;
-  saveAttempt(input: Readonly<{ attemptId: string; session: PracticeSession; mastery: MasteryRecord; outcome: AttemptOutcome }>): Promise<void>;
+  saveAttempt(input: Readonly<{ event: AttemptEvent; session: PracticeSession; mastery: MasteryRecord }>): Promise<void>;
   saveSession(session: PracticeSession): Promise<void>;
   loadResumableSession(learnerId: string, packId: string, now: string): Promise<PracticeSession | null>;
   loadSettings(): Promise<AppSettings>;
