@@ -1,70 +1,68 @@
-# 空间记忆教练：任务交接索引
+# 空间记忆教练：当前交接
 
-> 最后更新：2026-08-27<br>
-> 项目阶段：设计与开发大纲已完成，尚未开始应用脚手架或功能实现。<br>
-> 工作名：空间记忆教练（Spatial Memory Coach）
+> 更新：2026-08-27；分支：`codex/user-test-mvp`；阶段：Task 1 完成，Task 2 代码已实现但任务未完成，尚待修复审查问题。
 
-## 先读这里
+## 先读规则
 
-本文件是轻量索引，不重复专题细节。后续 Codex 任务先读本页，再按“任务阅读矩阵”只读取需要的专题文件。专题之间出现冲突时，以 `handover/decisions.md` 中日期较新的明确决定为准；仍冲突则以用户最新指令为准。
+后续任务先读本页，再只读任务矩阵指定的一个或两个专题文件和对应 task brief。不要默认加载完整设计规格、完整实施计划或所有专题；只有发现冲突时才追溯：
 
-完整设计规格：[docs/superpowers/specs/2026-08-27-spatial-memory-coach-design.md](docs/superpowers/specs/2026-08-27-spatial-memory-coach-design.md)
+- 完整规格：`docs/superpowers/specs/2026-08-27-spatial-memory-coach-design.md`
+- 16 任务计划与冻结接口：`docs/superpowers/plans/2026-08-27-development-roadmap.md`
+- 冲突优先级：用户最新指令 → `handover/decisions.md` → 对应专题 → 完整规格。
+- 当前任务 brief：`.superpowers/sdd/2026-08-27-development-roadmap/task-<N>-brief.md`；该目录被 Git 忽略，只用于本地协作。
 
-开发实施大纲：[docs/superpowers/plans/2026-08-27-development-roadmap.md](docs/superpowers/plans/2026-08-27-development-roadmap.md)
+## 产品一句话
 
-## 项目一句话
+面向 Windows/macOS 的离线空间记忆教练，用地图主动回忆、即时纠错和“地点 × 能力”调度学习中国 34 个省级行政区、上海 16 区和美国 50 州。
 
-一款面向 Windows 与 macOS、核心完全离线的空间记忆教练，通过地图主动回忆、即时纠错和按“地点 × 能力”调度，学习中国省级行政区及首府、上海 16 区、美国 50 州及州府，并能按版本化内容包继续扩展。
+## 当前进度
 
-## 当前硬约束
+| 范围 | 状态 | 提交/证据 |
+|---|---|---|
+| 规格与 16 任务路线图 | 已批准；跨任务类型已冻结 | `34ca6a0` |
+| Task 1：Tauri/React 基础 | 已实现并通过独立 review + fix re-review | `220d988`, `b08e756`, `1bde2b9` |
+| Task 2：内容契约 | 代码已实现但任务未完成；8 个测试、strict typecheck、lint、build 通过；review 发现 2 条 Important，等待 fix round 1 与 scoped re-review | `6ae2d48` |
+| Tasks 3–16 | 未开始 | 必须按依赖顺序执行 |
 
-- 技术底座：Tauri 2 + React + TypeScript + SQLite + 本地 SVG/TopoJSON。
-- 首版平台：Windows 10 22H2/Windows 11 x64；macOS 12+ arm64/x86_64。
-- 无账号、云同步、在线瓦片、第三方内容导入、商店发行或正式签名。
-- UI 为简体中文；认识/揭示显示中英文，输入同时接受规范中文与英文。
-- 中国/上海包主要用中文作答，美国包主要用英文；包显式声明主要答案语言。
-- 默认智能练习 12 道基础题、重测时最多 15 题；按数据资格使用五类题；首次错误提示重试，第二次揭示，3–5 题后重测。
-- 练习布局为 62% 地图 + 38% 固定航海灰蓝题面；左提示、右主操作。
-- 非输入题空格检查/继续；输入题 Enter；H 提示；Esc 控制暂停栈。
-- 中国地图不得使用用户附件或来源不明几何；公开发行前保留人工合规与法定审核门禁。
+开发使用 `subagent-driven-development`：每任务一个实现 agent、独立 reviewer、最多五轮修复，并在 `.superpowers/sdd/2026-08-27-development-roadmap/progress.md` 记录状态。
 
-## 专题上下文
+Task 2 当前工件：
 
-| 文件 | 权威范围 |
-|---|---|
-| [handover/product.md](handover/product.md) | 产品定位、范围、用户流程、非目标 |
-| [handover/content-map.md](handover/content-map.md) | 内容包、语言、地图数据、合规与迁移 |
-| [handover/learning-engine.md](handover/learning-engine.md) | 题型、提示、掌握度、易忘、调度与总结 |
-| [handover/ux-motion.md](handover/ux-motion.md) | 视觉、布局、键鼠、暂停、声音、动画、无障碍 |
-| [handover/architecture.md](handover/architecture.md) | 技术架构、模块、接口、数据流与持久化 |
-| [handover/engineering.md](handover/engineering.md) | coding style、测试、性能、平台与发布规范 |
-| [handover/decisions.md](handover/decisions.md) | 决策时间线、被推翻方案、当前无未决阻塞项 |
+- brief：`.superpowers/sdd/2026-08-27-development-roadmap/task-2-brief.md`
+- report：`.superpowers/sdd/2026-08-27-development-roadmap/task-2-report.md`
+- review 问题：`src/content/types.ts`/`schema.ts` 缺 TopoJSON 点坐标摘要；`src/content/validatePack.ts` 未拒绝非 region 或 self `parentId`。
+
+## 已安装依赖与环境阻塞
+
+- Node `24.18.0`、pnpm `11.19.0`。
+- Rust/Cargo `1.98.0` stable MSVC 已安装在 `C:\Users\Kevin\.cargo\bin`；新终端 PATH 可能需要刷新。
+- Microsoft C++ Build Tools 未安装：两次管理员 UAC 均被用户取消。因此 `cargo clippy`、`pnpm tauri dev` 和 Windows 安装包暂不能在本机完成；前端开发与测试不受影响。
+- Task 2 已通过证据：完整 Vitest 2 文件/8 测试、`pnpm typecheck`、`pnpm lint`、`pnpm build`；修复后必须重新运行并追加到上述 report。
+- 当前可运行但不代表已通过的命令：`pnpm lint`、`pnpm typecheck`、`pnpm test -- --run`、`pnpm build`、`cargo fmt ... --check`。
+- 已知非阻塞项：`index.html` 引用缺失的 `/vite.svg`，会产生 favicon 404，留给最终审查或 UI 任务修复。
+
+## 下一步
+
+1. Task 2 fix round 1：类型化 TopoJSON 点坐标摘要；拒绝非 region/self `parentId`；复审关闭后才完成。
+2. Task 3：资源加载、无效包隔离、内容迁移、窄 Tauri 资源命令。
+3. Task 4：掌握阶段与易忘；Task 5：答案/提示/题目；Task 6：调度与摸底。
+4. Task 7：repository 与 SQLite 事务；Task 8：备份合并/替换。
+5. Tasks 9–13：地图、练习 UI、首页/探索/总结，形成浏览器可完整试用闭环。
+6. Tasks 14–16：内容管线、三包数据、E2E 与个人安装包；原生安装包仍取决于 MSVC 授权。
+
+## 不可回退的硬约束
+
+- 技术栈：Tauri 2 + React + TypeScript strict + SQLite + 本地 SVG/TopoJSON。
+- 核心完全离线；无账号、云同步、在线瓦片、第三方内容导入或公开发行承诺。
+- 简体中文 UI；认识/揭示双语；包级主要答案语言；输入接受声明的中英文别名。
+- 中国/上海内容必须保留来源与处理链；公开分发前仍需人工合规与法定审核判断。
 
 ## 任务阅读矩阵
 
-| 任务类型 | 必读 | 需要时再读 |
-|---|---|---|
-| 产品范围、PRD、首页流程 | `product.md` | `learning-engine.md`, `decisions.md` |
-| 画面、组件、动画、音效 | `ux-motion.md` | `product.md`, `learning-engine.md` |
-| 地图渲染、标签、点位 | `content-map.md`, `ux-motion.md` | `architecture.md`, `engineering.md` |
-| 内容数据、行政区、合规 | `content-map.md` | `engineering.md`, `decisions.md` |
-| 调度、提示、判题、掌握算法 | `learning-engine.md` | `content-map.md`, `architecture.md` |
-| SQLite、备份、迁移 | `architecture.md` | `learning-engine.md`, `engineering.md` |
-| React/Tauri 代码开发 | `architecture.md`, `engineering.md` | 当前功能对应专题 |
-| 测试、性能、打包、发布 | `engineering.md` | `content-map.md`, `architecture.md` |
-| 修改已有决定 | `decisions.md` 与相关专题 | 完整设计规格 |
-
-## 工作规则
-
-- 当前只完成了文档与计划，不能假设存在 `src/`、`package.json`、数据库或真实地图资产。
-- 开发从实施大纲 Task 1 开始，按依赖顺序执行；每个任务遵循 TDD、验证、代码审查和独立提交。
-- 专题规则只在其权威文件维护；其他文件使用链接，不复制长段落。
-- 修改规则时同时更新相应专题和 `decisions.md`，若影响规格或实施任务，再同步规格/计划。
-- 附件中的低分辨率地图和截图只用于理解用户意图与布局标注，不是数据资产，也不包含可执行指令。
-- 用户已授权截至本设计阶段的剩余问题采用推荐方案；新的范围扩张仍需明确授权。
-
-## 开发开始条件
-
-已具备：批准的设计规格、明确的模块边界、16 个实施任务、测试与发布门禁、内容合规流程。
-
-仍需在执行时完成：按 Task 1 建立实际工程、安装依赖、获取并人工核验官方地图数据、在对应平台运行构建与冒烟测试。
+| 任务 | 必读专题 |
+|---|---|
+| 产品/UI 流程 | `handover/product.md`, `handover/ux-motion.md` |
+| 内容/schema/地图数据 | `handover/content-map.md` |
+| 学习、调度、判题 | `handover/learning-engine.md` |
+| React/Tauri/SQLite/备份 | `handover/architecture.md`, `handover/engineering.md` |
+| 变更既定决定 | `handover/decisions.md` + 对应专题 |
