@@ -81,7 +81,7 @@ export function insertDelayedRetry(input: Readonly<{
   }
 
   const legalGaps = [3, 4, 5].filter(
-    (gap) => revealedQuestionIndex + gap <= session.questions.length,
+    (gap) => revealedQuestionIndex + gap + 1 <= session.questions.length,
   );
   if (legalGaps.length === 0) {
     return {
@@ -94,7 +94,7 @@ export function insertDelayedRetry(input: Readonly<{
   if (gap === undefined) {
     throw new Error('Unable to choose a delayed retry gap');
   }
-  const insertionIndex = revealedQuestionIndex + gap;
+  const insertionIndex = revealedQuestionIndex + gap + 1;
   return {
     ...session,
     questions: [

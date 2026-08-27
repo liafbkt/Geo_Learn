@@ -93,7 +93,7 @@ describe('insertDelayedRetry', () => {
     { random: 0, expectedGap: 3 },
     { random: 0.34, expectedGap: 4 },
     { random: 0.99, expectedGap: 5 },
-  ])('inserts a supplied variation $expectedGap positions after reveal', ({ random, expectedGap }) => {
+  ])('inserts a supplied variation after $expectedGap other questions', ({ random, expectedGap }) => {
     const session = makeSession();
     const variation: Question = { kind: 'identify_region', presentation: 'text', entityId: 'r1', answer: { acceptedDisplayValues: ['一区'] } };
     const result = insertDelayedRetry({
@@ -104,7 +104,7 @@ describe('insertDelayedRetry', () => {
       random: { next: () => random },
     });
 
-    expect(result.questions.indexOf(variation) - 1).toBe(expectedGap);
+    expect(result.questions.indexOf(variation) - 1).toBe(expectedGap + 1);
     expect(result.questions).toHaveLength(13);
     expect(result.baseQuestionCount).toBe(12);
     expect(result.carryoverRetryDebts).toEqual([]);
@@ -115,14 +115,27 @@ describe('insertDelayedRetry', () => {
     const variation = question(99);
     const result = insertDelayedRetry({
       session: makeSession(),
-      revealedQuestionIndex: 9,
+      revealedQuestionIndex: 8,
       variation,
       debt,
       random: { next: () => 0.99 },
     });
 
-    expect(result.questions.indexOf(variation) - 9).toBe(3);
+    expect(result.questions.indexOf(variation) - 8).toBe(4);
     expect(result.carryoverRetryDebts).toEqual([]);
+  });
+
+  it('carries debt when fewer than three other questions remain after reveal', () => {
+    const result = insertDelayedRetry({
+      session: makeSession(),
+      revealedQuestionIndex: 9,
+      variation: question(99),
+      debt,
+      random: { next: () => 0 },
+    });
+
+    expect(result.questions).toHaveLength(12);
+    expect(result.carryoverRetryDebts).toEqual([debt]);
   });
 
   it('carries the exact debt in stable order when no 3–5 position gap fits', () => {

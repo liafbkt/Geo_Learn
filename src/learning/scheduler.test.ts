@@ -135,6 +135,12 @@ describe('scheduleSmartSession', () => {
     expect(session.questions).toHaveLength(12);
     expect(session.introductions).toHaveLength(4);
     expect(new Set(session.introductions).size).toBe(4);
+    const previouslyKnown = new Set([...normalRecords().map(({ entityId }) => entityId), 'r7']);
+    expect(
+      session.questions
+        .filter(({ entityId }) => !previouslyKnown.has(entityId))
+        .every(({ entityId }) => session.introductions.includes(entityId)),
+    ).toBe(true);
     expect(session.questions[0]).toMatchObject({ entityId: 'r7', kind: 'locate_region' });
 
     const dueLast = Math.max(
@@ -190,13 +196,14 @@ describe('scheduleSmartSession', () => {
     const records = normalRecords();
     const debts: readonly RetryDebt[] = [];
     const original = JSON.stringify({ pack, records, debts });
+    const observedQuestionOrders = new Set<string>();
 
     for (let seed = 1; seed <= 100; seed += 1) {
       const values = Array.from({ length: 64 }, (_, index) => ((seed * 37 + index * 17) % 997) / 997);
       const input = {
         pack,
         learnerId: 'learner-1',
-        sessionId: `session-${seed}`,
+        sessionId: 'seeded-smart-session',
         startedAt: '2026-08-27T00:00:00.000Z',
         masteryRecords: records,
         fragileKeys: ['p2|identify_place'] as const,
@@ -207,8 +214,10 @@ describe('scheduleSmartSession', () => {
       expect(first).toEqual(second);
       expect(first.baseQuestionCount).toBe(first.questions.length);
       expect(Math.max(...skills.map((skill) => first.questions.filter((q) => q.kind === skill).length))).toBeLessThanOrEqual(6);
+      observedQuestionOrders.add(JSON.stringify(first.questions));
     }
 
+    expect(observedQuestionOrders.size).toBeGreaterThan(1);
     expect(JSON.stringify({ pack, records, debts })).toBe(original);
   });
 
@@ -248,7 +257,7 @@ describe('scheduleSmartSession', () => {
     expect(new Set(session.questions.map(({ entityId }) => entityId)).size).toBe(6);
   });
 
-  it('treats persisted new-stage records as introduction inventory', () => {
+  it('schedules persisted new-stage records without re-introducing a known entity', () => {
     const records = [
       ...normalRecords(),
       mastery('r8', 'locate_region', 'new', '2026-08-27T00:00:00.000Z'),
@@ -264,7 +273,7 @@ describe('scheduleSmartSession', () => {
       random: sequenceRandom([0.2, 0.7, 0.4]),
     });
 
-    expect(session.introductions).toContain('r8');
+    expect(session.introductions).not.toContain('r8');
     expect(session.questions).toContainEqual({
       kind: 'locate_region',
       presentation: 'map',
@@ -294,6 +303,77 @@ describe('scheduleSmartSession', () => {
     expect(session.carryoverRetryDebts).toEqual([retryDebt]);
     expect(session.carryoverRetryDebts[0]).toBe(retryDebt);
   });
+
+  it('uses at most six introduced entities to fill an all-new 12-question session', () => {
+    const session = scheduleSmartSession({
+      pack: makePack(),
+      learnerId: 'learner-1',
+      sessionId: 'all-new',
+      startedAt: '2026-08-27T00:00:00.000Z',
+      masteryRecords: [],
+      fragileKeys: [],
+      retryDebts: [],
+      random: sequenceRandom([0.12, 0.73, 0.41, 0.88]),
+    });
+
+    expect(session.baseQuestionCount).toBe(12);
+    expect(session.introductions).toHaveLength(6);
+    expect(new Set(session.introductions).size).toBe(6);
+    expect(
+      session.questions.every(({ entityId }) => session.introductions.includes(entityId)),
+    ).toBe(true);
+    expect(new Set(session.questions.map(({ entityId }) => entityId)).size).toBeLessThanOrEqual(6);
+  });
+
+  it('schedules a missing natural-key skill for a known entity without introducing it again', () => {
+    const session = scheduleSmartSession({
+      pack: makePack(1),
+      learnerId: 'learner-1',
+      sessionId: 'missing-pair',
+      startedAt: '2026-08-27T00:00:00.000Z',
+      masteryRecords: [
+        mastery('r1', 'identify_region', 'weak', '2026-09-10T00:00:00.000Z'),
+      ],
+      fragileKeys: [],
+      retryDebts: [],
+      random: sequenceRandom([0.23, 0.61, 0.47]),
+    });
+
+    expect(session.questions).toContainEqual({
+      kind: 'locate_region',
+      presentation: 'map',
+      entityId: 'r1',
+    });
+    expect(session.introductions).not.toContain('r1');
+  });
+
+  it('uses debt skill for scheduling while preserving a different source kind as metadata', () => {
+    const retryDebt: RetryDebt = {
+      entityId: 'r1',
+      skill: 'locate_region',
+      sourceQuestionKind: 'identify_region',
+      createdAt: '2026-08-26T00:00:00.000Z',
+      priority: 'immediate',
+    };
+    const session = scheduleSmartSession({
+      pack: makePack(),
+      learnerId: 'learner-1',
+      sessionId: 'cross-kind-debt',
+      startedAt: '2026-08-27T00:00:00.000Z',
+      masteryRecords: [],
+      fragileKeys: [],
+      retryDebts: [retryDebt],
+      random: sequenceRandom([0.19, 0.67, 0.38]),
+    });
+
+    expect(session.questions[0]).toEqual({
+      kind: 'locate_region',
+      presentation: 'map',
+      entityId: 'r1',
+    });
+    expect(session.carryoverRetryDebts).toEqual([]);
+    expect(session.introductions).not.toContain('r1');
+  });
 });
 
 describe('schedulePlacement', () => {
@@ -320,17 +400,20 @@ describe('schedulePlacement', () => {
 
   it('is deterministic for 100 fixed random sequences', () => {
     const pack = makePack();
+    const observedQuestionOrders = new Set<string>();
     for (let seed = 1; seed <= 100; seed += 1) {
       const values = Array.from({ length: 64 }, (_, index) => ((seed * 53 + index * 29) % 991) / 991);
       const common = {
         pack,
         learnerId: 'learner-1',
-        sessionId: `placement-${seed}`,
+        sessionId: 'seeded-placement-session',
         startedAt: '2026-08-27T00:00:00.000Z',
       };
-      expect(schedulePlacement({ ...common, random: sequenceRandom(values) })).toEqual(
-        schedulePlacement({ ...common, random: sequenceRandom(values) }),
-      );
+      const first = schedulePlacement({ ...common, random: sequenceRandom(values) });
+      const second = schedulePlacement({ ...common, random: sequenceRandom(values) });
+      expect(first).toEqual(second);
+      observedQuestionOrders.add(JSON.stringify(first.questions));
     }
+    expect(observedQuestionOrders.size).toBeGreaterThan(1);
   });
 });

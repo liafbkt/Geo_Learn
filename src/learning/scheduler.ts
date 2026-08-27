@@ -42,6 +42,7 @@ const SMART_BASE_COUNT = 12;
 const SMART_KIND_CAP = 6;
 const SMART_FRAGILE_CAP = 3;
 const NORMAL_NEW_COUNT = 4;
+const MAX_NEW_COUNT = 6;
 
 /** Stable identity retained by every Question for presentation-time due checks. */
 export function masteryKey(entityId: string, skill: Skill): string {
@@ -210,9 +211,6 @@ export function scheduleSmartSession(input: SmartSessionInput): PracticeSession 
   const fragile = new Set(input.fragileKeys);
 
   const retryCandidates: Candidate[] = input.retryDebts.flatMap((debt) => {
-    if (debt.skill !== debt.sourceQuestionKind) {
-      return [];
-    }
     const record = recordsByKey.get(masteryKey(debt.entityId, debt.skill));
     return [{
       entityId: debt.entityId,
@@ -225,13 +223,12 @@ export function scheduleSmartSession(input: SmartSessionInput): PracticeSession 
   const weak: Candidate[] = [];
   const fragileQueue: Candidate[] = [];
   const maintenance: Candidate[] = [];
-  const persistedNewByEntity = new Map<string, Candidate[]>();
+  const persistedNew: Candidate[] = [];
   for (const record of relevantRecords) {
     const key = masteryKey(record.entityId, record.skill);
     const candidate = recordCandidate(record, fragile.has(key));
     if (record.stage === 'new') {
-      const existing = persistedNewByEntity.get(record.entityId) ?? [];
-      persistedNewByEntity.set(record.entityId, [...existing, candidate]);
+      persistedNew.push(candidate);
     } else if (Date.parse(record.dueAt) <= now) {
       due.push(candidate);
     } else if (record.stage === 'weak') {
@@ -243,36 +240,49 @@ export function scheduleSmartSession(input: SmartSessionInput): PracticeSession 
     }
   }
 
-  const knownEntities = new Set(relevantRecords.map(({ entityId }) => entityId));
-  const unknownNewGroups = shuffled(
-    input.pack.entities.filter((entity) => !knownEntities.has(entity.id)),
-    input.random,
-  ).map((entity) =>
-    shuffled(skillsForEntity(input.pack, entity), input.random).map((skill) => ({
-      entityId: entity.id,
-      skill,
-      stage: 'new' as const,
-      fragile: false,
-    })),
-  );
-  const newCandidateGroups = [
-    ...shuffled([...persistedNewByEntity.values()], input.random).map((group) =>
-      shuffled(group, input.random),
+  const knownEntities = new Set([
+    ...relevantRecords.map(({ entityId }) => entityId),
+    ...input.retryDebts.map(({ entityId }) => entityId),
+  ]);
+  const missingPairs = input.pack.entities.flatMap((entity) =>
+    skillsForEntity(input.pack, entity).flatMap((skill) =>
+      recordsByKey.has(masteryKey(entity.id, skill))
+        ? []
+        : [{
+            entityId: entity.id,
+            skill,
+            stage: 'new' as const,
+            fragile: false,
+          }],
     ),
-    ...unknownNewGroups,
+  );
+  const knownNewCandidates = [
+    ...persistedNew,
+    ...missingPairs.filter(({ entityId }) => knownEntities.has(entityId)),
   ];
+  const unknownCandidatesByEntity = new Map<string, Candidate[]>();
+  for (const candidate of missingPairs) {
+    if (knownEntities.has(candidate.entityId)) {
+      continue;
+    }
+    const existing = unknownCandidatesByEntity.get(candidate.entityId) ?? [];
+    unknownCandidatesByEntity.set(candidate.entityId, [...existing, candidate]);
+  }
+  const unknownNewGroups = shuffled(
+    [...unknownCandidatesByEntity.values()],
+    input.random,
+  ).map((group) => shuffled(group, input.random));
 
   const priorityQueues = [retryCandidates, due, weak, fragileQueue].map((queue) =>
     prepareQueue(input.pack, queue, input.random),
   );
-  const preparedNew = newCandidateGroups.flatMap((group) => {
-    for (const candidate of group) {
-      const prepared = prepareCandidate(input.pack, candidate, input.random);
-      if (prepared !== null) {
-        return [prepared];
-      }
-    }
-    return [];
+  const preparedKnownNew = prepareQueue(input.pack, knownNewCandidates, input.random);
+  const preparedUnknownGroups = unknownNewGroups.flatMap((group) => {
+    const prepared = group.flatMap((candidate) => {
+      const result = prepareCandidate(input.pack, candidate, input.random);
+      return result === null ? [] : [result];
+    });
+    return prepared.length === 0 ? [] : [prepared];
   });
   const preparedMaintenance = prepareQueue(input.pack, maintenance, input.random);
   const selected: PreparedCandidate[] = [];
@@ -303,9 +313,17 @@ export function scheduleSmartSession(input: SmartSessionInput): PracticeSession 
     return true;
   };
 
-  const preNewLimit = preparedNew.length >= NORMAL_NEW_COUNT
-    ? SMART_BASE_COUNT - NORMAL_NEW_COUNT
-    : SMART_BASE_COUNT - preparedNew.length;
+  const reviewKeys = new Set(
+    [...priorityQueues.flat(), ...preparedMaintenance].map(({ candidate }) =>
+      masteryKey(candidate.entityId, candidate.skill),
+    ),
+  );
+  const desiredIntroductions = Math.min(
+    MAX_NEW_COUNT,
+    Math.max(NORMAL_NEW_COUNT, SMART_BASE_COUNT - reviewKeys.size),
+  );
+  const introductionTarget = Math.min(desiredIntroductions, preparedUnknownGroups.length);
+  const preNewLimit = SMART_BASE_COUNT - introductionTarget;
   for (const queue of priorityQueues) {
     for (const candidate of queue) {
       if (selected.length >= preNewLimit) {
@@ -316,16 +334,26 @@ export function scheduleSmartSession(input: SmartSessionInput): PracticeSession 
   }
 
   const introduced: string[] = [];
-  for (const candidate of preparedNew) {
-    if (introduced.length >= NORMAL_NEW_COUNT) {
+  const introducedGroups: PreparedCandidate[][] = [];
+  for (const group of preparedUnknownGroups) {
+    if (introduced.length >= introductionTarget) {
       break;
     }
-    if (tryAdd(candidate)) {
-      introduced.push(candidate.candidate.entityId);
+    for (const candidate of group) {
+      if (tryAdd(candidate)) {
+        introduced.push(candidate.candidate.entityId);
+        introducedGroups.push(group);
+        break;
+      }
     }
   }
 
-  for (const queue of [...priorityQueues, preparedNew, preparedMaintenance]) {
+  for (const queue of [
+    ...priorityQueues,
+    preparedKnownNew,
+    ...introducedGroups,
+    preparedMaintenance,
+  ]) {
     for (const candidate of queue) {
       tryAdd(candidate);
     }
@@ -340,9 +368,6 @@ export function scheduleSmartSession(input: SmartSessionInput): PracticeSession 
     }
   }
   const carryoverRetryDebts = input.retryDebts.filter((debt) => {
-    if (debt.skill !== debt.sourceQuestionKind) {
-      return true;
-    }
     const key = masteryKey(debt.entityId, debt.skill);
     const remaining = scheduledRetryCounts.get(key) ?? 0;
     if (remaining === 0) {
