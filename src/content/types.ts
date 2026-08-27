@@ -10,6 +10,11 @@ export type PackCapability = (typeof packCapabilityValues)[number];
 export type PackCapabilities = readonly PackCapability[];
 export type Coordinate = readonly [longitude: number, latitude: number];
 
+export type TopologyPointSummary = Readonly<{
+  id: string;
+  coordinate: Coordinate;
+}>;
+
 export type LocalizedName = Readonly<{
   zh: string;
   en: string;
@@ -80,6 +85,7 @@ export type ContentPack = Readonly<{
   }>;
   entities: readonly Entity[];
   topologyObjectIds: readonly string[];
+  topologyPoints: readonly TopologyPointSummary[];
   sources: readonly ContentSource[];
 }>;
 

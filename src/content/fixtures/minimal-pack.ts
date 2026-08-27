@@ -38,6 +38,7 @@ export const minimalPack = {
     },
   ],
   topologyObjectIds: ['region-a'],
+  topologyPoints: [{ id: 'city-a', coordinate: [121.47, 31.23] }],
   sources: [
     {
       id: 'fixture',

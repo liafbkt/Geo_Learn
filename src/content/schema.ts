@@ -7,6 +7,10 @@ const sha256 = z.string().regex(/^[a-f0-9]{64}$/i, 'Expected a SHA-256 value.');
 const coordinate = z
   .tuple([z.number().gte(-180).lte(180), z.number().gte(-90).lte(90)])
   .readonly();
+export const topologyPointSummarySchema = z
+  .object({ id: nonEmptyString, coordinate })
+  .strict()
+  .readonly();
 const localizedName = z
   .object({ zh: nonEmptyString, en: nonEmptyString })
   .strict()
@@ -81,6 +85,7 @@ export const contentPackSchema: z.ZodType<ContentPack> = z
       .readonly(),
     entities: z.array(entitySchema).readonly(),
     topologyObjectIds: z.array(nonEmptyString).readonly(),
+    topologyPoints: z.array(topologyPointSummarySchema).readonly(),
     sources: z.array(source).readonly(),
   })
   .strict()

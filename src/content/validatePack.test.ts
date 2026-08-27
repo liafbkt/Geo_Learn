@@ -97,4 +97,61 @@ describe('validatePack', () => {
       'missing_geometry',
     );
   });
+
+  it('accepts a TopoJSON point coordinate summary keyed by point ID', () => {
+    const result = validatePack({
+      ...minimalPack,
+      topologyPoints: [{ id: 'city-a', coordinate: [121.47, 31.23] }],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.pack.topologyPoints).toEqual([{ id: 'city-a', coordinate: [121.47, 31.23] }]);
+    }
+  });
+
+  it('rejects extra fields in a TopoJSON point coordinate summary', () => {
+    expectIssue(
+      {
+        ...minimalPack,
+        topologyPoints: [{ id: 'city-a', coordinate: [121.47, 31.23], extra: true }],
+      },
+      'schema',
+    );
+  });
+
+  it('rejects a place whose parent is another place', () => {
+    expectIssue(
+      {
+        ...minimalPack,
+        manifest: {
+          ...minimalPack.manifest,
+          expectedEntityCounts: { region: 1, place: 2 },
+        },
+        entities: [
+          ...minimalPack.entities,
+          {
+            id: 'city-b',
+            kind: 'place',
+            names: { zh: '乙城', en: 'City B' },
+            aliases: [],
+            coordinate: [121.48, 31.24],
+          },
+        ].map((entity) => (entity.id === 'city-a' ? { ...entity, parentId: 'city-b' } : entity)),
+      },
+      'missing_reference',
+    );
+  });
+
+  it('rejects an entity that names itself as its parent', () => {
+    expectIssue(
+      {
+        ...minimalPack,
+        entities: minimalPack.entities.map((entity) =>
+          entity.id === 'city-a' ? { ...entity, parentId: 'city-a' } : entity,
+        ),
+      },
+      'missing_reference',
+    );
+  });
 });

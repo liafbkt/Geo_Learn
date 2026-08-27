@@ -39,14 +39,24 @@ function supportsCapability(
 }
 
 function validateReferences(pack: ContentPack, issues: PackValidationIssue[]): void {
-  const entityIds = new Set(pack.entities.map((entity) => entity.id));
   const entitiesById = new Map(pack.entities.map((entity) => [entity.id, entity] as const));
 
   pack.entities.forEach((entity, index) => {
-    if (entity.parentId !== undefined && !entityIds.has(entity.parentId)) {
-      issues.push(
-        issue('missing_reference', `entities.${index}.parentId`, `Unknown parent entity: ${entity.parentId}.`),
-      );
+    if (entity.parentId !== undefined) {
+      const parent = entitiesById.get(entity.parentId);
+      if (parent === undefined) {
+        issues.push(
+          issue('missing_reference', `entities.${index}.parentId`, `Unknown parent entity: ${entity.parentId}.`),
+        );
+      } else if (parent.id === entity.id) {
+        issues.push(
+          issue('missing_reference', `entities.${index}.parentId`, `Entity cannot be its own parent: ${entity.id}.`),
+        );
+      } else if (parent.kind !== 'region') {
+        issues.push(
+          issue('missing_reference', `entities.${index}.parentId`, `Parent entity must be a region: ${entity.parentId}.`),
+        );
+      }
     }
 
     if (entity.kind === 'region' && entity.capitalId !== undefined) {
