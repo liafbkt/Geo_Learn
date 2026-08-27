@@ -11,7 +11,7 @@ type ChoiceFields = Readonly<{
 type TextFields = Readonly<{
   presentation: 'text';
   entityId: string;
-  answerSpec: AnswerSpec;
+  answer: AnswerSpec;
 }>;
 
 export type Question =
@@ -66,14 +66,6 @@ function requireRegionGeometry(pack: ContentPack, entityId: string): void {
   if (!pack.topologyObjectIds.includes(entityId)) {
     throw new Error(`Region ${entityId} is missing required geometry`);
   }
-}
-
-function requirePlaceGeometry(pack: ContentPack, entityId: string): Coordinate {
-  const point = pack.topologyPoints.find((candidate) => candidate.id === entityId);
-  if (point === undefined) {
-    throw new Error(`Place ${entityId} is missing required geometry`);
-  }
-  return point.coordinate;
 }
 
 function answerSpec(entity: Entity): AnswerSpec {
@@ -141,7 +133,7 @@ export function generateQuestion(input: GenerateQuestionInput): Question {
           kind: 'identify_region',
           presentation: 'text',
           entityId,
-          answerSpec: answerSpec(entity),
+          answer: answerSpec(entity),
         };
       }
       return {
@@ -173,12 +165,13 @@ export function generateQuestion(input: GenerateQuestionInput): Question {
           presentation: 'text',
           entityId,
           capitalId: capital.id,
-          answerSpec: answerSpec(capital),
+          answer: answerSpec(capital),
         };
       }
       const capitalIds = new Set(
         pack.entities.flatMap((candidate) =>
           candidate.kind === 'region' &&
+          supportsSkill(candidate, skill) &&
           candidate.capitalId !== undefined &&
           pack.entities.some(
             (possibleCapital) =>
@@ -199,23 +192,22 @@ export function generateQuestion(input: GenerateQuestionInput): Question {
       };
     }
     case 'locate_place': {
-      requirePlace(entity);
+      const place = requirePlace(entity);
       return {
         kind: 'locate_place',
         presentation: 'map',
         entityId,
-        coordinate: requirePlaceGeometry(pack, entityId),
+        coordinate: place.coordinate,
       };
     }
     case 'identify_place': {
       requirePlace(entity);
-      requirePlaceGeometry(pack, entityId);
       if (!isChoiceStage(stage)) {
         return {
           kind: 'identify_place',
           presentation: 'text',
           entityId,
-          answerSpec: answerSpec(entity),
+          answer: answerSpec(entity),
         };
       }
       return {
@@ -226,8 +218,7 @@ export function generateQuestion(input: GenerateQuestionInput): Question {
           const candidate = pack.entities.find((item) => item.id === candidateId);
           return (
             candidate?.kind === 'place' &&
-            supportsSkill(candidate, skill) &&
-            pack.topologyPoints.some((point) => point.id === candidateId)
+            supportsSkill(candidate, skill)
           );
         }),
       };

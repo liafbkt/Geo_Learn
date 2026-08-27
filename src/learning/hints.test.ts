@@ -37,10 +37,23 @@ describe('buildHint', () => {
     ['上海', '上'],
     ['👨‍👩‍👧‍👦家庭', '👨‍👩‍👧‍👦'],
     ['e\u0301clair', 'E\u0301'],
+    ['ßland', 'ß'],
   ])('reveals exactly one Unicode grapheme from %j', (answer, reveal) => {
     expect(buildHint({ kind: 'text', acceptedDisplayValue: answer })).toEqual({
       kind: 'text-reveal',
       reveal,
+    });
+  });
+
+  it.each([
+    ['沪', 'han'],
+    ['x', 'latin'],
+    ['ß', 'latin'],
+  ] as const)('uses a non-revealing shape hint for one-grapheme %j', (answer, script) => {
+    expect(buildHint({ kind: 'text', acceptedDisplayValue: answer })).toEqual({
+      kind: 'text-shape',
+      script,
+      graphemeCount: 1,
     });
   });
 

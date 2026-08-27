@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ContentPack, Entity, PackCapability } from '../content/types';
-import { generateQuestion } from './questions';
+import type { AnswerSpec } from './normalizeAnswer';
+import { generateQuestion, type Question } from './questions';
 
 const capabilities = [
   'locate_region',
@@ -83,7 +84,7 @@ describe('generateQuestion', () => {
     });
   });
 
-  it('builds locate_place with the authoritative topology coordinate', () => {
+  it('builds locate_place with the authoritative entity coordinate', () => {
     const withDifferentEntityCoordinate = makePack({
       entities: pack.entities.map((entity) =>
         entity.id === 'p1' && entity.kind === 'place'
@@ -103,7 +104,62 @@ describe('generateQuestion', () => {
       kind: 'locate_place',
       presentation: 'map',
       entityId: 'p1',
+      coordinate: [0, 0],
+    });
+  });
+
+  it('builds locate_place when the optional topology point is absent', () => {
+    const withoutPoints = makePack({ topologyPoints: [] });
+
+    expect(
+      generateQuestion({
+        pack: withoutPoints,
+        entityId: 'p1',
+        skill: 'locate_place',
+        stage: 'new',
+      }),
+    ).toEqual({
+      kind: 'locate_place',
+      presentation: 'map',
+      entityId: 'p1',
       coordinate: [101, 30],
+    });
+  });
+
+  it('builds identify_place text when the optional topology point is absent', () => {
+    const withoutPoints = makePack({ topologyPoints: [] });
+
+    expect(
+      generateQuestion({
+        pack: withoutPoints,
+        entityId: 'p1',
+        skill: 'identify_place',
+        stage: 'weak',
+      }),
+    ).toEqual({
+      kind: 'identify_place',
+      presentation: 'text',
+      entityId: 'p1',
+      answer: { acceptedDisplayValues: ['p1城', 'p1 City', 'p1-alias'] },
+    });
+  });
+
+  it('accepts identify_place choice candidates without optional topology points', () => {
+    const withoutPoints = makePack({ topologyPoints: [] });
+
+    expect(
+      generateQuestion({
+        pack: withoutPoints,
+        entityId: 'p1',
+        skill: 'identify_place',
+        stage: 'new',
+        candidateOrder: ['p2', 'p1', 'p3', 'p4'],
+      }),
+    ).toEqual({
+      kind: 'identify_place',
+      presentation: 'choice',
+      entityId: 'p1',
+      candidateEntityIds: ['p2', 'p1', 'p3', 'p4'],
     });
   });
 
@@ -136,10 +192,42 @@ describe('generateQuestion', () => {
         kind: 'identify_region',
         presentation: 'text',
         entityId: 'r1',
-        answerSpec: { acceptedDisplayValues: ['r1区', 'r1 Region', 'r1 alias'] },
+        answer: { acceptedDisplayValues: ['r1区', 'r1 Region', 'r1 alias'] },
       });
     },
   );
+
+  it('exposes the exact frozen text-question answer shape', () => {
+    const question = generateQuestion({
+      pack,
+      entityId: 'r1',
+      skill: 'identify_region',
+      stage: 'weak',
+    });
+    if (question.kind !== 'identify_region' || question.presentation !== 'text') {
+      throw new Error('Expected an identify_region text question');
+    }
+
+    type Expected = Readonly<{
+      kind: 'identify_region';
+      presentation: 'text';
+      entityId: string;
+      answer: AnswerSpec;
+    }>;
+    const exactType: Expected = question;
+    const roundTrip: Extract<
+      Question,
+      Readonly<{ kind: 'identify_region'; presentation: 'text' }>
+    > = exactType;
+
+    expect(roundTrip).toEqual({
+      kind: 'identify_region',
+      presentation: 'text',
+      entityId: 'r1',
+      answer: { acceptedDisplayValues: ['r1区', 'r1 Region', 'r1 alias'] },
+    });
+    expect(roundTrip).not.toHaveProperty('answerSpec');
+  });
 
   it('builds associate_capital choice questions from valid capital places', () => {
     expect(
@@ -159,6 +247,50 @@ describe('generateQuestion', () => {
     });
   });
 
+  it('filters capitals whose owning region disables associate_capital', () => {
+    const withDisabledRegion = makePack({
+      entities: pack.entities.map((entity) =>
+        entity.id === 'r2' ? { ...entity, capabilities: ['identify_region'] } : entity,
+      ),
+    });
+
+    expect(
+      generateQuestion({
+        pack: withDisabledRegion,
+        entityId: 'r1',
+        skill: 'associate_capital',
+        stage: 'new',
+        candidateOrder: ['p1', 'p2', 'p3', 'p4', 'p5'],
+      }),
+    ).toEqual({
+      kind: 'associate_capital',
+      presentation: 'choice',
+      entityId: 'r1',
+      capitalId: 'p1',
+      candidateEntityIds: ['p1', 'p3', 'p4', 'p5'],
+    });
+  });
+
+  it('refuses associate_capital after capability filtering leaves fewer than three distractors', () => {
+    const withTwoDisabledRegions = makePack({
+      entities: pack.entities.map((entity) =>
+        entity.id === 'r2' || entity.id === 'r3'
+          ? { ...entity, capabilities: ['identify_region'] }
+          : entity,
+      ),
+    });
+
+    expect(() =>
+      generateQuestion({
+        pack: withTwoDisabledRegions,
+        entityId: 'r1',
+        skill: 'associate_capital',
+        stage: 'learning',
+        candidateOrder: ['p1', 'p2', 'p3', 'p4', 'p5'],
+      }),
+    ).toThrow(/four valid choices/i);
+  });
+
   it('builds associate_capital text questions from the capital names and aliases', () => {
     expect(
       generateQuestion({
@@ -172,7 +304,7 @@ describe('generateQuestion', () => {
       presentation: 'text',
       entityId: 'r1',
       capitalId: 'p1',
-      answerSpec: { acceptedDisplayValues: ['p1城', 'p1 City', 'p1-alias'] },
+      answer: { acceptedDisplayValues: ['p1城', 'p1 City', 'p1-alias'] },
     });
   });
 
@@ -197,7 +329,7 @@ describe('generateQuestion', () => {
       kind: 'identify_place',
       presentation: 'text',
       entityId: 'p1',
-      answerSpec: { acceptedDisplayValues: ['p1城', 'p1 City', 'p1-alias'] },
+      answer: { acceptedDisplayValues: ['p1城', 'p1 City', 'p1-alias'] },
     });
   });
 
@@ -244,16 +376,6 @@ describe('generateQuestion', () => {
         pack: makePack({ topologyObjectIds: ['r2', 'r3', 'r4', 'r5'] }),
         entityId: 'r1',
         skill: 'locate_region' as const,
-        stage: 'new' as const,
-      },
-      message: /geometry/i,
-    },
-    {
-      name: 'a missing authoritative place point',
-      input: {
-        pack: makePack({ topologyPoints: pack.topologyPoints.filter((point) => point.id !== 'p1') }),
-        entityId: 'p1',
-        skill: 'locate_place' as const,
         stage: 'new' as const,
       },
       message: /geometry/i,
