@@ -4,5 +4,7 @@ dist/
 coverage/
 playwright-report/
 test-results/
+.pnpm-store/
+.tauri-template-spatial-memory-coach/
 src-tauri/target/
 *.log
