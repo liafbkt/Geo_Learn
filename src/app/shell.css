@@ -1,0 +1,79 @@
+.app-overlay {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgb(23 49 45 / 42%);
+  backdrop-filter: blur(5px);
+}
+
+.pause-card,
+.options-card,
+.error-boundary__card {
+  width: min(100%, 30rem);
+  padding: var(--space-8);
+  border: 1px solid var(--color-cartographic-grid);
+  border-radius: var(--radius-lg);
+  background: #f5fbf9;
+  box-shadow: var(--shadow-panel);
+}
+
+.pause-card__eyebrow,
+.error-boundary__eyebrow,
+.error-boundary__code {
+  color: var(--color-hint);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pause-card__actions,
+.error-boundary__actions {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.pause-card button,
+.options-card button,
+.error-boundary button {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-cartographic-grid);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.primary-action {
+  border-color: var(--color-primary-action) !important;
+  background: var(--color-primary-action) !important;
+  color: white !important;
+}
+
+.toggle-row,
+.radio-row,
+.range-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+}
+
+.options-card fieldset {
+  margin-block: var(--space-4);
+  border: 1px solid var(--color-cartographic-grid);
+  border-radius: var(--radius-md);
+}
+
+.range-row {
+  flex-direction: column;
+}
+
+.error-boundary {
+  display: grid;
+  place-items: center;
+}
