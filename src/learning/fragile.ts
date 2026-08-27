@@ -10,12 +10,13 @@ function moveStage(stage: MasteryStage, direction: -1 | 1): MasteryStage {
 }
 
 function advanceStage(stage: MasteryStage, event: AttemptEvent): MasteryStage {
-  const independentCorrect =
-    event.correct && event.independentCorrect && !event.usedHint && event.answerAttemptCount === 1;
+  const firstAttemptCorrect = event.correct && !event.usedHint && event.answerAttemptCount === 1;
+  const promotionCorrect =
+    firstAttemptCorrect && (event.mode === 'placement' || event.independentCorrect);
   if (event.mode === 'placement' && !event.correct) {
     return stage;
   }
-  if (independentCorrect) {
+  if (promotionCorrect) {
     const promoted = moveStage(stage, 1);
     return event.mode === 'placement' && stages.indexOf(promoted) > stages.indexOf('familiar')
       ? 'familiar'
@@ -39,30 +40,35 @@ function isClearEvidence(event: AttemptEvent): boolean {
 
 export function isFragile(history: readonly AttemptEvent[], now: string): boolean {
   const nowMs = Date.parse(now);
-  const cutoffMs = nowMs - THIRTY_DAYS;
   const ordered = [...history].sort((left, right) => Date.parse(left.completedAt) - Date.parse(right.completedAt));
   let stage: MasteryStage = 'new';
   let reachedFamiliar = false;
   let fragile = false;
-  let failureCount = 0;
+  let failureTimes: number[] = [];
   let clearCount = 0;
   let lastClearEvidenceAt: number | null = null;
 
   for (const event of ordered) {
     const completedAt = Date.parse(event.completedAt);
+    if (completedAt > nowMs) {
+      continue;
+    }
     const wasFamiliar = reachedFamiliar;
     stage = advanceStage(stage, event);
     reachedFamiliar ||= stages.indexOf(stage) >= stages.indexOf('familiar');
 
-    const isEvidence =
-      event.scheduledReview && event.mode !== 'placement' && completedAt >= cutoffMs && completedAt <= nowMs;
+    const isEvidence = event.scheduledReview && event.mode !== 'placement';
     if (!isEvidence || !wasFamiliar) {
       continue;
     }
 
     if (!event.correct) {
-      failureCount += 1;
-      if (failureCount >= 2 && !fragile) {
+      if (fragile) {
+        continue;
+      }
+      failureTimes = failureTimes.filter((failureAt) => failureAt >= completedAt - THIRTY_DAYS);
+      failureTimes.push(completedAt);
+      if (failureTimes.length >= 2) {
         fragile = true;
         clearCount = 0;
         lastClearEvidenceAt = null;
@@ -80,7 +86,7 @@ export function isFragile(history: readonly AttemptEvent[], now: string): boolea
     }
     if (clearCount === 3) {
       fragile = false;
-      failureCount = 0;
+      failureTimes = [];
       clearCount = 0;
       lastClearEvidenceAt = null;
     }

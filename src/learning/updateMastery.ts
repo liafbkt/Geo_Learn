@@ -23,6 +23,12 @@ function smoothedResponse(previous: number | null, observed: number): number {
   return previous === null ? observed : previous * 0.8 + observed * 0.2;
 }
 
+function responseAfter(record: MasteryRecord, outcome: AttemptOutcome): number | null {
+  return outcome.correct
+    ? smoothedResponse(record.smoothedResponseMs, outcome.responseMs)
+    : record.smoothedResponseMs;
+}
+
 function withSchedule(
   record: MasteryRecord,
   stage: MasteryStage,
@@ -36,7 +42,7 @@ function withSchedule(
     stage,
     scheduledIntervalMs: intervalMs,
     dueAt: new Date(nowMs + intervalMs).toISOString(),
-    smoothedResponseMs: smoothedResponse(record.smoothedResponseMs, outcome.responseMs),
+    smoothedResponseMs: responseAfter(record, outcome),
     updatedAt,
   };
 }
@@ -47,16 +53,15 @@ export function updateMastery(
   now: string,
 ): MasteryRecord {
   const nowMs = Date.parse(now);
-  const independentCorrect =
-    outcome.correct &&
-    outcome.independentCorrect &&
-    !outcome.usedHint &&
-    outcome.answerAttemptCount === 1;
+  const firstAttemptCorrect =
+    outcome.correct && !outcome.usedHint && outcome.answerAttemptCount === 1;
+  const promotionCorrect =
+    firstAttemptCorrect && (outcome.mode === 'placement' || outcome.independentCorrect);
 
   if (outcome.mode === 'placement' && !outcome.correct) {
     return {
       ...record,
-      smoothedResponseMs: smoothedResponse(record.smoothedResponseMs, outcome.responseMs),
+      smoothedResponseMs: responseAfter(record, outcome),
       updatedAt: new Date(nowMs).toISOString(),
     };
   }
@@ -64,12 +69,12 @@ export function updateMastery(
   if (outcome.mode === 'placement' && stages.indexOf(record.stage) >= stages.indexOf('familiar')) {
     return {
       ...record,
-      smoothedResponseMs: smoothedResponse(record.smoothedResponseMs, outcome.responseMs),
+      smoothedResponseMs: responseAfter(record, outcome),
       updatedAt: new Date(nowMs).toISOString(),
     };
   }
 
-  if (independentCorrect) {
+  if (promotionCorrect) {
     if (record.stage === 'mastered') {
       const intervalMs = Math.min(90 * DAY, Math.max(21 * DAY, record.scheduledIntervalMs * 2));
       return withSchedule(record, record.stage, intervalMs, outcome, nowMs);

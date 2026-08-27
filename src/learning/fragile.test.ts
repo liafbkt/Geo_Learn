@@ -12,7 +12,7 @@ function event(completedAt: string, overrides: Partial<AttemptEvent> = {}): Atte
     packId: 'fixture-pack',
     entityId: 'region-a',
     skill: 'identify_region',
-    questionKind: 'multiple_choice',
+    questionKind: 'identify_region',
     mode: 'smart',
     scheduledReview: false,
     delayedRetry: false,
@@ -23,7 +23,7 @@ function event(completedAt: string, overrides: Partial<AttemptEvent> = {}): Atte
     responseMs: 1_000,
     completedAt,
     ...overrides,
-  };
+  } as AttemptEvent;
 }
 
 const reachedFamiliar: readonly AttemptEvent[] = [
@@ -66,6 +66,30 @@ describe('isFragile', () => {
     expect(isFragile(history, NOW)).toBe(false);
   });
 
+  it('latches fragile after a historical rolling-window mark until valid review successes clear it', () => {
+    const history = [
+      event('2026-06-01T00:00:00.000Z'),
+      event('2026-06-02T00:00:00.000Z'),
+      event('2026-06-03T00:00:00.000Z'),
+      failedReview('2026-07-01T00:00:00.000Z'),
+      failedReview('2026-07-02T00:00:00.000Z'),
+    ];
+
+    expect(isFragile(history, NOW)).toBe(true);
+  });
+
+  it('does not mark when two failures were never within the same rolling 30-day window', () => {
+    const history = [
+      event('2026-04-01T00:00:00.000Z'),
+      event('2026-04-02T00:00:00.000Z'),
+      event('2026-04-03T00:00:00.000Z'),
+      failedReview('2026-05-01T00:00:00.000Z'),
+      failedReview('2026-06-05T00:00:00.000Z'),
+    ];
+
+    expect(isFragile(history, NOW)).toBe(false);
+  });
+
   it('does not mark before the reconstructed mastery has reached familiar', () => {
     const history = [
       event('2026-08-01T00:00:00.000Z'),
@@ -95,6 +119,25 @@ describe('isFragile', () => {
     ];
 
     expect(isFragile(history, NOW)).toBe(false);
+  });
+
+  it('reconstructs familiar from legal placement answers without using placement as evidence', () => {
+    const placement = [
+      event('2026-08-01T00:00:00.000Z', { mode: 'placement', independentCorrect: false }),
+      event('2026-08-02T00:00:00.000Z', { mode: 'placement', independentCorrect: false }),
+      event('2026-08-03T00:00:00.000Z', {
+        mode: 'placement',
+        scheduledReview: true,
+        independentCorrect: false,
+      }),
+    ];
+    const history = [
+      ...placement,
+      failedReview('2026-08-10T00:00:00.000Z'),
+      failedReview('2026-08-20T00:00:00.000Z'),
+    ];
+
+    expect(isFragile(history, NOW)).toBe(true);
   });
 
   it('clears fragile after three independent scheduled-review successes at least 24 hours apart', () => {

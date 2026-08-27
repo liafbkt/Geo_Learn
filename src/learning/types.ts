@@ -2,7 +2,7 @@ import type { PackCapability } from '../content/types';
 
 export type Skill = PackCapability;
 export type MasteryStage = 'new' | 'learning' | 'weak' | 'familiar' | 'solid' | 'mastered';
-export type QuestionKind = 'map' | 'multiple_choice' | 'text_input';
+export type QuestionKind = Skill;
 export type PracticeMode = 'smart' | 'custom' | 'placement';
 
 export type MasteryRecord = Readonly<{
@@ -17,16 +17,18 @@ export type MasteryRecord = Readonly<{
   updatedAt: string;
 }>;
 
-export type AttemptOutcome = Readonly<{
-  mode: PracticeMode;
+type AttemptOutcomeFields = Readonly<{
   correct: boolean;
-  independentCorrect: boolean;
   usedHint: boolean;
-  answerAttemptCount: number;
+  answerAttemptCount: 1 | 2;
   responseMs: number;
 }>;
 
-export type AttemptEvent = Readonly<{
+export type AttemptOutcome =
+  | Readonly<AttemptOutcomeFields & { mode: 'placement'; independentCorrect: false }>
+  | Readonly<AttemptOutcomeFields & { mode: Exclude<PracticeMode, 'placement'>; independentCorrect: boolean }>;
+
+type AttemptEventFields = Readonly<{
   attemptId: string;
   sessionId: string;
   learnerId: string;
@@ -34,13 +36,15 @@ export type AttemptEvent = Readonly<{
   entityId: string;
   skill: Skill;
   questionKind: QuestionKind;
-  mode: PracticeMode;
   scheduledReview: boolean;
   delayedRetry: boolean;
-  answerAttemptCount: number;
+  answerAttemptCount: 1 | 2;
   correct: boolean;
-  independentCorrect: boolean;
   usedHint: boolean;
   responseMs: number;
   completedAt: string;
 }>;
+
+export type AttemptEvent =
+  | Readonly<AttemptEventFields & { mode: 'placement'; independentCorrect: false }>
+  | Readonly<AttemptEventFields & { mode: Exclude<PracticeMode, 'placement'>; independentCorrect: boolean }>;

@@ -1,10 +1,20 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 import { updateMastery } from './updateMastery';
-import type { AttemptOutcome, MasteryRecord, MasteryStage } from './types';
+import type {
+  AttemptOutcome,
+  AttemptEvent,
+  MasteryRecord,
+  MasteryStage,
+  QuestionKind,
+  Skill,
+} from './types';
 
 const MINUTE = 60_000;
 const DAY = 24 * 60 * MINUTE;
 const NOW = '2026-08-27T00:00:00.000Z';
+const skillQuestionKind: QuestionKind = 'identify_region';
+const questionKindSkill: Skill = skillQuestionKind;
+void questionKindSkill;
 
 function record(
   stage: MasteryStage,
@@ -33,10 +43,24 @@ function outcome(overrides: Partial<AttemptOutcome> = {}): AttemptOutcome {
     answerAttemptCount: 1,
     responseMs: 1_000,
     ...overrides,
-  };
+  } as AttemptOutcome;
 }
 
 describe('updateMastery', () => {
+  it('restricts persisted and transient answer counts to the two supported attempts', () => {
+    expectTypeOf<AttemptOutcome['answerAttemptCount']>().toEqualTypeOf<1 | 2>();
+    expectTypeOf<AttemptEvent['answerAttemptCount']>().toEqualTypeOf<1 | 2>();
+  });
+
+  it('forbids independent-correct evidence in placement outcomes and events', () => {
+    expectTypeOf<
+      (AttemptOutcome & { mode: 'placement' })['independentCorrect']
+    >().toEqualTypeOf<false>();
+    expectTypeOf<
+      (AttemptEvent & { mode: 'placement' })['independentCorrect']
+    >().toEqualTypeOf<false>();
+  });
+
   it.each([
     ['new', 'learning', 10 * MINUTE],
     ['learning', 'weak', DAY],
@@ -135,6 +159,26 @@ describe('updateMastery', () => {
     expect(capped.scheduledIntervalMs).toBe(3 * DAY);
   });
 
+  it('uses legal first-attempt placement answers to initialize through familiar', () => {
+    let current = record('new');
+
+    for (const now of [
+      '2026-08-27T00:00:00.000Z',
+      '2026-08-27T00:01:00.000Z',
+      '2026-08-27T00:02:00.000Z',
+      '2026-08-27T00:03:00.000Z',
+    ]) {
+      current = updateMastery(
+        current,
+        outcome({ mode: 'placement', independentCorrect: false }),
+        now,
+      );
+    }
+
+    expect(current.stage).toBe('familiar');
+    expect(current.scheduledIntervalMs).toBe(3 * DAY);
+  });
+
   it('does not let placement change an existing stage above familiar', () => {
     const input = record('solid', 7 * DAY);
 
@@ -166,5 +210,22 @@ describe('updateMastery', () => {
     const result = updateMastery(record('new'), outcome({ responseMs: 875 }), NOW);
 
     expect(result.smoothedResponseMs).toBe(875);
+  });
+
+  it('preserves the response-time tie-break value after ordinary and placement failures', () => {
+    const input = record('weak', DAY, 1_200);
+    const failed = updateMastery(
+      input,
+      outcome({ correct: false, independentCorrect: false, answerAttemptCount: 2, responseMs: 5_000 }),
+      NOW,
+    );
+    const placementFailed = updateMastery(
+      input,
+      outcome({ mode: 'placement', correct: false, independentCorrect: false, responseMs: 5_000 }),
+      NOW,
+    );
+
+    expect(failed.smoothedResponseMs).toBe(1_200);
+    expect(placementFailed.smoothedResponseMs).toBe(1_200);
   });
 });
