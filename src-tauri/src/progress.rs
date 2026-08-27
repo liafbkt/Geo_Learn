@@ -47,7 +47,7 @@ pub struct MasteryDto {
     stage: String,
     scheduled_interval_ms: i64,
     due_at: String,
-    smoothed_response_ms: Option<i64>,
+    smoothed_response_ms: Option<f64>,
     updated_at: String,
 }
 
@@ -189,7 +189,11 @@ fn validate_mastery(value: &MasteryDto) -> Result<(), ProgressError> {
     if !STAGES.contains(&value.stage.as_str()) {
         return Err(ProgressError::invalid("Mastery stage is unsupported."));
     }
-    if value.scheduled_interval_ms < 0 || value.smoothed_response_ms.is_some_and(|ms| ms < 0) {
+    if value.scheduled_interval_ms < 0
+        || value
+            .smoothed_response_ms
+            .is_some_and(|ms| !ms.is_finite() || ms < 0.0)
+    {
         return Err(ProgressError::invalid("Mastery duration is invalid."));
     }
     parse_timestamp(&value.due_at, "Due")?;
@@ -280,6 +284,25 @@ fn validate_session(value: &PracticeSessionDto) -> Result<(), ProgressError> {
         {
             return Err(ProgressError::invalid("Custom session request is invalid."));
         }
+        for entity_id in value.request.entity_ids.as_deref().unwrap_or_default() {
+            validate_id(entity_id, "Custom entity")?;
+        }
+        for skill in value.request.skills.as_deref().unwrap_or_default() {
+            validate_skill(skill)?;
+        }
+        for status in value.request.statuses.as_deref().unwrap_or_default() {
+            if !STAGES.contains(&status.as_str()) && status != "fragile" {
+                return Err(ProgressError::invalid("Custom status is unsupported."));
+            }
+        }
+    } else if value.request.question_count.is_some()
+        || value.request.entity_ids.is_some()
+        || value.request.skills.is_some()
+        || value.request.statuses.is_some()
+    {
+        return Err(ProgressError::invalid(
+            "Non-custom session request contains custom filters.",
+        ));
     }
     if value.base_question_count < 0
         || value.introduction_cursor < 0
@@ -405,7 +428,6 @@ fn write_session(
 pub(crate) fn save_attempt_transaction_on(
     connection: &mut Connection,
     input: &SaveAttemptInput,
-    force_final_failure: bool,
 ) -> Result<(), ProgressError> {
     validate_transaction(input)?;
     let transaction = connection
@@ -484,9 +506,6 @@ pub(crate) fn save_attempt_transaction_on(
             ],
         )
         .map_err(|_| ProgressError::persistence())?;
-    if force_final_failure {
-        return Err(ProgressError::persistence());
-    }
     write_session(&transaction, &input.session, &input.event.completed_at)?;
     transaction
         .commit()
@@ -541,7 +560,7 @@ pub fn save_attempt_transaction(
     database: State<'_, Database>,
     input: SaveAttemptInput,
 ) -> Result<(), ProgressError> {
-    save_attempt_transaction_on(&mut lock_database(&database)?, &input, false)
+    save_attempt_transaction_on(&mut lock_database(&database)?, &input)
 }
 
 #[tauri::command]
@@ -717,7 +736,7 @@ pub fn save_settings(
 
 #[cfg(test)]
 mod tests {
-    use super::{save_attempt_transaction_on, SaveAttemptInput};
+    use super::{save_attempt_transaction_on, validate_session, SaveAttemptInput};
     use rusqlite::Connection;
 
     fn connection() -> Connection {
@@ -728,8 +747,8 @@ mod tests {
         connection
     }
 
-    fn input(attempt_id: &str, stage: &str, question_cursor: i64) -> SaveAttemptInput {
-        serde_json::from_value(serde_json::json!({
+    fn input_value(attempt_id: &str, stage: &str, question_cursor: i64) -> serde_json::Value {
+        serde_json::json!({
             "event": {
                 "attemptId": attempt_id,
                 "sessionId": "session-1",
@@ -756,7 +775,7 @@ mod tests {
                 "stage": stage,
                 "scheduledIntervalMs": 86400000,
                 "dueAt": "2026-08-27T12:00:00.000Z",
-                "smoothedResponseMs": 2000,
+                "smoothedResponseMs": 1294.6,
                 "updatedAt": "2026-08-26T12:01:00.000Z"
             },
             "session": {
@@ -775,15 +794,19 @@ mod tests {
                 "startedAt": "2026-08-26T12:00:00.000Z",
                 "accumulatedPauseMs": 0
             }
-        }))
-        .expect("deserialize transaction fixture")
+        })
+    }
+
+    fn input(attempt_id: &str, stage: &str, question_cursor: i64) -> SaveAttemptInput {
+        serde_json::from_value(input_value(attempt_id, stage, question_cursor))
+            .expect("deserialize transaction fixture")
     }
 
     #[test]
     fn transaction_inserts_attempt_upserts_mastery_and_advances_session() {
         let mut connection = connection();
 
-        save_attempt_transaction_on(&mut connection, &input("attempt-1", "learning", 1), false)
+        save_attempt_transaction_on(&mut connection, &input("attempt-1", "learning", 1))
             .expect("save complete attempt transaction");
 
         let attempt_count: i64 = connection
@@ -792,6 +815,11 @@ mod tests {
         let mastery_stage: String = connection
             .query_row("SELECT stage FROM mastery", [], |row| row.get(0))
             .expect("load mastery stage");
+        let smoothed_response_ms: f64 = connection
+            .query_row("SELECT smoothed_response_ms FROM mastery", [], |row| {
+                row.get(0)
+            })
+            .expect("load fractional EMA");
         let cursor: i64 = connection
             .query_row(
                 "SELECT question_cursor FROM practice_session WHERE session_id = 'session-1'",
@@ -802,15 +830,25 @@ mod tests {
 
         assert_eq!(attempt_count, 1);
         assert_eq!(mastery_stage, "learning");
+        assert_eq!(smoothed_response_ms, 1294.6);
         assert_eq!(cursor, 1);
     }
 
     #[test]
     fn final_step_failure_rolls_back_attempt_and_mastery() {
         let mut connection = connection();
+        connection
+            .execute_batch(
+                "CREATE TRIGGER fail_practice_session_write
+                 BEFORE INSERT ON practice_session
+                 BEGIN
+                   SELECT RAISE(ABORT, 'forced final-step session failure');
+                 END;",
+            )
+            .expect("install real SQLite final-step failure trigger");
 
         let result =
-            save_attempt_transaction_on(&mut connection, &input("attempt-1", "learning", 1), true);
+            save_attempt_transaction_on(&mut connection, &input("attempt-1", "learning", 1));
 
         assert!(result.is_err());
         for table in ["attempt_event", "mastery", "practice_session"] {
@@ -826,10 +864,10 @@ mod tests {
     #[test]
     fn duplicate_attempt_does_not_overwrite_mastery_or_advance_session() {
         let mut connection = connection();
-        save_attempt_transaction_on(&mut connection, &input("attempt-1", "learning", 1), false)
+        save_attempt_transaction_on(&mut connection, &input("attempt-1", "learning", 1))
             .expect("save original attempt");
 
-        save_attempt_transaction_on(&mut connection, &input("attempt-1", "mastered", 2), false)
+        save_attempt_transaction_on(&mut connection, &input("attempt-1", "mastered", 2))
             .expect("duplicate is successful no-op");
 
         let attempt_count: i64 = connection
@@ -847,5 +885,48 @@ mod tests {
         assert_eq!(attempt_count, 1);
         assert_eq!(stage, "learning");
         assert_eq!(cursor, 1);
+    }
+
+    #[test]
+    fn custom_request_validates_every_present_filter_value() {
+        let invalid_requests = [
+            serde_json::json!({
+                "mode": "custom",
+                "packId": "china-provinces",
+                "questionCount": 10,
+                "entityIds": ["../bad"],
+                "skills": ["locate_region"],
+                "statuses": ["learning"]
+            }),
+            serde_json::json!({
+                "mode": "custom",
+                "packId": "china-provinces",
+                "questionCount": 10,
+                "entityIds": ["anhui"],
+                "skills": ["unknown"],
+                "statuses": ["learning"]
+            }),
+            serde_json::json!({
+                "mode": "custom",
+                "packId": "china-provinces",
+                "questionCount": 10,
+                "entityIds": ["anhui"],
+                "skills": ["locate_region"],
+                "statuses": ["legendary"]
+            }),
+            serde_json::json!({
+                "mode": "smart",
+                "packId": "china-provinces",
+                "skills": ["locate_region"]
+            }),
+        ];
+
+        for request in invalid_requests {
+            let mut value = input_value("attempt-1", "learning", 1);
+            value["session"]["request"] = request;
+            let input: SaveAttemptInput =
+                serde_json::from_value(value).expect("deserialize invalid request fixture");
+            assert!(validate_session(&input.session).is_err());
+        }
     }
 }

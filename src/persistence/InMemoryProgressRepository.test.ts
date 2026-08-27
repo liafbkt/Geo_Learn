@@ -267,6 +267,24 @@ describe('InMemoryProgressRepository', () => {
     ]);
   });
 
+  it('orders legal ASCII entity IDs by code unit rather than host locale', async () => {
+    const repository = new InMemoryProgressRepository();
+    const entityIds = ['a_1', 'a:1', 'a.1', 'a-1', 'a', 'A'];
+    for (const [index, entityId] of entityIds.entries()) {
+      await repository.saveAttempt({
+        event: event({ attemptId: `ascii-attempt-${index}`, entityId }),
+        session: session(),
+        mastery: mastery({ entityId }),
+      });
+    }
+
+    expect(
+      (await repository.loadSnapshot('learner-1', 'china-provinces')).map(
+        ({ entityId }) => entityId,
+      ),
+    ).toEqual(['A', 'a', 'a-1', 'a.1', 'a:1', 'a_1']);
+  });
+
   it('persists cloned settings and rejects unsupported or out-of-range audio values', async () => {
     const repository = new InMemoryProgressRepository();
     const settings: AppSettings = {

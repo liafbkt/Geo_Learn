@@ -89,7 +89,11 @@ function masteryKey(record: MasteryRecord): string {
 }
 
 function compareMastery(left: MasteryRecord, right: MasteryRecord): number {
-  return left.entityId.localeCompare(right.entityId) || left.skill.localeCompare(right.skill);
+  return compareAscii(left.entityId, right.entityId) || compareAscii(left.skill, right.skill);
+}
+
+function compareAscii(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
 }
 
 export class InMemoryProgressRepository implements ProgressRepository {

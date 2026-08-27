@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS mastery (
     stage TEXT NOT NULL,
     scheduled_interval_ms INTEGER NOT NULL CHECK (scheduled_interval_ms >= 0),
     due_at TEXT NOT NULL,
-    smoothed_response_ms INTEGER,
+    smoothed_response_ms REAL,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (learner_id, pack_id, entity_id, skill)
 );
