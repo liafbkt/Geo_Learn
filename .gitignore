@@ -8,3 +8,4 @@ test-results/
 .tauri-template-spatial-memory-coach/
 src-tauri/target/
 *.log
+*.tsbuildinfo
