@@ -30,3 +30,6 @@ zip = { version = "2.4", default-features = false, features = ["deflate"] }
 
 [dev-dependencies]
 tempfile = "3"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Storage_FileSystem"] }

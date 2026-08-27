@@ -1,9 +1,10 @@
-use rusqlite::Connection;
+use rusqlite::{params, Connection};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use spatial_memory_coach_lib::backup::{
-    apply_import_on, inspect_archive_bytes, write_selected_backup, BackupError, BackupStages,
-    ImportMode, MAX_ARCHIVE_BYTES, MAX_ENTRY_BYTES, STAGE_TTL_SECONDS,
+    apply_import_on, inspect_archive_bytes, installed_pack_versions_on,
+    write_backup_atomically_with, write_selected_backup, BackupError, BackupStages, ImportMode,
+    MAX_ARCHIVE_BYTES, MAX_ENTRY_BYTES, STAGE_TTL_SECONDS,
 };
 use std::collections::BTreeMap;
 use std::io::{Cursor, Write};
@@ -78,10 +79,14 @@ fn sha256(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
 
-fn manifest(documents: &BTreeMap<String, Vec<u8>>, version: u64) -> Vec<u8> {
+fn manifest_with_pack_version(
+    documents: &BTreeMap<String, Vec<u8>>,
+    version: u64,
+    pack_version: &str,
+) -> Vec<u8> {
     serde_json::to_vec(&json!({
         "format": "geolearn-backup", "version": version, "exportedAt": EXPORTED_AT,
-        "learnerId": "learner-1", "packVersions": {"china-provinces": "1.0.0"},
+        "learnerId": "learner-1", "packVersions": {"china-provinces": pack_version},
         "checksums": {
             "progress.json": sha256(&documents["progress.json"]),
             "sessions.json": sha256(&documents["sessions.json"]),
@@ -89,6 +94,10 @@ fn manifest(documents: &BTreeMap<String, Vec<u8>>, version: u64) -> Vec<u8> {
         }
     }))
     .unwrap()
+}
+
+fn manifest(documents: &BTreeMap<String, Vec<u8>>, version: u64) -> Vec<u8> {
+    manifest_with_pack_version(documents, version, "1.0.0")
 }
 
 fn archive(entries: Vec<(String, Vec<u8>, Option<u32>)>) -> Vec<u8> {
@@ -121,6 +130,20 @@ fn valid_archive() -> Vec<u8> {
     archive(entries)
 }
 
+fn archive_with_documents(documents: BTreeMap<String, Vec<u8>>, pack_version: &str) -> Vec<u8> {
+    let mut entries = vec![(
+        "manifest.json".to_owned(),
+        manifest_with_pack_version(&documents, 1, pack_version),
+        None,
+    )];
+    entries.extend(
+        documents
+            .into_iter()
+            .map(|(name, bytes)| (name, bytes, None)),
+    );
+    archive(entries)
+}
+
 fn assert_code(result: Result<impl std::fmt::Debug, BackupError>, expected: &str) {
     assert_eq!(result.unwrap_err().code, expected);
 }
@@ -131,6 +154,10 @@ fn connection() -> Connection {
         .execute_batch(include_str!("../migrations/0001_initial.sql"))
         .unwrap();
     connection
+}
+
+fn current_versions() -> BTreeMap<String, String> {
+    BTreeMap::from([("china-provinces".to_owned(), "1.0.0".to_owned())])
 }
 
 fn seed_current(connection: &Connection) {
@@ -159,6 +186,17 @@ fn seed_current(connection: &Connection) {
         .unwrap();
 }
 
+fn seed_attempt(connection: &Connection, response_ms: i64) {
+    connection
+        .execute(
+            "INSERT INTO attempt_event VALUES (
+            'attempt-1','session-1','learner-1','china-provinces','anhui','locate_region',
+            'locate_region',0,0,1,1,0,?1,?2,'smart',1)",
+            params![response_ms, EXPORTED_AT],
+        )
+        .unwrap();
+}
+
 #[test]
 fn valid_archive_is_inspected_without_exposing_a_path() {
     let inspected = inspect_archive_bytes(&valid_archive()).unwrap();
@@ -166,6 +204,31 @@ fn valid_archive_is_inspected_without_exposing_a_path() {
     assert_eq!(inspected.summary.mastery_count, 1);
     assert_eq!(inspected.summary.attempt_count, 1);
     assert_eq!(inspected.summary.session_count, 1);
+}
+
+#[test]
+fn capabilities_do_not_expose_dialog_and_lib_keeps_exactly_three_backup_commands() {
+    let capability: Value =
+        serde_json::from_str(include_str!("../capabilities/default.json")).unwrap();
+    let permissions = capability["permissions"].as_array().unwrap();
+    assert!(permissions
+        .iter()
+        .all(|permission| !permission.as_str().unwrap().starts_with("dialog:")));
+
+    let lib = include_str!("../src/lib.rs");
+    for command in [
+        "backup::choose_and_export_backup",
+        "backup::choose_and_inspect_backup",
+        "backup::import_staged_backup",
+    ] {
+        assert_eq!(
+            lib.matches(command).count(),
+            1,
+            "registration for {command}"
+        );
+    }
+    assert_eq!(lib.matches("backup::choose_and_").count(), 2);
+    assert_eq!(lib.matches("backup::import_").count(), 1);
 }
 
 #[test]
@@ -263,6 +326,79 @@ fn rejects_corrupt_json_unsupported_version_and_checksum_mismatch() {
 }
 
 #[test]
+fn rejects_mode_only_fields_and_malformed_question_variants() {
+    let base: Value = serde_json::from_slice(&valid_documents()["sessions.json"]).unwrap();
+    let mut invalid_documents = Vec::new();
+
+    let mut smart_with_custom_fields = base.clone();
+    smart_with_custom_fields[0]["session"]["request"]["questionCount"] = json!(10);
+    invalid_documents.push(smart_with_custom_fields);
+
+    for question in [
+        json!({"kind":"locate_region","presentation":"map","entityId":"anhui","answer":{"acceptedDisplayValues":["安徽"]}}),
+        json!({"kind":"identify_region","presentation":"choice","entityId":"anhui"}),
+        json!({"kind":"associate_capital","presentation":"text","entityId":"anhui","answer":{"acceptedDisplayValues":["合肥"]}}),
+        json!({"kind":"locate_place","presentation":"map","entityId":"hefei"}),
+        json!({"kind":"identify_place","presentation":"map","entityId":"hefei"}),
+        json!({"kind":"identify_place","presentation":"text","entityId":"hefei","answer":{"acceptedDisplayValues":[]}}),
+    ] {
+        let mut document = base.clone();
+        document[0]["session"]["questions"][0] = question;
+        invalid_documents.push(document);
+    }
+
+    for invalid_sessions in invalid_documents {
+        let mut documents = valid_documents();
+        documents.insert(
+            "sessions.json".to_owned(),
+            serde_json::to_vec(&invalid_sessions).unwrap(),
+        );
+        assert_code(
+            inspect_archive_bytes(&archive_with_documents(documents, "1.0.0")),
+            "invalid_data",
+        );
+    }
+}
+
+#[test]
+fn rejects_malformed_retry_debts_cursors_timestamps_and_ids() {
+    let base: Value = serde_json::from_slice(&valid_documents()["sessions.json"]).unwrap();
+    let mut invalid_documents = Vec::new();
+
+    for debt in [
+        json!({"entityId":"anhui","skill":"locate_region","sourceQuestionKind":"unknown","createdAt":EXPORTED_AT,"priority":"immediate"}),
+        json!({"entityId":"anhui","skill":"locate_region","sourceQuestionKind":"locate_region","createdAt":"yesterday","priority":"immediate"}),
+        json!({"entityId":"anhui","skill":"locate_region","sourceQuestionKind":"locate_region","createdAt":EXPORTED_AT,"priority":"later"}),
+    ] {
+        let mut document = base.clone();
+        document[0]["session"]["carryoverRetryDebts"] = json!([debt]);
+        invalid_documents.push(document);
+    }
+
+    let mut cursor = base.clone();
+    cursor[0]["session"]["questionCursor"] = json!(3);
+    invalid_documents.push(cursor);
+    let mut timestamp = base.clone();
+    timestamp[0]["session"]["startedAt"] = json!("2026-08-27T20:00:00+08:00");
+    invalid_documents.push(timestamp);
+    let mut invalid_id = base.clone();
+    invalid_id[0]["session"]["sessionId"] = json!("../session");
+    invalid_documents.push(invalid_id);
+
+    for invalid_sessions in invalid_documents {
+        let mut documents = valid_documents();
+        documents.insert(
+            "sessions.json".to_owned(),
+            serde_json::to_vec(&invalid_sessions).unwrap(),
+        );
+        assert_code(
+            inspect_archive_bytes(&archive_with_documents(documents, "1.0.0")),
+            "invalid_data",
+        );
+    }
+}
+
+#[test]
 fn staging_ids_expire_and_are_single_use() {
     let now = OffsetDateTime::from_unix_timestamp(1_800_000_000).unwrap();
     let inspected = inspect_archive_bytes(&valid_archive()).unwrap();
@@ -302,6 +438,40 @@ fn cancelled_export_is_successful_and_atomic_write_cleans_temporary_files() {
 }
 
 #[test]
+fn atomic_export_replaces_an_existing_target_without_partial_content() {
+    let directory = tempdir().unwrap();
+    let target = directory.path().join("existing.geolearn-backup");
+    std::fs::write(&target, b"old-complete-content").unwrap();
+
+    write_selected_backup(Some(target.clone()), &valid_archive()).unwrap();
+
+    assert_eq!(std::fs::read(&target).unwrap(), valid_archive());
+}
+
+#[test]
+fn failure_after_temp_fsync_preserves_old_target_and_cleans_temp() {
+    let directory = tempdir().unwrap();
+    let target = directory.path().join("existing.geolearn-backup");
+    std::fs::write(&target, b"old-complete-content").unwrap();
+
+    let result =
+        write_backup_atomically_with(
+            &target,
+            b"new-content",
+            || Err(BackupError::safety_backup()),
+        );
+
+    assert!(result.is_err());
+    assert_eq!(std::fs::read(&target).unwrap(), b"old-complete-content");
+    let leftovers = std::fs::read_dir(directory.path())
+        .unwrap()
+        .filter_map(Result::ok)
+        .filter(|entry| entry.file_name().to_string_lossy().contains(".tmp-"))
+        .count();
+    assert_eq!(leftovers, 0);
+}
+
+#[test]
 fn safety_backup_happens_before_merge_mutation() {
     let mut connection = connection();
     seed_current(&connection);
@@ -315,6 +485,7 @@ fn safety_backup_happens_before_merge_mutation() {
         &inspected,
         ImportMode::Merge,
         false,
+        &current_versions(),
         |bytes| {
             safety_called = true;
             std::fs::write(&safety_path, bytes).map_err(|_| BackupError::safety_backup())
@@ -327,6 +498,87 @@ fn safety_backup_happens_before_merge_mutation() {
         .query_row("SELECT stage FROM mastery", [], |row| row.get(0))
         .unwrap();
     assert_eq!(stage, "solid");
+}
+
+#[test]
+fn installed_pack_versions_include_session_only_packs_and_validate_manifests() {
+    let connection = connection();
+    seed_current(&connection);
+    connection
+        .execute(
+            "INSERT INTO practice_session VALUES (
+            'session-only','learner-1','session-pack',?1,0,'[]',0,'[]',0,'[]',?2,0,?2)",
+            [r#"{"mode":"smart","packId":"session-pack"}"#, EXPORTED_AT],
+        )
+        .unwrap();
+    let directory = tempdir().unwrap();
+    for (pack_id, version) in [("china-provinces", "1.0.0"), ("session-pack", "3.2.1")] {
+        let pack = directory.path().join(pack_id);
+        std::fs::create_dir_all(&pack).unwrap();
+        std::fs::write(
+            pack.join("manifest.json"),
+            serde_json::to_vec(&json!({"packId": pack_id, "contentVersion": version})).unwrap(),
+        )
+        .unwrap();
+    }
+
+    let versions = installed_pack_versions_on(&connection, directory.path(), "learner-1").unwrap();
+
+    assert_eq!(versions["china-provinces"], "1.0.0");
+    assert_eq!(versions["session-pack"], "3.2.1");
+}
+
+#[test]
+fn safety_backup_uses_current_v1_instead_of_imported_v2_pack_versions() {
+    let mut connection = connection();
+    seed_current(&connection);
+    let imported =
+        inspect_archive_bytes(&archive_with_documents(valid_documents(), "2.0.0")).unwrap();
+    let current = current_versions();
+    let mut observed = None;
+
+    apply_import_on(
+        &mut connection,
+        &imported,
+        ImportMode::Merge,
+        false,
+        &current,
+        |bytes| {
+            observed = Some(inspect_archive_bytes(bytes)?.summary.pack_versions);
+            Ok(())
+        },
+    )
+    .unwrap();
+
+    assert_eq!(observed.unwrap()["china-provinces"], "1.0.0");
+}
+
+#[test]
+fn conflicting_attempt_code_rolls_back_mastery_and_sessions() {
+    let mut connection = connection();
+    seed_current(&connection);
+    seed_attempt(&connection, 1_000);
+    let inspected = inspect_archive_bytes(&valid_archive()).unwrap();
+
+    let result = apply_import_on(
+        &mut connection,
+        &inspected,
+        ImportMode::Merge,
+        true,
+        &current_versions(),
+        |_| Ok(()),
+    );
+
+    assert_code(result, "attempt_conflict");
+    assert_seed_unchanged(&connection);
+    let response_ms: i64 = connection
+        .query_row(
+            "SELECT response_ms FROM attempt_event WHERE attempt_id='attempt-1'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert_eq!(response_ms, 1_000);
 }
 
 fn install_failure(connection: &Connection, table: &str) {
@@ -354,9 +606,14 @@ fn merge_sql_failure_rolls_back_the_whole_import() {
     seed_current(&connection);
     install_failure(&connection, "attempt_event");
     let inspected = inspect_archive_bytes(&valid_archive()).unwrap();
-    let result = apply_import_on(&mut connection, &inspected, ImportMode::Merge, true, |_| {
-        Ok(())
-    });
+    let result = apply_import_on(
+        &mut connection,
+        &inspected,
+        ImportMode::Merge,
+        true,
+        &current_versions(),
+        |_| Ok(()),
+    );
     assert_code(result, "import_failed");
     assert_seed_unchanged(&connection);
 }
@@ -372,6 +629,7 @@ fn replace_sql_failure_restores_all_application_tables() {
         &inspected,
         ImportMode::Replace,
         true,
+        &current_versions(),
         |_| Ok(()),
     );
     assert_code(result, "import_failed");
@@ -388,6 +646,7 @@ fn safety_backup_failure_prevents_any_database_mutation() {
         &inspected,
         ImportMode::Replace,
         true,
+        &current_versions(),
         |_| Err(BackupError::safety_backup()),
     );
     assert_code(result, "safety_backup_failed");

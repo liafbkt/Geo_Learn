@@ -1,7 +1,6 @@
 use crate::db::Database;
 use rusqlite::{params, Connection, OptionalExtension, Transaction};
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs::{File, OpenOptions};
@@ -125,9 +124,145 @@ struct ProgressDocument {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(tag = "mode", rename_all = "snake_case", deny_unknown_fields)]
+enum SessionRequest {
+    Smart {
+        #[serde(rename = "packId")]
+        pack_id: String,
+    },
+    Placement {
+        #[serde(rename = "packId")]
+        pack_id: String,
+    },
+    Custom {
+        #[serde(rename = "packId")]
+        pack_id: String,
+        #[serde(rename = "questionCount")]
+        question_count: i64,
+        #[serde(rename = "entityIds")]
+        entity_ids: Vec<String>,
+        skills: Vec<String>,
+        statuses: Vec<String>,
+    },
+}
+
+impl SessionRequest {
+    fn pack_id(&self) -> &str {
+        match self {
+            Self::Smart { pack_id }
+            | Self::Placement { pack_id }
+            | Self::Custom { pack_id, .. } => pack_id,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum MapPresentation {
+    Map,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum ChoiceOrTextPresentation {
+    Choice,
+    Text,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum QuestionKind {
+    LocateRegion,
+    IdentifyRegion,
+    AssociateCapital,
+    LocatePlace,
+    IdentifyPlace,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct AnswerSpec {
+    accepted_display_values: Vec<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+enum Question {
+    LocateRegion {
+        presentation: MapPresentation,
+        #[serde(rename = "entityId")]
+        entity_id: String,
+    },
+    IdentifyRegion {
+        presentation: ChoiceOrTextPresentation,
+        #[serde(rename = "entityId")]
+        entity_id: String,
+        #[serde(rename = "candidateEntityIds")]
+        candidate_entity_ids: Option<[String; 4]>,
+        answer: Option<AnswerSpec>,
+    },
+    AssociateCapital {
+        presentation: ChoiceOrTextPresentation,
+        #[serde(rename = "entityId")]
+        entity_id: String,
+        #[serde(rename = "capitalId")]
+        capital_id: String,
+        #[serde(rename = "candidateEntityIds")]
+        candidate_entity_ids: Option<[String; 4]>,
+        answer: Option<AnswerSpec>,
+    },
+    LocatePlace {
+        presentation: MapPresentation,
+        #[serde(rename = "entityId")]
+        entity_id: String,
+        coordinate: [f64; 2],
+    },
+    IdentifyPlace {
+        presentation: ChoiceOrTextPresentation,
+        #[serde(rename = "entityId")]
+        entity_id: String,
+        #[serde(rename = "candidateEntityIds")]
+        candidate_entity_ids: Option<[String; 4]>,
+        answer: Option<AnswerSpec>,
+    },
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum RetryPriority {
+    Immediate,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct RetryDebt {
+    entity_id: String,
+    skill: String,
+    source_question_kind: QuestionKind,
+    created_at: String,
+    priority: RetryPriority,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct PracticeSession {
+    session_id: String,
+    learner_id: String,
+    request: SessionRequest,
+    base_question_count: i64,
+    introductions: Vec<String>,
+    introduction_cursor: i64,
+    questions: Vec<Question>,
+    question_cursor: i64,
+    carryover_retry_debts: Vec<RetryDebt>,
+    started_at: String,
+    accumulated_pause_ms: i64,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct SessionRecord {
-    session: Value,
+    session: PracticeSession,
     saved_at: String,
 }
 
@@ -143,6 +278,13 @@ struct AudioSettings {
 #[serde(deny_unknown_fields)]
 struct AppSettings {
     audio: AudioSettings,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct InstalledPackManifest {
+    pack_id: String,
+    content_version: String,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -280,91 +422,152 @@ fn validate_attempt(value: &AttemptRecord, learner_id: &str) -> Result<(), Backu
     Ok(())
 }
 
-fn required_string<'a>(value: &'a Value, key: &str) -> Result<&'a str, BackupError> {
-    value
-        .get(key)
-        .and_then(Value::as_str)
-        .filter(|item| !item.is_empty())
-        .ok_or_else(BackupError::invalid_data)
-}
-
-fn required_nonnegative(value: &Value, key: &str) -> Result<i64, BackupError> {
-    value
-        .get(key)
-        .and_then(Value::as_i64)
-        .filter(|item| *item >= 0)
-        .ok_or_else(BackupError::invalid_data)
-}
-
-fn validate_session(value: &SessionRecord, learner_id: &str) -> Result<(), BackupError> {
-    parse_timestamp(&value.saved_at)?;
-    let session = value
-        .session
-        .as_object()
-        .ok_or_else(BackupError::invalid_data)?;
-    let session_value = Value::Object(session.clone());
-    let session_id = required_string(&session_value, "sessionId")?;
-    let session_learner = required_string(&session_value, "learnerId")?;
-    let request = session_value
-        .get("request")
-        .and_then(Value::as_object)
-        .ok_or_else(BackupError::invalid_data)?;
-    let pack_id = request
-        .get("packId")
-        .and_then(Value::as_str)
-        .ok_or_else(BackupError::invalid_data)?;
-    let mode = request
-        .get("mode")
-        .and_then(Value::as_str)
-        .ok_or_else(BackupError::invalid_data)?;
-    let introductions = session_value
-        .get("introductions")
-        .and_then(Value::as_array)
-        .ok_or_else(BackupError::invalid_data)?;
-    let questions = session_value
-        .get("questions")
-        .and_then(Value::as_array)
-        .ok_or_else(BackupError::invalid_data)?;
-    let debts = session_value
-        .get("carryoverRetryDebts")
-        .and_then(Value::as_array)
-        .ok_or_else(BackupError::invalid_data)?;
-    let introduction_cursor = required_nonnegative(&session_value, "introductionCursor")?;
-    let question_cursor = required_nonnegative(&session_value, "questionCursor")?;
-    if session_learner != learner_id
-        || !valid_id(session_id)
-        || !valid_id(session_learner)
-        || !valid_id(pack_id)
-        || !matches!(mode, "smart" | "custom" | "placement")
-        || required_nonnegative(&session_value, "baseQuestionCount").is_err()
-        || required_nonnegative(&session_value, "accumulatedPauseMs").is_err()
-        || introduction_cursor as usize > introductions.len()
-        || question_cursor as usize > questions.len()
-        || introductions
+fn validate_answer(answer: &AnswerSpec) -> Result<(), BackupError> {
+    if answer.accepted_display_values.is_empty()
+        || answer
+            .accepted_display_values
             .iter()
-            .any(|item| item.as_str().is_none_or(|id| !valid_id(id)))
-        || questions.iter().any(|item| {
-            item.get("kind")
-                .and_then(Value::as_str)
-                .is_none_or(|kind| !SKILLS.contains(&kind))
-                || item
-                    .get("entityId")
-                    .and_then(Value::as_str)
-                    .is_none_or(|id| !valid_id(id))
-        })
-        || debts.iter().any(|item| {
-            item.get("entityId")
-                .and_then(Value::as_str)
-                .is_none_or(|id| !valid_id(id))
-                || item
-                    .get("skill")
-                    .and_then(Value::as_str)
-                    .is_none_or(|skill| !SKILLS.contains(&skill))
-        })
+            .any(|item| item.trim().is_empty())
     {
         return Err(BackupError::invalid_data());
     }
-    parse_timestamp(required_string(&session_value, "startedAt")?)?;
+    Ok(())
+}
+
+fn validate_choice_or_text(
+    presentation: &ChoiceOrTextPresentation,
+    candidates: &Option<[String; 4]>,
+    answer: &Option<AnswerSpec>,
+) -> Result<(), BackupError> {
+    match presentation {
+        ChoiceOrTextPresentation::Choice => {
+            let candidates = candidates.as_ref().ok_or_else(BackupError::invalid_data)?;
+            if answer.is_some()
+                || candidates.iter().any(|id| !valid_id(id))
+                || candidates.iter().collect::<BTreeSet<_>>().len() != 4
+            {
+                return Err(BackupError::invalid_data());
+            }
+        }
+        ChoiceOrTextPresentation::Text => {
+            if candidates.is_some() {
+                return Err(BackupError::invalid_data());
+            }
+            validate_answer(answer.as_ref().ok_or_else(BackupError::invalid_data)?)?;
+        }
+    }
+    Ok(())
+}
+
+fn validate_question(question: &Question) -> Result<(), BackupError> {
+    match question {
+        Question::LocateRegion { entity_id, .. } => {
+            if !valid_id(entity_id) {
+                return Err(BackupError::invalid_data());
+            }
+        }
+        Question::IdentifyRegion {
+            presentation,
+            entity_id,
+            candidate_entity_ids,
+            answer,
+        }
+        | Question::IdentifyPlace {
+            presentation,
+            entity_id,
+            candidate_entity_ids,
+            answer,
+        } => {
+            if !valid_id(entity_id) {
+                return Err(BackupError::invalid_data());
+            }
+            validate_choice_or_text(presentation, candidate_entity_ids, answer)?;
+        }
+        Question::AssociateCapital {
+            presentation,
+            entity_id,
+            capital_id,
+            candidate_entity_ids,
+            answer,
+        } => {
+            if !valid_id(entity_id) || !valid_id(capital_id) {
+                return Err(BackupError::invalid_data());
+            }
+            validate_choice_or_text(presentation, candidate_entity_ids, answer)?;
+        }
+        Question::LocatePlace {
+            entity_id,
+            coordinate,
+            ..
+        } => {
+            if !valid_id(entity_id)
+                || coordinate.iter().any(|item| !item.is_finite())
+                || !(-180.0..=180.0).contains(&coordinate[0])
+                || !(-90.0..=90.0).contains(&coordinate[1])
+            {
+                return Err(BackupError::invalid_data());
+            }
+        }
+    }
+    Ok(())
+}
+
+fn validate_request(request: &SessionRequest) -> Result<(), BackupError> {
+    if !valid_id(request.pack_id()) {
+        return Err(BackupError::invalid_data());
+    }
+    if let SessionRequest::Custom {
+        question_count,
+        entity_ids,
+        skills,
+        statuses,
+        ..
+    } = request
+    {
+        if !(1..=50).contains(question_count)
+            || entity_ids.is_empty()
+            || skills.is_empty()
+            || entity_ids.iter().any(|id| !valid_id(id))
+            || skills.iter().any(|skill| !SKILLS.contains(&skill.as_str()))
+            || statuses
+                .iter()
+                .any(|status| status != "fragile" && !STAGES.contains(&status.as_str()))
+        {
+            return Err(BackupError::invalid_data());
+        }
+    }
+    Ok(())
+}
+
+fn validate_session(value: &SessionRecord, learner_id: &str) -> Result<(), BackupError> {
+    let session = &value.session;
+    parse_timestamp(&value.saved_at)?;
+    parse_timestamp(&session.started_at)?;
+    validate_request(&session.request)?;
+    if session.learner_id != learner_id
+        || !valid_id(&session.session_id)
+        || !valid_id(&session.learner_id)
+        || session.base_question_count < 0
+        || session.introduction_cursor < 0
+        || session.introduction_cursor as usize > session.introductions.len()
+        || session.question_cursor < 0
+        || session.question_cursor as usize > session.questions.len()
+        || session.accumulated_pause_ms < 0
+        || session.introductions.iter().any(|id| !valid_id(id))
+    {
+        return Err(BackupError::invalid_data());
+    }
+    for question in &session.questions {
+        validate_question(question)?;
+    }
+    for debt in &session.carryover_retry_debts {
+        let _priority = &debt.priority;
+        let _source = &debt.source_question_kind;
+        if !valid_id(&debt.entity_id) || !SKILLS.contains(&debt.skill.as_str()) {
+            return Err(BackupError::invalid_data());
+        }
+        parse_timestamp(&debt.created_at)?;
+    }
     Ok(())
 }
 
@@ -469,14 +672,12 @@ fn normalize_progress(progress: &mut ProgressDocument) -> Result<(), BackupError
 fn normalize_sessions(sessions: &mut Vec<SessionRecord>) -> Result<(), BackupError> {
     let mut output = BTreeMap::<String, SessionRecord>::new();
     for candidate in std::mem::take(sessions) {
-        let id = required_string(&candidate.session, "sessionId")?.to_owned();
+        let id = candidate.session.session_id.clone();
         if let Some(current) = output.get(&id) {
-            let candidate_question = required_nonnegative(&candidate.session, "questionCursor")?;
-            let current_question = required_nonnegative(&current.session, "questionCursor")?;
-            let candidate_introduction =
-                required_nonnegative(&candidate.session, "introductionCursor")?;
-            let current_introduction =
-                required_nonnegative(&current.session, "introductionCursor")?;
+            let candidate_question = candidate.session.question_cursor;
+            let current_question = current.session.question_cursor;
+            let candidate_introduction = candidate.session.introduction_cursor;
+            let current_introduction = current.session.introduction_cursor;
             let replace = candidate_question > current_question
                 || (candidate_question == current_question
                     && candidate_introduction > current_introduction)
@@ -752,28 +953,28 @@ fn read_sessions(
         .map_err(|_| BackupError::export_failed())?;
     let rows = statement
         .query_map([learner_id], |row| {
-            let request: Value = serde_json::from_str(&row.get::<_, String>(2)?)
+            let request: SessionRequest = serde_json::from_str(&row.get::<_, String>(2)?)
                 .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
-            let introductions: Value = serde_json::from_str(&row.get::<_, String>(4)?)
+            let introductions: Vec<String> = serde_json::from_str(&row.get::<_, String>(4)?)
                 .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
-            let questions: Value = serde_json::from_str(&row.get::<_, String>(6)?)
+            let questions: Vec<Question> = serde_json::from_str(&row.get::<_, String>(6)?)
                 .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
-            let debts: Value = serde_json::from_str(&row.get::<_, String>(8)?)
+            let debts: Vec<RetryDebt> = serde_json::from_str(&row.get::<_, String>(8)?)
                 .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
             Ok(SessionRecord {
-                session: json!({
-                    "sessionId": row.get::<_, String>(0)?,
-                    "learnerId": row.get::<_, String>(1)?,
-                    "request": request,
-                    "baseQuestionCount": row.get::<_, i64>(3)?,
-                    "introductions": introductions,
-                    "introductionCursor": row.get::<_, i64>(5)?,
-                    "questions": questions,
-                    "questionCursor": row.get::<_, i64>(7)?,
-                    "carryoverRetryDebts": debts,
-                    "startedAt": row.get::<_, String>(9)?,
-                    "accumulatedPauseMs": row.get::<_, i64>(10)?
-                }),
+                session: PracticeSession {
+                    session_id: row.get(0)?,
+                    learner_id: row.get(1)?,
+                    request,
+                    base_question_count: row.get(3)?,
+                    introductions,
+                    introduction_cursor: row.get(5)?,
+                    questions,
+                    question_cursor: row.get(7)?,
+                    carryover_retry_debts: debts,
+                    started_at: row.get(9)?,
+                    accumulated_pause_ms: row.get(10)?,
+                },
                 saved_at: row.get(11)?,
             })
         })
@@ -846,6 +1047,59 @@ pub fn write_selected_backup(
         .and_then(|value| value.to_str())
         .ok_or_else(BackupError::export_failed)?
         .to_owned();
+    write_backup_atomically_with(&target, bytes, || Ok(()))?;
+    Ok(Some(name))
+}
+
+#[cfg(windows)]
+fn atomic_replace(source: &Path, target: &Path) -> Result<(), BackupError> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::{
+        MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
+    };
+
+    let source = source
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect::<Vec<_>>();
+    let target = target
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect::<Vec<_>>();
+    let result = unsafe {
+        MoveFileExW(
+            source.as_ptr(),
+            target.as_ptr(),
+            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
+        )
+    };
+    if result == 0 {
+        Err(BackupError::export_failed())
+    } else {
+        Ok(())
+    }
+}
+
+#[cfg(not(windows))]
+fn atomic_replace(source: &Path, target: &Path) -> Result<(), BackupError> {
+    std::fs::rename(source, target).map_err(|_| BackupError::export_failed())
+}
+
+pub fn write_backup_atomically_with<F>(
+    target: &Path,
+    bytes: &[u8],
+    before_replace: F,
+) -> Result<(), BackupError>
+where
+    F: FnOnce() -> Result<(), BackupError>,
+{
+    let directory = target.parent().ok_or_else(BackupError::export_failed)?;
+    let name = target
+        .file_name()
+        .and_then(|value| value.to_str())
+        .ok_or_else(BackupError::export_failed)?;
     let temporary = directory.join(format!(".{name}.tmp-{}", Uuid::new_v4().simple()));
     let result = (|| -> Result<(), BackupError> {
         let mut file = OpenOptions::new()
@@ -857,7 +1111,8 @@ pub fn write_selected_backup(
             .and_then(|_| file.flush())
             .and_then(|_| file.sync_all())
             .map_err(|_| BackupError::export_failed())?;
-        std::fs::rename(&temporary, &target).map_err(|_| BackupError::export_failed())?;
+        before_replace()?;
+        atomic_replace(&temporary, target)?;
         if let Ok(directory_file) = File::open(directory) {
             let _ = directory_file.sync_all();
         }
@@ -866,7 +1121,7 @@ pub fn write_selected_backup(
     if result.is_err() {
         let _ = std::fs::remove_file(&temporary);
     }
-    result.map(|()| Some(name))
+    result
 }
 
 fn canonical_json<T: Serialize>(value: &T) -> Result<String, BackupError> {
@@ -995,18 +1250,18 @@ fn write_session(transaction: &Transaction<'_>, record: &SessionRecord) -> Resul
                 started_at=excluded.started_at,accumulated_pause_ms=excluded.accumulated_pause_ms,
                 updated_at=excluded.updated_at",
             params![
-                required_string(session, "sessionId")?,
-                required_string(session, "learnerId")?,
-                required_string(&session["request"], "packId")?,
-                canonical_json(&session["request"])?,
-                required_nonnegative(session, "baseQuestionCount")?,
-                canonical_json(&session["introductions"])?,
-                required_nonnegative(session, "introductionCursor")?,
-                canonical_json(&session["questions"])?,
-                required_nonnegative(session, "questionCursor")?,
-                canonical_json(&session["carryoverRetryDebts"])?,
-                required_string(session, "startedAt")?,
-                required_nonnegative(session, "accumulatedPauseMs")?,
+                session.session_id,
+                session.learner_id,
+                session.request.pack_id(),
+                canonical_json(&session.request)?,
+                session.base_question_count,
+                canonical_json(&session.introductions)?,
+                session.introduction_cursor,
+                canonical_json(&session.questions)?,
+                session.question_cursor,
+                canonical_json(&session.carryover_retry_debts)?,
+                session.started_at,
+                session.accumulated_pause_ms,
                 record.saved_at,
             ],
         )
@@ -1018,7 +1273,7 @@ fn session_should_replace(
     transaction: &Transaction<'_>,
     record: &SessionRecord,
 ) -> Result<bool, BackupError> {
-    let id = required_string(&record.session, "sessionId")?;
+    let id = &record.session.session_id;
     let current = transaction
         .query_row(
             "SELECT learner_id,question_cursor,introduction_cursor,updated_at
@@ -1038,11 +1293,11 @@ fn session_should_replace(
     let Some((learner_id, question_cursor, introduction_cursor, saved_at)) = current else {
         return Ok(true);
     };
-    if learner_id != required_string(&record.session, "learnerId")? {
+    if learner_id.as_str() != record.session.learner_id.as_str() {
         return Err(BackupError::invalid_data());
     }
-    let imported_question = required_nonnegative(&record.session, "questionCursor")?;
-    let imported_introduction = required_nonnegative(&record.session, "introductionCursor")?;
+    let imported_question = record.session.question_cursor;
+    let imported_introduction = record.session.introduction_cursor;
     Ok(imported_question > question_cursor
         || (imported_question == question_cursor && imported_introduction > introduction_cursor)
         || (imported_question == question_cursor
@@ -1142,6 +1397,7 @@ pub fn apply_import_on<F>(
     backup: &InspectedBackup,
     mode: ImportMode,
     include_settings: bool,
+    current_pack_versions: &BTreeMap<String, String>,
     safety_backup: F,
 ) -> Result<(), BackupError>
 where
@@ -1159,7 +1415,7 @@ where
     let safety_bytes = archive_from_connection(
         connection,
         &backup.manifest.learner_id,
-        &backup.manifest.pack_versions,
+        current_pack_versions,
         &safety_exported_at,
     )
     .map_err(|_| BackupError::safety_backup())?;
@@ -1245,18 +1501,55 @@ fn format_now(now: OffsetDateTime) -> Result<String, BackupError> {
         .map_err(|_| BackupError::export_failed())
 }
 
-fn pack_versions_for(connection: &Connection, learner_id: &str) -> BTreeMap<String, String> {
-    let Ok(mut statement) = connection
-        .prepare("SELECT DISTINCT pack_id FROM mastery WHERE learner_id=?1 ORDER BY pack_id")
-    else {
-        return BTreeMap::new();
-    };
-    let Ok(rows) = statement.query_map([learner_id], |row| row.get::<_, String>(0)) else {
-        return BTreeMap::new();
-    };
-    rows.filter_map(Result::ok)
-        .map(|id| (id, "unknown".to_owned()))
-        .collect()
+pub fn installed_pack_versions_on(
+    connection: &Connection,
+    content_root: &Path,
+    learner_id: &str,
+) -> Result<BTreeMap<String, String>, BackupError> {
+    if !valid_id(learner_id) {
+        return Err(BackupError::invalid_data());
+    }
+    let mut statement = connection
+        .prepare(
+            "SELECT pack_id FROM mastery WHERE learner_id=?1
+             UNION
+             SELECT pack_id FROM practice_session WHERE learner_id=?1
+             ORDER BY pack_id",
+        )
+        .map_err(|_| BackupError::export_failed())?;
+    let pack_ids = statement
+        .query_map([learner_id], |row| row.get::<_, String>(0))
+        .map_err(|_| BackupError::export_failed())?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|_| BackupError::export_failed())?;
+
+    let mut versions = BTreeMap::new();
+    for pack_id in pack_ids {
+        if !valid_id(&pack_id) {
+            return Err(BackupError::invalid_data());
+        }
+        let manifest_path = content_root.join(&pack_id).join("manifest.json");
+        let metadata =
+            std::fs::metadata(&manifest_path).map_err(|_| BackupError::export_failed())?;
+        if !metadata.is_file() || metadata.len() > MAX_ENTRY_BYTES as u64 {
+            return Err(BackupError::export_failed());
+        }
+        let bytes = std::fs::read(manifest_path).map_err(|_| BackupError::export_failed())?;
+        let manifest: InstalledPackManifest =
+            serde_json::from_slice(&bytes).map_err(|_| BackupError::invalid_data())?;
+        if manifest.pack_id != pack_id || manifest.content_version.trim().is_empty() {
+            return Err(BackupError::invalid_data());
+        }
+        versions.insert(pack_id, manifest.content_version);
+    }
+    Ok(versions)
+}
+
+fn content_root(app: &AppHandle) -> Result<PathBuf, BackupError> {
+    app.path()
+        .resource_dir()
+        .map(|root| root.join("resources").join("content"))
+        .map_err(|_| BackupError::export_failed())
 }
 
 #[tauri::command]
@@ -1281,7 +1574,7 @@ pub fn choose_and_export_backup(
         .lock()
         .map_err(|_| BackupError::export_failed())?;
     let now = format_now(OffsetDateTime::now_utc())?;
-    let versions = pack_versions_for(&connection, &learner_id);
+    let versions = installed_pack_versions_on(&connection, &content_root(&app)?, &learner_id)?;
     let bytes = archive_from_connection(&connection, &learner_id, &versions, &now)?;
     write_selected_backup(selected, &bytes)
 }
@@ -1362,7 +1655,18 @@ pub fn import_staged_backup(
         .0
         .lock()
         .map_err(|_| BackupError::import_failed())?;
-    apply_import_on(&mut connection, &backup, mode, include_settings, |bytes| {
-        write_safety_backup(&app, bytes)
-    })
+    let versions = installed_pack_versions_on(
+        &connection,
+        &content_root(&app).map_err(|_| BackupError::safety_backup())?,
+        &backup.manifest.learner_id,
+    )
+    .map_err(|_| BackupError::safety_backup())?;
+    apply_import_on(
+        &mut connection,
+        &backup,
+        mode,
+        include_settings,
+        &versions,
+        |bytes| write_safety_backup(&app, bytes),
+    )
 }
