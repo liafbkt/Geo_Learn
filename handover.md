@@ -1,6 +1,6 @@
 # 空间记忆教练：当前交接
 
-> 更新：2026-08-28；分支：`codex/user-test-mvp`；阶段：Tasks 1–7 已完成并通过独立审查，下一步 Task 8。
+> 更新：2026-08-28；分支：`codex/user-test-mvp`；阶段：Tasks 1–8 已完成并通过独立审查，下一步 Tasks 9–12 基础 UI 波次。
 
 ## 先读规则
 
@@ -27,7 +27,8 @@
 | Task 5：答案、提示与题目 | 已实现；fix round 1 关闭 4 条 Important，scoped re-review 通过；全套 131 测试、strict typecheck、lint、build 通过 | `6a22605`, `c425c73` |
 | Task 6：智能调度与摸底 | 已实现；fix round 1 关闭 4 条 Important + 1 Minor，scoped re-review 通过；全套 166 测试、strict typecheck、lint、build 通过 | `410ac35`, `8dc1070` |
 | Task 7：repository 与 SQLite | 已实现；fix round 1 关闭 1 Critical + 3 Important，scoped re-review 通过；全套 188 测试、strict typecheck、lint、build、rustfmt 通过 | `7c58edb`, `e647f5c` |
-| Tasks 8–16 + 发布扩展 | 未开始 | 下一步 Task 8，按依赖顺序执行 |
+| Task 8：备份合并/替换 | 已实现；fix round 1 关闭 4 Important + 2 Minor，scoped re-review 通过；全套 198 测试、strict typecheck、lint、build、rustfmt 通过 | `6b41e02`, `0493816` |
+| Tasks 9–16 + 发布扩展 | 未开始 | 下一步并行推进地图、练习状态机、内容管线和应用壳层 |
 
 开发使用 `subagent-driven-development`：每任务一个实现 agent、独立 reviewer、最多五轮修复，并在 `.superpowers/sdd/2026-08-27-development-roadmap/progress.md` 记录状态。
 
@@ -67,6 +68,10 @@ Task 7 完成工件：
 - report：`.superpowers/sdd/2026-08-27-development-roadmap/task-7-report.md`
 - 已落地深拷贝内存仓库、严格 Tauri DTO decoder、七表 SQLite migration、attempt/mastery/session 原子事务、真实 SQL 故障回滚测试与六命令白名单。
 
+Task 8 完成工件：
+
+- 已落地四文件校验备份、短时单次 staging、原子覆盖、严格 session DTO、事务 merge/replace、安全快照和实际已安装内容版本记录；Rust 可执行测试仍由 Windows CI 补齐。
+
 ## 已安装依赖与环境阻塞
 
 - Node `24.18.0`、pnpm `11.19.0`。
@@ -78,10 +83,9 @@ Task 7 完成工件：
 
 ## 下一步
 
-1. Task 8：备份合并/替换。
-2. Tasks 9–13：地图、练习 UI、首页/探索/总结，形成浏览器可完整试用闭环。
-3. Tasks 14–16：内容管线、三包数据与 E2E。
-4. 发布扩展：Windows NSIS 安装器检查并自动安装 WebView2；Tauri updater 从 GitHub Releases `latest.json` 检查、下载和安装签名更新；GitHub Actions 产出安装包和更新元数据。
+1. 基础波次：Task 9 地图、Task 10 练习状态机、Task 14 内容管线、Task 12 应用壳层/音效，文件隔离并行。
+2. 产品波次：练习 UI、首页/探索/总结、三包数据和 Windows 发布基础设施。
+3. 集成与发布：完整应用接线、E2E、NSIS/WebView2、GitHub Releases 签名更新和实际安装包验证。
 
 ## 不可回退的硬约束
 
