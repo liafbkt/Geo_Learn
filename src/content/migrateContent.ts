@@ -40,12 +40,28 @@ function undeclaredChangedIds(
   const oldSet = new Set(oldIds);
   const newSet = new Set(newIds);
   const removedWithoutOperation = oldIds.filter(
-    (id) => !newSet.has(id) && !ledger.some((operation) => operation.from.includes(id)),
+    (id) =>
+      !newSet.has(id) &&
+      !ledger.some((operation) => operation.kind !== 'boundary-update' && operation.from.includes(id)),
   );
   const addedWithoutOperation = newIds.filter(
-    (id) => !oldSet.has(id) && !ledger.some((operation) => operation.to.includes(id)),
+    (id) =>
+      !oldSet.has(id) &&
+      !ledger.some((operation) => operation.kind !== 'boundary-update' && operation.to.includes(id)),
   );
   return [...new Set([...removedWithoutOperation, ...addedWithoutOperation])].sort();
+}
+
+function boundaryUpdateChangedIds(ledger: readonly ContentMigrationOperation[]): string[] {
+  const changed = ledger
+    .filter((operation) => operation.kind === 'boundary-update')
+    .flatMap((operation) => {
+      const from = new Set(operation.from);
+      const to = new Set(operation.to);
+      const stable = from.size === to.size && [...from].every((id) => to.has(id));
+      return stable ? [] : [...from, ...to];
+    });
+  return [...new Set(changed)].sort();
 }
 
 function resetRecord(record: ContentMasteryRecord, entityId: string): ContentMasteryRecord {
@@ -55,12 +71,18 @@ function resetRecord(record: ContentMasteryRecord, entityId: string): ContentMas
 }
 
 export function migrateContentProgress(input: ContentMigrationInput): ContentMigrationResult {
-  const undeclared = undeclaredChangedIds(input.oldEntityIds, input.newEntityIds, input.ledger);
+  const undeclared = [
+    ...new Set([
+      ...undeclaredChangedIds(input.oldEntityIds, input.newEntityIds, input.ledger),
+      ...boundaryUpdateChangedIds(input.ledger),
+    ]),
+  ].sort();
   if (undeclared.length > 0) {
     return { ok: false, code: 'undeclared_id_change', changedEntityIds: undeclared };
   }
 
   const records: ContentMasteryRecord[] = [];
+  const replacementKeys = new Set<string>();
   input.mastery.forEach((record) => {
     const operations = input.ledger.filter((operation) => operation.from.includes(record.entityId));
     const destructive = operations.find(
@@ -69,7 +91,13 @@ export function migrateContentProgress(input: ContentMigrationInput): ContentMig
     );
     if (destructive !== undefined) {
       records.push({ ...record, status: 'archived' });
-      destructive.to.forEach((entityId) => records.push(resetRecord(record, entityId)));
+      destructive.to.forEach((entityId) => {
+        const key = `${record.packId}\u0000${entityId}\u0000${record.capability}`;
+        if (!replacementKeys.has(key)) {
+          replacementKeys.add(key);
+          records.push(resetRecord(record, entityId));
+        }
+      });
       return;
     }
 

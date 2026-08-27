@@ -44,6 +44,43 @@ describe('migrateContentProgress', () => {
     expect(result).toEqual({ ok: true, records: [mastery] });
   });
 
+  it('rejects a boundary update that changes a stable entity ID', () => {
+    const result = migrateContentProgress({
+      oldManifest: manifest,
+      newManifest: { ...manifest, contentVersion: '2.0.0' },
+      oldEntityIds: ['region-a'],
+      newEntityIds: ['region-b'],
+      mastery: [mastery],
+      ledger: [{ kind: 'boundary-update', from: ['region-a'], to: ['region-b'] }],
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      code: 'undeclared_id_change',
+      changedEntityIds: ['region-a', 'region-b'],
+    });
+  });
+
+  it('rejects an ID-changing boundary update even when another operation declares the IDs', () => {
+    const result = migrateContentProgress({
+      oldManifest: manifest,
+      newManifest: { ...manifest, contentVersion: '2.0.0' },
+      oldEntityIds: ['region-a'],
+      newEntityIds: ['region-b'],
+      mastery: [mastery],
+      ledger: [
+        { kind: 'boundary-update', from: ['region-a'], to: ['region-b'] },
+        { kind: 'rename', from: ['region-a'], to: ['region-b'] },
+      ],
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      code: 'undeclared_id_change',
+      changedEntityIds: ['region-a', 'region-b'],
+    });
+  });
+
   it('archives source mastery and creates new records for split replacement IDs', () => {
     const result = migrateContentProgress({
       oldManifest: manifest,
@@ -60,6 +97,29 @@ describe('migrateContentProgress', () => {
         { ...mastery, entityId: 'region-a', status: 'archived' },
         { ...mastery, entityId: 'region-a-north', stage: 'new', successCount: 0 },
         { ...mastery, entityId: 'region-a-south', stage: 'new', successCount: 0 },
+      ]);
+    }
+  });
+
+  it('creates one new mastery record per replacement entity and capability when records merge', () => {
+    const secondMastery = { ...mastery, entityId: 'region-b', successCount: 1 };
+    const result = migrateContentProgress({
+      oldManifest: manifest,
+      newManifest: { ...manifest, contentVersion: '2.0.0' },
+      oldEntityIds: ['region-a', 'region-b'],
+      newEntityIds: ['region-c'],
+      mastery: [mastery, secondMastery],
+      ledger: [{ kind: 'merge', from: ['region-a', 'region-b'], to: ['region-c'] }],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.records.filter((record) => record.status === 'archived')).toEqual([
+        { ...mastery, status: 'archived' },
+        { ...secondMastery, status: 'archived' },
+      ]);
+      expect(result.records.filter((record) => record.entityId === 'region-c')).toEqual([
+        { ...mastery, entityId: 'region-c', stage: 'new', successCount: 0 },
       ]);
     }
   });
