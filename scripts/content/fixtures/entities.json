@@ -1,0 +1,32 @@
+[
+  {
+    "id": "region-a",
+    "kind": "region",
+    "names": { "zh": "甲区", "en": "Region A" },
+    "aliases": [],
+    "capitalId": "city-a"
+  },
+  {
+    "id": "region-b",
+    "kind": "region",
+    "names": { "zh": "乙区", "en": "Region B" },
+    "aliases": [],
+    "capitalId": "city-b"
+  },
+  {
+    "id": "city-a",
+    "kind": "place",
+    "names": { "zh": "甲城", "en": "City A" },
+    "aliases": [],
+    "parentId": "region-a",
+    "coordinate": [0.5, 0.5]
+  },
+  {
+    "id": "city-b",
+    "kind": "place",
+    "names": { "zh": "乙城", "en": "City B" },
+    "aliases": [],
+    "parentId": "region-b",
+    "coordinate": [1.5, 0.5]
+  }
+]

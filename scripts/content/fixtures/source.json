@@ -1,0 +1,13 @@
+{
+  "id": "fixture-regions",
+  "organization": "Fixture Authority",
+  "url": "https://example.invalid/fixture.geojson",
+  "retrievedAt": "2026-08-28",
+  "license": "test-only",
+  "sha256": "8b0373f31aa0c5eed4a6266f0dfae0f358712aeb803467dd4885b05fba66a3f5",
+  "coordinateReferenceSystem": "EPSG:4326",
+  "processing": [],
+  "simplification": null,
+  "quantization": null,
+  "reviewIdentifier": null
+}

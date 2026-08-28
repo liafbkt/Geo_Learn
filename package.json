@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.content.json --noEmit",
+    "content:validate": "tsx scripts/content/validate.ts"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -36,6 +37,7 @@
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^10.9.1",
     "jsdom": "^30.0.1",
+    "tsx": "^4.20.6",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.68.0",
     "vite": "^7.0.4",

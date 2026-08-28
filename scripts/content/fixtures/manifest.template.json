@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "0.0.0-fixture",
+  "packId": "content-pipeline-fixture",
+  "title": { "zh": "管线测试包", "en": "Pipeline Fixture" },
+  "primaryAnswerLanguage": "zh",
+  "expectedEntityCounts": { "region": 2, "place": 2 },
+  "capabilities": [
+    "locate_region",
+    "identify_region",
+    "associate_capital",
+    "locate_place",
+    "identify_place"
+  ],
+  "defaultViewport": { "center": [1, 0.5], "scale": 100 },
+  "distributionStatus": "development-only"
+}
