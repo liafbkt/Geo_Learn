@@ -7,6 +7,7 @@ type PlaceLayerProps = Readonly<{
   activeEntityId: string | null;
   selection: MapSelection | null;
   selectable: boolean;
+  domIdFor: (entityId: string) => string | undefined;
   onSelect: (entityId: string) => void;
 }>;
 
@@ -16,6 +17,7 @@ export function PlaceLayer({
   activeEntityId,
   selection,
   selectable,
+  domIdFor,
   onSelect,
 }: PlaceLayerProps) {
   const entities = new Map(pack.entities.map((entity) => [entity.id, entity] as const));
@@ -27,11 +29,12 @@ export function PlaceLayer({
         const selected = selection?.kind === 'place' && selection.entityId === entityId;
         return (
           <circle
-            id={`map-place-${entityId}`}
+            id={domIdFor(entityId)}
             key={entityId}
-            role="option"
-            aria-label={`${entity.names.zh} / ${entity.names.en}`}
-            aria-selected={selected}
+            role={selectable ? 'option' : undefined}
+            aria-hidden={selectable ? undefined : true}
+            aria-label={selectable ? `${entity.names.zh} / ${entity.names.en}` : undefined}
+            aria-selected={selectable ? selected : undefined}
             className={activeEntityId === entityId ? 'is-active' : undefined}
             cx={point[0]}
             cy={point[1]}

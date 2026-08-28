@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, PointerEvent, WheelEvent } from 'react';
 import { HydroLayer } from './HydroLayer';
 import { LabelLayer } from './LabelLayer';
@@ -27,9 +27,20 @@ function useReducedMotion(override: boolean | undefined): boolean {
   return override ?? preferred;
 }
 
-function entityDomId(selection: MapSelection): string {
-  return `map-${selection.kind}-${selection.entityId}`;
+function selectionKey(selection: MapSelection): string {
+  return `${selection.kind}:${selection.entityId}`;
 }
+
+const dragThreshold = 4;
+
+type TrackedPointer = Readonly<{
+  x: number;
+  y: number;
+  startX: number;
+  startY: number;
+  type: string;
+  captured: boolean;
+}>;
 
 function nearestInDirection(
   items: readonly ProjectedEntity[],
@@ -66,6 +77,7 @@ export function MapViewport({
   onViewportChange,
   className,
 }: MapViewportProps) {
+  const instanceId = useId();
   const entities = useMemo(
     () => new Map(pack.entities.map((entity) => [entity.id, entity] as const)),
     [pack.entities],
@@ -81,11 +93,6 @@ export function MapViewport({
     });
     return [...regions, ...places];
   }, [entities, map.places, map.regions]);
-  const selectedItem = selection === null
-    ? undefined
-    : projectedEntities.find(
-        ({ entity, kind }) => kind === selection.kind && entity.id === selection.entityId,
-      );
   const selectableEntities = useMemo(
     () =>
       selectableKind === undefined
@@ -93,13 +100,29 @@ export function MapViewport({
         : projectedEntities.filter(({ kind }) => kind === selectableKind),
     [projectedEntities, selectableKind],
   );
+  const selectedItem = selection === null
+    ? undefined
+    : selectableEntities.find(
+        ({ entity, kind }) => kind === selection.kind && entity.id === selection.entityId,
+      );
+  const entityDomIds = useMemo(
+    () => new Map(
+      projectedEntities.map((item, index) => [
+        selectionKey({ kind: item.kind, entityId: item.entity.id }),
+        `${instanceId}-map-option-${index}`,
+      ] as const),
+    ),
+    [instanceId, projectedEntities],
+  );
+  const statusId = `${instanceId}-map-selection-status`;
   const [active, setActive] = useState<ProjectedEntity | undefined>(
     selectedItem ?? selectableEntities[0],
   );
   const [viewport, setViewport] = useState<MapViewportState>(initialViewport);
   const prefersReducedMotion = useReducedMotion(reducedMotion);
-  const pointers = useRef(new Map<number, Readonly<{ x: number; y: number; type: string }>>());
+  const pointers = useRef(new Map<number, TrackedPointer>());
   const pinch = useRef<Readonly<{ distance: number; zoom: number }> | null>(null);
+  const dragged = useRef(false);
 
   useEffect(() => {
     setActive((current) => {
@@ -125,8 +148,27 @@ export function MapViewport({
   };
 
   const selectActive = () => {
-    if (active?.kind === 'region') onRegionSelect(active.entity.id);
-    if (active?.kind === 'place') onPlaceSelect(active.entity.id);
+    if (
+      active === undefined ||
+      (selectableKind !== undefined && active.kind !== selectableKind) ||
+      !selectableEntities.some(
+        ({ entity, kind }) => kind === active.kind && entity.id === active.entity.id,
+      )
+    ) {
+      return;
+    }
+    if (active.kind === 'region') onRegionSelect(active.entity.id);
+    if (active.kind === 'place') onPlaceSelect(active.entity.id);
+  };
+
+  const selectFromPointer = (kind: MapSelection['kind'], entityId: string) => {
+    if (dragged.current) {
+      dragged.current = false;
+      return;
+    }
+    if (selectableKind !== undefined && selectableKind !== kind) return;
+    if (kind === 'region') onRegionSelect(entityId);
+    if (kind === 'place') onPlaceSelect(entityId);
   };
 
   const handleKeyDown = (event: KeyboardEvent<SVGSVGElement>) => {
@@ -149,8 +191,15 @@ export function MapViewport({
 
   const handlePointerDown = (event: PointerEvent<SVGSVGElement>) => {
     const pointerId = event.pointerId ?? 0;
-    pointers.current.set(pointerId, { x: event.clientX, y: event.clientY, type: event.pointerType });
-    event.currentTarget.setPointerCapture?.(pointerId);
+    if (pointers.current.size === 0) dragged.current = false;
+    pointers.current.set(pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+      startX: event.clientX,
+      startY: event.clientY,
+      type: event.pointerType,
+      captured: false,
+    });
     const touchPoints = [...pointers.current.values()].filter(({ type }) => type === 'touch');
     if (touchPoints.length === 2) {
       pinch.current = {
@@ -167,7 +216,22 @@ export function MapViewport({
     const pointerId = event.pointerId ?? 0;
     const previous = pointers.current.get(pointerId);
     if (previous === undefined) return;
-    pointers.current.set(pointerId, { x: event.clientX, y: event.clientY, type: event.pointerType });
+    const touchCount = [...pointers.current.values()].filter(({ type }) => type === 'touch').length;
+    const crossedThreshold = Math.hypot(
+      event.clientX - previous.startX,
+      event.clientY - previous.startY,
+    ) > dragThreshold;
+    const captured = previous.captured || crossedThreshold || touchCount >= 2;
+    if (captured && !previous.captured) {
+      dragged.current = true;
+      event.currentTarget.setPointerCapture?.(pointerId);
+    }
+    pointers.current.set(pointerId, {
+      ...previous,
+      x: event.clientX,
+      y: event.clientY,
+      captured,
+    });
     const touchPoints = [...pointers.current.values()].filter(({ type }) => type === 'touch');
     if (touchPoints.length === 2 && pinch.current !== null && pinch.current.distance > 0) {
       const distance = Math.hypot(
@@ -181,17 +245,22 @@ export function MapViewport({
       updateViewport((current) => ({ ...current, zoom }));
       return;
     }
+    if (!captured) return;
+    const deltaX = previous.captured ? event.clientX - previous.x : event.clientX - previous.startX;
+    const deltaY = previous.captured ? event.clientY - previous.y : event.clientY - previous.startY;
     updateViewport((current) => ({
       ...current,
-      panX: current.panX + event.clientX - previous.x,
-      panY: current.panY + event.clientY - previous.y,
+      panX: current.panX + deltaX,
+      panY: current.panY + deltaY,
     }));
   };
 
   const handlePointerUp = (event: PointerEvent<SVGSVGElement>) => {
-    pointers.current.delete(event.pointerId ?? 0);
+    const pointerId = event.pointerId ?? 0;
+    const pointer = pointers.current.get(pointerId);
+    pointers.current.delete(pointerId);
     if (pointers.current.size < 2) pinch.current = null;
-    event.currentTarget.releasePointerCapture?.(event.pointerId ?? 0);
+    if (pointer?.captured) event.currentTarget.releasePointerCapture?.(pointerId);
   };
 
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
@@ -212,14 +281,17 @@ export function MapViewport({
   const activeSelection = active === undefined
     ? undefined
     : ({ kind: active.kind, entityId: active.entity.id } satisfies MapSelection);
+  const activeDescendant = activeSelection === undefined
+    ? undefined
+    : entityDomIds.get(selectionKey(activeSelection));
 
   return (
     <div className={['map-viewport', className].filter(Boolean).join(' ')}>
       <svg
-        role="application"
+        role="listbox"
         aria-label={pack.manifest.title.zh}
-        aria-activedescendant={activeSelection === undefined ? undefined : entityDomId(activeSelection)}
-        aria-describedby="map-selection-status"
+        aria-activedescendant={activeDescendant}
+        aria-describedby={statusId}
         tabIndex={0}
         viewBox={map.viewBox}
         onKeyDown={handleKeyDown}
@@ -240,21 +312,19 @@ export function MapViewport({
               const entity = entities.get(entityId);
               if (entity?.kind !== 'region') return null;
               const selected = selection?.kind === 'region' && selection.entityId === entityId;
+              const selectable = selectableKind === undefined || selectableKind === 'region';
               return (
                 <path
-                  id={`map-region-${entityId}`}
+                  id={entityDomIds.get(selectionKey({ kind: 'region', entityId }))}
                   key={entityId}
-                  role="option"
-                  aria-label={`${entity.names.zh} / ${entity.names.en}`}
-                  aria-selected={selected}
+                  role={selectable ? 'option' : undefined}
+                  aria-hidden={selectable ? undefined : true}
+                  aria-label={selectable ? `${entity.names.zh} / ${entity.names.en}` : undefined}
+                  aria-selected={selectable ? selected : undefined}
                   className={active?.entity.id === entityId ? 'is-active' : undefined}
                   d={path}
                   stroke="none"
-                  onClick={
-                    selectableKind === undefined || selectableKind === 'region'
-                      ? () => onRegionSelect(entityId)
-                      : undefined
-                  }
+                  onClick={selectable ? () => selectFromPointer('region', entityId) : undefined}
                 />
               );
             })}
@@ -268,7 +338,8 @@ export function MapViewport({
             activeEntityId={active?.entity.id ?? null}
             selection={selection}
             selectable={selectableKind === undefined || selectableKind === 'place'}
-            onSelect={onPlaceSelect}
+            domIdFor={(entityId) => entityDomIds.get(selectionKey({ kind: 'place', entityId }))}
+            onSelect={(entityId) => selectFromPointer('place', entityId)}
           />
           <LabelLayer
             pack={pack}
@@ -278,7 +349,7 @@ export function MapViewport({
           />
         </g>
       </svg>
-      <span id="map-selection-status" role="status" className="map-sr-only">
+      <span id={statusId} role="status" className="map-sr-only">
         {status}
       </span>
     </div>
