@@ -1,0 +1,92 @@
+.map-viewport {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-ink);
+}
+
+.map-viewport svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+  background: color-mix(in srgb, var(--color-panel-marine-mist) 72%, white);
+  cursor: grab;
+}
+
+.map-viewport svg:active {
+  cursor: grabbing;
+}
+
+.map-regions path {
+  fill: color-mix(in srgb, var(--color-panel-marine-mist) 60%, white);
+  stroke: none;
+}
+
+.map-regions path[aria-selected='true'] {
+  fill: color-mix(in srgb, var(--color-primary-action) 35%, white);
+}
+
+.map-regions path.is-active,
+.map-places circle.is-active {
+  stroke: var(--color-focus);
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-boundaries {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.4;
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-hydro path {
+  fill: none;
+  stroke: var(--color-cartographic-grid);
+  stroke-width: 1.5;
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-places circle {
+  fill: var(--color-primary-action);
+  stroke: white;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-labels {
+  pointer-events: none;
+}
+
+.map-labels text {
+  fill: var(--color-ink);
+  font-size: 12px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  text-anchor: middle;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-viewport [data-testid='map-transform'] {
+    transition: none !important;
+  }
+}
