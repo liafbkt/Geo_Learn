@@ -89,7 +89,7 @@ function makeState(
 }
 
 function startAnswering(state = makeState()): PracticeState {
-  return practiceReducer(state, { type: 'INTRO_CONTINUED' });
+  return practiceReducer(state, { type: 'INTRO_CONTINUED', now: STARTED_AT });
 }
 
 function selectAndSubmit(state: PracticeState, value: string, now = CORRECT_AT): PracticeState {
@@ -110,7 +110,7 @@ function save(state: PracticeState): PracticeState {
 describe('practiceReducer', () => {
   it('runs presenting → answering → completed and gates navigation until atomic save succeeds', () => {
     const presenting = makeState();
-    const answering = practiceReducer(presenting, { type: 'INTRO_CONTINUED' });
+    const answering = practiceReducer(presenting, { type: 'INTRO_CONTINUED', now: STARTED_AT });
     const completed = selectAndSubmit(answering, 'r1');
 
     expect(answering.phase).toBe('answering');
@@ -149,13 +149,31 @@ describe('practiceReducer', () => {
     };
     const initial = makeState({ session: currentSession });
 
-    const afterFirst = practiceReducer(initial, { type: 'INTRO_CONTINUED' });
+    const afterFirst = practiceReducer(initial, { type: 'INTRO_CONTINUED', now: STARTED_AT });
     expect(afterFirst.phase).toBe('presenting');
     expect(afterFirst.session.introductionCursor).toBe(1);
 
-    const afterSecond = practiceReducer(afterFirst, { type: 'INTRO_CONTINUED' });
+    const afterSecond = practiceReducer(afterFirst, { type: 'INTRO_CONTINUED', now: STARTED_AT });
     expect(afterSecond.phase).toBe('answering');
     expect(afterSecond.session.introductionCursor).toBe(2);
+  });
+
+  it('starts answer timing only after the final introduction is continued', () => {
+    const currentSession = { ...session(), introductions: ['r1', 'r2'] };
+    const initial = makeState({ session: currentSession });
+    const afterFirst = practiceReducer(initial, {
+      type: 'INTRO_CONTINUED',
+      now: '2026-08-28T00:00:05.000Z',
+    });
+    const answering = practiceReducer(afterFirst, {
+      type: 'INTRO_CONTINUED',
+      now: '2026-08-28T00:00:10.000Z',
+    });
+
+    const completed = selectAndSubmit(answering, 'r1', '2026-08-28T00:00:15.000Z');
+
+    expect(answering.questionPresentedAt).toBe('2026-08-28T00:00:10.000Z');
+    expect(completed.pendingAttempt?.event.responseMs).toBe(5_000);
   });
 
   it('refuses submission without a non-empty selection or typed answer', () => {
@@ -367,9 +385,9 @@ describe('practiceReducer', () => {
     expect(
       practiceReducer(completed, { type: 'ATTEMPT_SAVED', attemptId: 'stale-attempt' }),
     ).toBe(completed);
-    expect(practiceReducer(completed, { type: 'CONTINUED' })).toBe(completed);
+    expect(practiceReducer(completed, { type: 'CONTINUED', now: CORRECT_AT })).toBe(completed);
 
-    const next = practiceReducer(save(completed), { type: 'CONTINUED' });
+    const next = practiceReducer(save(completed), { type: 'CONTINUED', now: CORRECT_AT });
     expect(next).toMatchObject({
       phase: 'presenting',
       currentQuestion: { entityId: 'r2' },
@@ -377,6 +395,18 @@ describe('practiceReducer', () => {
       pendingAttempt: null,
       feedback: null,
     });
+  });
+
+  it('uses the continue timestamp when presenting and scheduling the next question', () => {
+    const first = selectAndSubmit(startAnswering(), 'r1');
+    const saved = save(first);
+
+    const next = practiceReducer(saved, {
+      type: 'CONTINUED',
+      now: '2026-08-28T00:00:30.000Z',
+    });
+
+    expect(next.questionPresentedAt).toBe('2026-08-28T00:00:30.000Z');
   });
 
   it('does not mutate a deeply frozen state while reducing', () => {

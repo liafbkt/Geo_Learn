@@ -415,7 +415,7 @@ function resume(state: PracticeState, now: string): PracticeState {
   };
 }
 
-function continueToNextQuestion(state: PracticeState): PracticeState {
+function continueToNextQuestion(state: PracticeState, now: string): PracticeState {
   if (state.pendingAttempt === null || state.saveStatus !== 'saved') {
     return state;
   }
@@ -424,7 +424,8 @@ function continueToNextQuestion(state: PracticeState): PracticeState {
   }
   const question = currentQuestion(state.session);
   const record = matchingMastery(state.masteryRecords, state.session, question);
-  const presentedAt = state.pendingAttempt.event.completedAt;
+  timestamp(now, 'Presentation time');
+  const presentedAt = now;
   return {
     ...state,
     phase: 'presenting',
@@ -457,14 +458,24 @@ export function practiceReducer(state: PracticeState, action: PracticeAction): P
         state.session.introductions.length,
         state.session.introductionCursor + 1,
       );
+      const beginsAnswering = introductionCursor >= state.session.introductions.length;
+      if (beginsAnswering) {
+        timestamp(action.now, 'Presentation time');
+      }
+      const record = beginsAnswering
+        ? matchingMastery(state.masteryRecords, state.session, state.currentQuestion)
+        : null;
       return {
         ...state,
-        phase:
-          introductionCursor < state.session.introductions.length ? 'presenting' : 'answering',
+        phase: beginsAnswering ? 'answering' : 'presenting',
         session: {
           ...state.session,
           introductionCursor,
         },
+        questionPresentedAt: beginsAnswering ? action.now : state.questionPresentedAt,
+        scheduledReview: record === null
+          ? state.scheduledReview
+          : reviewWasScheduled(record, action.now),
       };
     }
     case 'ANSWER_SELECTED':
@@ -526,7 +537,7 @@ export function practiceReducer(state: PracticeState, action: PracticeAction): P
         ? { ...state, saveStatus: 'failed', saveErrorCode: action.code }
         : state;
     case 'CONTINUED':
-      return continueToNextQuestion(state);
+      return continueToNextQuestion(state, action.now);
     case 'PAUSED':
       if (state.pausedAt !== null || state.pendingAttempt !== null) {
         return state;

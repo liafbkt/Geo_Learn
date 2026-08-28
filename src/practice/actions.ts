@@ -2,14 +2,14 @@ import type { ProgressRepository } from '../persistence/ProgressRepository';
 import type { PracticeState } from './reducer';
 
 export type PracticeAction =
-  | Readonly<{ type: 'INTRO_CONTINUED' }>
+  | Readonly<{ type: 'INTRO_CONTINUED'; now: string }>
   | Readonly<{ type: 'ANSWER_SELECTED'; value: string }>
   | Readonly<{ type: 'ANSWER_TYPED'; value: string }>
   | Readonly<{ type: 'HINT_REQUESTED' }>
   | Readonly<{ type: 'ANSWER_SUBMITTED'; now: string }>
   | Readonly<{ type: 'ATTEMPT_SAVED'; attemptId: string }>
   | Readonly<{ type: 'ATTEMPT_SAVE_FAILED'; code: string }>
-  | Readonly<{ type: 'CONTINUED' }>
+  | Readonly<{ type: 'CONTINUED'; now: string }>
   | Readonly<{ type: 'PAUSED'; now: string }>
   | Readonly<{ type: 'RESUMED'; now: string }>;
 
