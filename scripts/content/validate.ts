@@ -4,8 +4,9 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Entity, PackValidationIssue } from '../../src/content/types';
 import { validatePack } from '../../src/content/validatePack';
-import { compareOrdinal, sha256Bytes, sha256File } from './lib/hash';
+import { compareOrdinal, sha256Bytes, sha256File, stableJsonBytes } from './lib/hash';
 import { pointInMultiPolygon, pointInPolygon, type MultiPolygonCoordinates, type PolygonCoordinates, type Position } from './lib/pointInRegion';
+import { samePosition, validateSimpleClosedRing } from './lib/ringGeometry';
 import { transformContent } from './transform';
 
 type ValidationResult =
@@ -47,16 +48,16 @@ function parseTopology(value: unknown): ParsedTopology | PackValidationIssue {
   return value as ParsedTopology;
 }
 
-function decodeArc(topology: ParsedTopology, reference: number): readonly Position[] | undefined {
+function decodeArcGrid(topology: ParsedTopology, reference: number): readonly Position[] | undefined {
   const arcIndex = reference < 0 ? ~reference : reference;
   const encoded = topology.arcs[arcIndex];
   if (encoded === undefined) return undefined;
   let x = 0;
   let y = 0;
-  const decoded = encoded.map(([deltaX, deltaY]) => {
+  const decoded: Position[] = encoded.map(([deltaX, deltaY]) => {
     x += deltaX;
     y += deltaY;
-    return [x * topology.transform.scale[0] + topology.transform.translate[0], y * topology.transform.scale[1] + topology.transform.translate[1]] as const;
+    return [x, y] as const;
   });
   return reference < 0 ? decoded.reverse() : decoded;
 }
@@ -66,20 +67,29 @@ function decodeRing(topology: ParsedTopology, references: unknown, path: string,
     issues.push(issue('invalid_topology', path, 'Polygon ring must contain integer arc references.'));
     return undefined;
   }
-  const ring: Position[] = [];
+  const gridRing: Position[] = [];
   for (const [index, reference] of references.entries()) {
-    const decoded = decodeArc(topology, reference as number);
+    const decoded = decodeArcGrid(topology, reference as number);
     if (decoded === undefined) {
       issues.push(issue('invalid_topology', `${path}.${index}`, `Arc reference ${String(reference)} is out of range.`));
       return undefined;
     }
-    ring.push(...(ring.length === 0 ? decoded : decoded.slice(1)));
+    if (gridRing.length > 0 && !samePosition(gridRing[gridRing.length - 1]!, decoded[0]!)) {
+      issues.push(issue('invalid_topology', `${path}.${index}`, 'Polygon arc references must form a continuous chain.'));
+      return undefined;
+    }
+    gridRing.push(...(gridRing.length === 0 ? decoded : decoded.slice(1)));
   }
-  const last = ring[ring.length - 1];
-  if (ring.length < 4 || ring[0]?.[0] !== last?.[0] || ring[0]?.[1] !== last?.[1]) {
-    issues.push(issue('invalid_topology', path, 'Decoded polygon ring must be closed with at least four positions.'));
+  try {
+    validateSimpleClosedRing(gridRing, 'Decoded polygon ring');
+  } catch (error) {
+    issues.push(issue('invalid_topology', path, error instanceof Error ? error.message : String(error)));
     return undefined;
   }
+  const ring = gridRing.map(([x, y]) => [
+    x * topology.transform.scale[0] + topology.transform.translate[0],
+    y * topology.transform.scale[1] + topology.transform.translate[1],
+  ] as const);
   const invalidIndex = ring.findIndex(([longitude, latitude]) => longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90);
   if (invalidIndex >= 0) {
     issues.push(issue('invalid_topology', `${path}.${invalidIndex}`, 'Decoded coordinates must be valid longitude/latitude values.'));
@@ -113,8 +123,8 @@ function extractRegions(topology: ParsedTopology, issues: PackValidationIssue[])
       issues.push(issue('invalid_topology', `${path}.id`, `Duplicate topology geometry ID: ${geometry.id}.`));
       return;
     }
-    if (!Array.isArray(geometry.arcs)) {
-      issues.push(issue('invalid_topology', `${path}.arcs`, 'Region geometry must contain arcs.'));
+    if (!Array.isArray(geometry.arcs) || geometry.arcs.length === 0) {
+      issues.push(issue('invalid_topology', `${path}.arcs`, 'Region geometry must contain at least one polygon ring.'));
       return;
     }
     if (geometry.type === 'Polygon') {
@@ -123,8 +133,8 @@ function extractRegions(topology: ParsedTopology, issues: PackValidationIssue[])
       return;
     }
     const polygons = geometry.arcs.map((polygon, polygonIndex) => {
-      if (!Array.isArray(polygon)) {
-        issues.push(issue('invalid_topology', `${path}.arcs.${polygonIndex}`, 'MultiPolygon member must contain rings.'));
+      if (!Array.isArray(polygon) || polygon.length === 0) {
+        issues.push(issue('invalid_topology', `${path}.arcs.${polygonIndex}`, 'MultiPolygon member must contain at least one ring.'));
         return undefined;
       }
       const rings = polygon.map((references, ringIndex) => decodeRing(topology, references, `${path}.arcs.${polygonIndex}.${ringIndex}`, issues));
@@ -140,14 +150,32 @@ async function readJson(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, 'utf8')) as unknown;
 }
 
-function validateSourceLedger(sources: unknown, issues: PackValidationIssue[]): void {
+function validateSourceLedger(sources: unknown, entityHash: string, issues: PackValidationIssue[]): void {
   if (!Array.isArray(sources)) return;
-  const requiredOperations = ['normalize-coordinate-reference-system', 'normalize-longitude-latitude', 'simplify-geometry', 'quantize-coordinates', 'build-topology'];
   sources.forEach((source, index) => {
     if (!isRecord(source) || !Array.isArray(source.processing)) return;
-    const operations = new Set(source.processing.filter(isRecord).map((step) => step.operation));
-    const missing = requiredOperations.filter((operation) => !operations.has(operation));
-    if (missing.length > 0) issues.push(issue('source_metadata', `sources.${index}.processing`, `Missing required processing operations: ${missing.join(', ')}.`));
+    const simplification = isRecord(source.simplification) ? source.simplification : null;
+    const quantization = isRecord(source.quantization) ? source.quantization : null;
+    const expected = [
+      { operation: 'normalize-coordinate-reference-system', parameters: { from: 'EPSG:4326', to: 'EPSG:4326' } },
+      { operation: 'normalize-longitude-latitude', parameters: { longitudeRange: '[-180,180]', latitudeRange: '[-90,90]' } },
+      { operation: 'simplify-geometry', parameters: { algorithm: 'douglas-peucker', tolerance: simplification?.tolerance } },
+      { operation: 'quantize-coordinates', parameters: { gridSize: quantization?.gridSize } },
+      { operation: 'build-topology', parameters: { sharedBoundaryStrategy: 'node-collinear-segments-and-deduplicate' } },
+    ];
+    const suffix = source.processing.slice(-6);
+    const entityBinding = suffix[5];
+    const metadataMatches = source.coordinateReferenceSystem === 'EPSG:4326' &&
+      simplification?.algorithm === 'douglas-peucker' && typeof simplification.tolerance === 'number' &&
+      typeof quantization?.gridSize === 'number' &&
+      expected.every((step, stepIndex) => stableJsonBytes(suffix[stepIndex]).equals(stableJsonBytes(step))) &&
+      isRecord(entityBinding) && entityBinding.operation === 'bind-entity-input' &&
+      isRecord(entityBinding.parameters) &&
+      typeof entityBinding.parameters.inputSha256 === 'string' && /^[a-f0-9]{64}$/i.test(entityBinding.parameters.inputSha256) &&
+      entityBinding.parameters.outputSha256 === entityHash;
+    if (!metadataMatches) {
+      issues.push(issue('source_metadata', `sources.${index}.processing`, 'Source processing parameters do not match the generated pack.'));
+    }
   });
 }
 
@@ -187,7 +215,7 @@ export async function validateContentPack(directory: string): Promise<Validation
       if (checksums[key] !== actual[key]) issues.push(issue('checksum_mismatch', `manifest.checksums.${key}`, `Expected ${String(checksums[key])} but found ${actual[key]}.`));
     });
   }
-  validateSourceLedger(sources, issues);
+  validateSourceLedger(sources, entityHash, issues);
   if (core.ok) validatePlaces(core.pack.entities, regions, issues);
   return issues.length === 0
     ? { ok: true, packId: core.ok ? core.pack.manifest.packId : '' }
@@ -225,15 +253,14 @@ async function validateFixture(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const args = process.argv.slice(2).filter((arg) => arg !== '--');
-  if (args.includes('--fixture')) {
+  const parsed = parseValidationArguments(process.argv.slice(2));
+  if (parsed.mode === 'fixture') {
     await validateFixture();
     return;
   }
-  const directories = args.includes('--all')
+  const directories = parsed.mode === 'all'
     ? (await readdir(resolve('src-tauri/resources/content'), { withFileTypes: true })).filter((entry) => entry.isDirectory()).map((entry) => resolve('src-tauri/resources/content', entry.name))
-    : args.filter((arg) => !arg.startsWith('--')).map((directory) => resolve(directory));
-  if (directories.length === 0) throw new Error('Pass --fixture, --all, or one or more content pack directories.');
+    : parsed.directories.map((directory) => resolve(directory));
   let failed = false;
   for (const directory of directories.sort(compareOrdinal)) {
     const result = await validateContentPack(directory);
@@ -244,6 +271,28 @@ async function main(): Promise<void> {
     }
   }
   if (failed) process.exitCode = 1;
+}
+
+export type ValidationArguments =
+  | Readonly<{ mode: 'fixture' }>
+  | Readonly<{ mode: 'all' }>
+  | Readonly<{ mode: 'directories'; directories: readonly string[] }>;
+
+export function parseValidationArguments(input: readonly string[]): ValidationArguments {
+  const args = input.filter((argument) => argument !== '--');
+  const flags = args.filter((argument) => argument.startsWith('--'));
+  const unknown = flags.find((flag) => flag !== '--fixture' && flag !== '--all');
+  if (unknown !== undefined) throw new Error(`Unknown validation option: ${unknown}`);
+  const hasFixture = flags.includes('--fixture');
+  const hasAll = flags.includes('--all');
+  const directories = args.filter((argument) => !argument.startsWith('--'));
+  const selectedModes = Number(hasFixture) + Number(hasAll) + Number(directories.length > 0);
+  if (selectedModes !== 1) {
+    throw new Error('Choose exactly one validation mode: --fixture, --all, or one or more directories.');
+  }
+  if (hasFixture) return { mode: 'fixture' };
+  if (hasAll) return { mode: 'all' };
+  return { mode: 'directories', directories };
 }
 
 const entryPoint = process.argv[1];

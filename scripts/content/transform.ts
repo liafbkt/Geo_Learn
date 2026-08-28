@@ -1,10 +1,12 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { basename, dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { ContentSource, Entity } from '../../src/content/types';
-import { entitySchema } from '../../src/content/schema';
+import { contentSourceSchema, entitySchema } from '../../src/content/schema';
+import { validatePack } from '../../src/content/validatePack';
 import { compareOrdinal, sha256Bytes, sha256File, stableJsonBytes } from './lib/hash';
 import { buildTopology, type RegionFeature, type SupportedGeometry } from './lib/topology';
+import { validateSimpleClosedRing } from './lib/ringGeometry';
 
 type FeatureCollection = Readonly<{
   type: 'FeatureCollection';
@@ -102,6 +104,7 @@ function parseRing(value: unknown, regionId: string): readonly (readonly [number
       throw new Error(`Region ${regionId} has a longitude/latitude value outside EPSG:4326 bounds.`);
     }
   });
+  validateSimpleClosedRing(value, `Region ${regionId} ring`);
   return value;
 }
 
@@ -110,12 +113,14 @@ function parseGeometry(value: unknown, regionId: string): SupportedGeometry {
     throw new Error(`Region ${regionId} must use Polygon or MultiPolygon geometry.`);
   }
   if (value.type === 'Polygon') {
+    if (value.coordinates.length === 0) throw new Error(`Region ${regionId} Polygon must contain at least one ring.`);
     return { type: 'Polygon', coordinates: value.coordinates.map((ring) => parseRing(ring, regionId)) };
   }
+  if (value.coordinates.length === 0) throw new Error(`Region ${regionId} MultiPolygon must contain at least one polygon.`);
   return {
     type: 'MultiPolygon',
     coordinates: value.coordinates.map((polygon) => {
-      if (!Array.isArray(polygon)) throw new Error(`Region ${regionId} multipolygons must contain polygons.`);
+      if (!Array.isArray(polygon) || polygon.length === 0) throw new Error(`Region ${regionId} multipolygons must contain non-empty polygons.`);
       return polygon.map((ring) => parseRing(ring, regionId));
     }),
   };
@@ -125,6 +130,7 @@ function parseRegions(input: unknown): readonly RegionFeature[] {
   if (!isRecord(input) || input.type !== 'FeatureCollection' || !Array.isArray(input.features)) {
     throw new Error('Regions input must be a GeoJSON FeatureCollection.');
   }
+  if (input.features.length === 0) throw new Error('Regions input must contain at least one feature.');
   const collection = input as FeatureCollection;
   const regions = collection.features.map((feature, index) => {
     const propertyId = feature.properties?.id;
@@ -151,56 +157,80 @@ function parseEntities(input: unknown): readonly Entity[] {
   }).sort((left, right) => compareOrdinal(left.id, right.id));
 }
 
-function parseSource(input: unknown, options: TransformContentOptions): ContentSource {
-  if (!isRecord(input)) throw new Error('Source metadata must be an object.');
+function parseSource(
+  input: unknown,
+  options: TransformContentOptions,
+  entityInputSha256: string,
+  entityOutputSha256: string,
+): ContentSource {
+  const parsed = contentSourceSchema.safeParse(input);
+  if (!parsed.success) throw new Error(`Invalid source metadata: ${parsed.error.message}`);
+  if (parsed.data.coordinateReferenceSystem !== options.sourceCrs) {
+    throw new Error(
+      `Source coordinate reference system ${parsed.data.coordinateReferenceSystem} does not match ${options.sourceCrs}.`,
+    );
+  }
+  if (parsed.data.simplification !== null || parsed.data.quantization !== null) {
+    throw new Error('Source metadata must describe the pinned raw input before this pipeline simplifies or quantizes it.');
+  }
   const processing = [
     { operation: 'normalize-coordinate-reference-system', parameters: { from: options.sourceCrs, to: 'EPSG:4326' } },
     { operation: 'normalize-longitude-latitude', parameters: { longitudeRange: '[-180,180]', latitudeRange: '[-90,90]' } },
     { operation: 'simplify-geometry', parameters: { algorithm: 'douglas-peucker', tolerance: options.simplificationTolerance } },
     { operation: 'quantize-coordinates', parameters: { gridSize: options.quantizationGridSize } },
-    { operation: 'build-topology', parameters: { sharedBoundaryStrategy: 'deduplicate-directed-segments' } },
+    { operation: 'build-topology', parameters: { sharedBoundaryStrategy: 'node-collinear-segments-and-deduplicate' } },
+    { operation: 'bind-entity-input', parameters: { inputSha256: entityInputSha256, outputSha256: entityOutputSha256 } },
   ] as const;
   return {
-    id: String(input.id ?? ''),
-    organization: String(input.organization ?? ''),
-    url: String(input.url ?? ''),
-    retrievedAt: String(input.retrievedAt ?? ''),
-    license: String(input.license ?? ''),
-    sha256: String(input.sha256 ?? ''),
-    coordinateReferenceSystem: options.sourceCrs,
-    processing,
+    ...parsed.data,
+    processing: [...parsed.data.processing, ...processing],
     simplification: { algorithm: 'douglas-peucker', tolerance: options.simplificationTolerance },
     quantization: { gridSize: options.quantizationGridSize },
-    reviewIdentifier: typeof input.reviewIdentifier === 'string' ? input.reviewIdentifier : null,
   };
+}
+
+async function inspectOutputDirectory(path: string): Promise<'missing' | 'empty'> {
+  try {
+    const information = await lstat(path);
+    if (information.isSymbolicLink()) throw new Error(`Output directory cannot be a symbolic link: ${path}`);
+    if (!information.isDirectory()) throw new Error(`Output path already exists and is not a directory: ${path}`);
+    if ((await readdir(path)).length > 0) throw new Error(`Output directory already exists and is not empty: ${path}`);
+    return 'empty';
+  } catch (error) {
+    if (isRecord(error) && error.code === 'ENOENT') return 'missing';
+    throw error;
+  }
 }
 
 export async function transformContent(options: TransformContentOptions): Promise<void> {
   if (options.sourceCrs !== 'EPSG:4326') {
     throw new Error('Only EPSG:4326 input is supported; reproject authoritative source data explicitly before transformation.');
   }
-  if (!Number.isFinite(options.simplificationTolerance) || options.simplificationTolerance < 0) {
-    throw new Error('Simplification tolerance must be a non-negative finite number.');
+  if (options.simplificationTolerance !== 0) {
+    throw new Error('Version 1 requires simplification tolerance 0 so shared boundaries remain topologically identical.');
   }
 
-  const [regionsInput, entitiesInput, manifestInput, sourceInput] = await Promise.all([
+  const resolvedOutputDirectory = resolve(options.outputDirectory);
+  const outputState = await inspectOutputDirectory(resolvedOutputDirectory);
+  const [regionsInput, entitiesInput, manifestInput, sourceInput, inputHash, entityInputHash] = await Promise.all([
     readJson(options.regionsPath),
     readJson(options.entitiesPath),
     readJson(options.manifestPath),
     readJson(options.sourcePath),
+    sha256File(options.regionsPath),
+    sha256File(options.entitiesPath),
   ]);
   if (!isRecord(manifestInput)) throw new Error('Manifest template must be an object.');
 
   const regions = parseRegions(regionsInput);
   const entities = parseEntities(entitiesInput);
   const topology = buildTopology(regions, options.simplificationTolerance, options.quantizationGridSize);
-  const sources = [parseSource(sourceInput, options)];
-  const inputHash = await sha256File(options.regionsPath);
-  if (sources[0]?.sha256.toLowerCase() !== inputHash) {
+  if (!isRecord(sourceInput) || typeof sourceInput.sha256 !== 'string' || sourceInput.sha256.toLowerCase() !== inputHash) {
     throw new Error(`Source metadata input SHA-256 does not match ${options.regionsPath}.`);
   }
   const entityBytes = stableJsonBytes(entities);
   const topologyBytes = stableJsonBytes(topology);
+  const sources = [parseSource(sourceInput, options, entityInputHash, sha256Bytes(entityBytes))];
   const sourceBytes = stableJsonBytes(sources);
   const manifest = {
     ...manifestInput,
@@ -210,14 +240,37 @@ export async function transformContent(options: TransformContentOptions): Promis
       sources: sha256Bytes(sourceBytes),
     },
   };
+  const validation = validatePack({
+    manifest,
+    entities,
+    sources,
+    topologyObjectIds: regions.map(({ id }) => id),
+    topologyPoints: [],
+  });
+  if (!validation.ok) {
+    throw new Error(`Generated pack failed validation: ${validation.issues.map((entry) => `${entry.path}: ${entry.message}`).join('; ')}`);
+  }
 
-  await mkdir(options.outputDirectory, { recursive: true });
-  await Promise.all([
-    writeFile(join(options.outputDirectory, 'entities.json'), entityBytes),
-    writeFile(join(options.outputDirectory, 'map.topojson'), topologyBytes),
-    writeFile(join(options.outputDirectory, 'sources.json'), sourceBytes),
-    writeFile(join(options.outputDirectory, 'manifest.json'), stableJsonBytes(manifest)),
-  ]);
+  const outputParent = dirname(resolvedOutputDirectory);
+  await mkdir(outputParent, { recursive: true });
+  const stagingDirectory = await mkdtemp(join(outputParent, `.${basename(resolvedOutputDirectory)}-staging-`));
+  try {
+    await Promise.all([
+      writeFile(join(stagingDirectory, 'entities.json'), entityBytes),
+      writeFile(join(stagingDirectory, 'map.topojson'), topologyBytes),
+      writeFile(join(stagingDirectory, 'sources.json'), sourceBytes),
+      writeFile(join(stagingDirectory, 'manifest.json'), stableJsonBytes(manifest)),
+    ]);
+    const { validateContentPack } = await import('./validate');
+    const stagedValidation = await validateContentPack(stagingDirectory);
+    if (!stagedValidation.ok) {
+      throw new Error(`Staged pack failed validation: ${stagedValidation.issues.map((entry) => `${entry.path}: ${entry.message}`).join('; ')}`);
+    }
+    if (outputState === 'empty') await rm(resolvedOutputDirectory, { recursive: true });
+    await rename(stagingDirectory, resolvedOutputDirectory);
+  } finally {
+    await rm(stagingDirectory, { recursive: true, force: true });
+  }
 }
 
 async function main(): Promise<void> {

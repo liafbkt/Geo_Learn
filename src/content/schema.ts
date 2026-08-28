@@ -39,7 +39,7 @@ const sourceProcessingStep = z
   .strict()
   .readonly();
 
-const source = z
+export const contentSourceSchema = z
   .object({
     id: nonEmptyString,
     organization: nonEmptyString,
@@ -86,7 +86,7 @@ export const contentPackSchema: z.ZodType<ContentPack> = z
     entities: z.array(entitySchema).readonly(),
     topologyObjectIds: z.array(nonEmptyString).readonly(),
     topologyPoints: z.array(topologyPointSummarySchema).readonly(),
-    sources: z.array(source).readonly(),
+    sources: z.array(contentSourceSchema).readonly(),
   })
   .strict()
   .readonly();

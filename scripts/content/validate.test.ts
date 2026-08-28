@@ -5,8 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { afterEach, describe, expect, it } from 'vitest';
 import { compareOrdinal, sha256Bytes, sha256File, stableJsonBytes } from './lib/hash';
+import { buildTopology } from './lib/topology';
 import { parseTransformArguments, transformContent } from './transform';
-import { validateContentPack } from './validate';
+import { parseValidationArguments, validateContentPack } from './validate';
 
 const fixtureDirectory = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const regionsPath = join(fixtureDirectory, 'regions.geojson');
@@ -135,6 +136,40 @@ describe('deterministic content transformation', () => {
     expect([...regionAArcs].filter((arc) => regionBArcs.has(arc))).toHaveLength(1);
   });
 
+  it('nodes a shared boundary when adjacent regions use different segmentation', () => {
+    const topology = buildTopology([
+      {
+        id: 'a',
+        geometry: { type: 'Polygon', coordinates: [[[0, 0], [1, 0], [1, 2], [0, 2], [0, 0]]] },
+      },
+      {
+        id: 'b',
+        geometry: { type: 'Polygon', coordinates: [[[1, 0], [2, 0], [2, 2], [1, 2], [1, 1], [1, 0]]] },
+      },
+    ], 0, 101) as FixtureTopology;
+    const [a, b] = topology.objects.regions.geometries;
+    const aArcs = new Set((a?.arcs?.[0] ?? []).map(absoluteArcIndex));
+    const bArcs = new Set((b?.arcs?.[0] ?? []).map(absoluteArcIndex));
+
+    expect([...aArcs].filter((arc) => bArcs.has(arc))).toHaveLength(2);
+  });
+
+  it('rejects empty, zero-area, self-intersecting, and quantization-collapsed rings', () => {
+    expect(() => buildTopology([
+      { id: 'empty', geometry: { type: 'Polygon', coordinates: [] } },
+    ], 0, 101)).toThrow();
+    expect(() => buildTopology([
+      { id: 'line', geometry: { type: 'Polygon', coordinates: [[[0, 0], [1, 0], [2, 0], [0, 0]]] } },
+    ], 0, 101)).toThrow('area');
+    expect(() => buildTopology([
+      { id: 'bow-tie', geometry: { type: 'Polygon', coordinates: [[[0, 0], [2, 2], [0, 2], [2, 0], [0, 0]]] } },
+    ], 0, 101)).toThrow('self-intersect');
+    expect(() => buildTopology([
+      { id: 'large', geometry: { type: 'Polygon', coordinates: [[[0, 0], [100, 0], [100, 100], [0, 100], [0, 0]]] } },
+      { id: 'tiny', geometry: { type: 'Polygon', coordinates: [[[1, 1], [1.1, 1], [1.1, 1.1], [1, 1.1], [1, 1]]] } },
+    ], 0, 2)).toThrow('quantization');
+  });
+
   it('records CRS normalization, simplification, quantization, and topology operations', async () => {
     const outputDirectory = await makeTemporaryDirectory('ledger');
 
@@ -150,9 +185,56 @@ describe('deterministic content transformation', () => {
         { operation: 'normalize-longitude-latitude', parameters: { longitudeRange: '[-180,180]', latitudeRange: '[-90,90]' } },
         { operation: 'simplify-geometry', parameters: { algorithm: 'douglas-peucker', tolerance: 0 } },
         { operation: 'quantize-coordinates', parameters: { gridSize: 101 } },
-        { operation: 'build-topology', parameters: { sharedBoundaryStrategy: 'deduplicate-directed-segments' } },
+        { operation: 'build-topology', parameters: { sharedBoundaryStrategy: 'node-collinear-segments-and-deduplicate' } },
+        {
+          operation: 'bind-entity-input',
+          parameters: {
+            inputSha256: await sha256File(entitiesPath),
+            outputSha256: await sha256File(join(outputDirectory, 'entities.json')),
+          },
+        },
       ],
     });
+  });
+
+  it('rejects source metadata whose declared CRS differs from the transform input', async () => {
+    const outputDirectory = await makeTemporaryDirectory('source-crs-output');
+    const metadataDirectory = await makeTemporaryDirectory('source-crs-metadata');
+    const sourcePath = await writeSourceMetadata(metadataDirectory);
+    const source = await readJson<Record<string, unknown>>(sourcePath);
+    await writeFile(sourcePath, stableJsonBytes({
+      ...source,
+      coordinateReferenceSystem: 'EPSG:3857',
+    }));
+
+    await expect(transformContent({
+      regionsPath,
+      entitiesPath,
+      manifestPath,
+      sourcePath,
+      outputDirectory,
+      sourceCrs: 'EPSG:4326',
+      simplificationTolerance: 0,
+      quantizationGridSize: 101,
+    })).rejects.toThrow('coordinate reference system');
+  });
+
+  it('refuses to overwrite an existing generated pack', async () => {
+    const outputDirectory = await makeTemporaryDirectory('immutable-output');
+    await writeFile(join(outputDirectory, 'sentinel.txt'), 'keep');
+    const metadataDirectory = await makeTemporaryDirectory('immutable-metadata');
+
+    await expect(transformContent({
+      regionsPath,
+      entitiesPath,
+      manifestPath,
+      sourcePath: await writeSourceMetadata(metadataDirectory),
+      outputDirectory,
+      sourceCrs: 'EPSG:4326',
+      simplificationTolerance: 0,
+      quantizationGridSize: 101,
+    })).rejects.toThrow('already exists');
+    await expect(readFile(join(outputDirectory, 'sentinel.txt'), 'utf8')).resolves.toBe('keep');
   });
 
   it('produces byte-identical files and hashes for identical inputs', async () => {
@@ -285,6 +367,29 @@ describe('content pack validation', () => {
     expect(result.issues).toContainEqual(expect.objectContaining({ code: 'invalid_topology' }));
   });
 
+  it('rejects a discontinuous arc chain even when its endpoints form a closed ring', async () => {
+    const outputDirectory = await makeTemporaryDirectory('discontinuous-topology');
+    await transformFixture(outputDirectory);
+    const topology = await readJson<FixtureTopology>(join(outputDirectory, 'map.topojson'));
+    const geometries = topology.objects.regions.geometries.map((geometry, index) => {
+      if (index !== 0) return geometry;
+      const references = geometry.arcs?.[0] ?? [];
+      return { ...geometry, arcs: [[references[0], references[2], references[1], ...references.slice(3)]] };
+    });
+    await replaceGeneratedJson(outputDirectory, 'map.topojson', {
+      ...topology,
+      objects: { ...topology.objects, regions: { ...topology.objects.regions, geometries } },
+    });
+
+    const result = await validateContentPack(outputDirectory);
+
+    expectInvalid(result);
+    expect(result.issues).toContainEqual(expect.objectContaining({
+      code: 'invalid_topology',
+      message: expect.stringContaining('continuous'),
+    }));
+  });
+
   it('rejects non-integer TopoJSON delta coordinates', async () => {
     const outputDirectory = await makeTemporaryDirectory('fractional-topology');
     await transformFixture(outputDirectory);
@@ -312,6 +417,23 @@ describe('content pack validation', () => {
     expect(result.ok).toBe(false);
     expectInvalid(result);
     expect(result.issues).toContainEqual(expect.objectContaining({ code: 'source_metadata', path: 'sources.0.processing' }));
+  });
+
+  it('rejects source ledger parameters that disagree with generated content', async () => {
+    const outputDirectory = await makeTemporaryDirectory('source-ledger-parameters');
+    await transformFixture(outputDirectory);
+    const sources = await readJson<Array<Record<string, unknown> & { processing: Array<Record<string, unknown>> }>>(join(outputDirectory, 'sources.json'));
+    await replaceGeneratedJson(outputDirectory, 'sources.json', sources.map((source) => ({
+      ...source,
+      processing: source.processing.map((step) => step.operation === 'quantize-coordinates'
+        ? { ...step, parameters: { gridSize: 999 } }
+        : step),
+    })));
+
+    const result = await validateContentPack(outputDirectory);
+
+    expectInvalid(result);
+    expect(result.issues).toContainEqual(expect.objectContaining({ code: 'source_metadata' }));
   });
 
   it('rejects a manifest checksum that does not match generated bytes', async () => {
@@ -355,5 +477,32 @@ describe('fetch-source.ps1', () => {
     expect(result.status).not.toBe(0);
     expect(`${result.stdout}${result.stderr}`).toContain('SHA-256 mismatch');
     await expect(readFile(destination)).rejects.toThrow();
+  });
+
+  it('rejects a destination whose parent traverses a Windows junction', () => {
+    const unique = `reparse-${process.pid}-${Date.now()}`;
+    const scriptDirectory = dirname(scriptPath);
+    const command = `. '${scriptPath.split("'").join("''")}'; $outside = Join-Path ([IO.Path]::GetTempPath()) '${unique}-outside'; $link = Join-Path (Join-Path '${scriptDirectory.split("'").join("''")}' 'raw') '${unique}-link'; New-Item -ItemType Directory -Path $outside -Force | Out-Null; New-Item -ItemType Directory -Path (Split-Path $link) -Force | Out-Null; New-Item -ItemType Junction -Path $link -Target $outside | Out-Null; try { Assert-SafeRawDestination -Destination (Join-Path $link 'payload.bin') } finally { Remove-Item -LiteralPath $link -Force; Remove-Item -LiteralPath $outside -Recurse -Force }`;
+
+    const result = spawnSync('pwsh', ['-NoProfile', '-Command', command], { encoding: 'utf8' });
+
+    expect(result.status).not.toBe(0);
+    expect(`${result.stdout}${result.stderr}`).toContain('reparse point');
+  });
+});
+
+describe('validate CLI arguments', () => {
+  it('rejects unknown and conflicting validation modes', () => {
+    expect(() => parseValidationArguments(['--typo'])).toThrow('Unknown');
+    expect(() => parseValidationArguments(['--fixture', '--all'])).toThrow('Choose exactly one');
+  });
+
+  it('accepts exactly one validation mode', () => {
+    expect(parseValidationArguments(['--fixture'])).toEqual({ mode: 'fixture' });
+    expect(parseValidationArguments(['--all'])).toEqual({ mode: 'all' });
+    expect(parseValidationArguments(['pack-a', 'pack-b'])).toEqual({
+      mode: 'directories',
+      directories: ['pack-a', 'pack-b'],
+    });
   });
 });

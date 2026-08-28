@@ -31,7 +31,9 @@ pnpm exec tsx ./scripts/content/transform.ts `
   --quantization-grid-size 100001
 ```
 
-The transform verifies the raw input hash, sorts stable IDs, normalizes longitude/latitude, records simplification and quantization, deduplicates shared boundary segments, and emits deterministic `manifest.json`, `entities.json`, `map.topojson` and `sources.json` bytes.
+The transform verifies the raw map input hash, binds the raw and generated entity hashes into the source ledger, sorts stable IDs, normalizes longitude/latitude, records simplification and quantization, nodes differently segmented collinear borders, deduplicates shared boundary segments, and emits deterministic `manifest.json`, `entities.json`, `map.topojson` and `sources.json` bytes. Version 1 requires simplification tolerance `0`; non-zero simplification remains disabled until it can operate on shared arcs rather than independent region rings. The quantization grid must be between 2 and 1,000,000.
+
+The output directory must be missing or empty. Generation happens in a sibling staging directory, runs the complete pack validator there, and publishes with one directory rename. A non-empty output is immutable and is never overwritten.
 
 The pipeline deliberately refuses other CRSs. Reprojection must be an explicit, separately recorded preprocessing step rather than an implicit guess.
 

@@ -7,6 +7,38 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+function Assert-SafeRawDestination {
+    param([Parameter(Mandatory = $true)][string]$Destination)
+
+    $scriptRoot = [IO.Path]::GetFullPath($PSScriptRoot)
+    $rawRoot = [IO.Path]::GetFullPath((Join-Path $scriptRoot 'raw'))
+    $destinationPath = [IO.Path]::GetFullPath($Destination)
+    $rawPrefix = $rawRoot.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    if (-not $destinationPath.StartsWith($rawPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Destination must be inside scripts/content/raw.'
+    }
+
+    $destinationParent = [IO.Path]::GetDirectoryName($destinationPath)
+    $relativeParent = [IO.Path]::GetRelativePath($rawRoot, $destinationParent)
+    $pathsToCheck = [Collections.Generic.List[string]]::new()
+    $pathsToCheck.Add($rawRoot)
+    $currentPath = $rawRoot
+    if ($relativeParent -ne '.') {
+        foreach ($segment in $relativeParent.Split([IO.Path]::DirectorySeparatorChar, [StringSplitOptions]::RemoveEmptyEntries)) {
+            $currentPath = Join-Path $currentPath $segment
+            $pathsToCheck.Add($currentPath)
+        }
+    }
+    foreach ($path in $pathsToCheck) {
+        if (Test-Path -LiteralPath $path) {
+            $item = Get-Item -LiteralPath $path -Force
+            if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                throw "Destination parent contains a reparse point: $path"
+            }
+        }
+    }
+}
+
 function Invoke-VerifiedSourceFetch {
     param(
         [Parameter(Mandatory = $true)][string]$Url,
@@ -29,15 +61,13 @@ function Invoke-VerifiedSourceFetch {
     $scriptRoot = [IO.Path]::GetFullPath($PSScriptRoot)
     $rawRoot = [IO.Path]::GetFullPath((Join-Path $scriptRoot 'raw'))
     $destinationPath = [IO.Path]::GetFullPath($Destination)
-    $rawPrefix = $rawRoot.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
-    if (-not $destinationPath.StartsWith($rawPrefix, [StringComparison]::OrdinalIgnoreCase)) {
-        throw 'Destination must be inside scripts/content/raw.'
-    }
+    Assert-SafeRawDestination -Destination $destinationPath
     if (Test-Path -LiteralPath $destinationPath) {
         throw 'Destination already exists. Source files are immutable; choose a new path.'
     }
 
-    New-Item -ItemType Directory -Path $rawRoot -Force | Out-Null
+    New-Item -ItemType Directory -Path ([IO.Path]::GetDirectoryName($destinationPath)) -Force | Out-Null
+    Assert-SafeRawDestination -Destination $destinationPath
     $temporaryPath = Join-Path $rawRoot ('.download-' + [Guid]::NewGuid().ToString('N'))
     try {
         & $DownloadAction $uri $temporaryPath
