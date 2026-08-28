@@ -66,9 +66,23 @@ describe('appReducer', () => {
 
     expect(requested.page.kind).toBe('practice');
     expect(requested.pendingHomeNavigation).toBe(true);
+    expect(appReducer(requested, {
+      type: 'ESCAPE_PRESSED',
+      now: '2026-08-28T00:00:05.000Z',
+    })).toBe(requested);
 
     const completed = appReducer(requested, { type: 'SAVE_FINISHED' });
     expect(completed.page).toEqual({ kind: 'home' });
     expect(completed.pendingHomeNavigation).toBe(false);
+  });
+
+  it('starts response timing again when each new question is presented', () => {
+    const nextQuestion = appReducer(inPractice(), {
+      type: 'QUESTION_PRESENTED',
+      now: '2026-08-28T00:00:20.000Z',
+    });
+
+    expect(elapsedResponseMs(nextQuestion, '2026-08-28T00:00:25.000Z')).toBe(5_000);
+    expect(nextQuestion.accumulatedPauseMs).toBe(0);
   });
 });

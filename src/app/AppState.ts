@@ -29,6 +29,7 @@ export type AppAction =
   | Readonly<{ type: 'OPTIONS_OPENED' }>
   | Readonly<{ type: 'WINDOW_HIDDEN'; now: string }>
   | Readonly<{ type: 'WINDOW_VISIBLE' }>
+  | Readonly<{ type: 'QUESTION_PRESENTED'; now: string }>
   | Readonly<{ type: 'SAVE_STARTED' }>
   | Readonly<{ type: 'SAVE_FINISHED' }>
   | Readonly<{ type: 'HOME_REQUESTED' }>;

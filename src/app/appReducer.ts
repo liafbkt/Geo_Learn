@@ -61,7 +61,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         pendingHomeNavigation: false,
       };
     case 'ESCAPE_PRESSED': {
-      if (state.page.kind !== 'practice') return state;
+      if (state.page.kind !== 'practice' || state.pendingHomeNavigation) return state;
       const top = topOverlay(state);
       if (top === 'options') {
         return { ...state, overlayStack: ['pause'] };
@@ -76,6 +76,16 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return pause(state, action.now);
     case 'WINDOW_VISIBLE':
       return state;
+    case 'QUESTION_PRESENTED':
+      if (state.page.kind !== 'practice' || state.pendingHomeNavigation) return state;
+      timestamp(action.now);
+      return {
+        ...state,
+        page: { ...state.page, questionStartedAt: action.now },
+        accumulatedPauseMs: 0,
+        pausedAt: null,
+        overlayStack: [],
+      };
     case 'SAVE_STARTED':
       return { ...state, saveInFlight: true };
     case 'SAVE_FINISHED':

@@ -7,6 +7,13 @@ export interface AudioBackend {
   play(source: string, volume: number): Promise<void>;
 }
 
+export class AudioAssetUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AudioAssetUnavailableError';
+  }
+}
+
 const sources: Readonly<Record<SoundPackId, Readonly<Record<SoundEvent, string>>>> = {
   crisp: {
     correct: new URL('./assets/crisp/correct.wav', import.meta.url).href,
@@ -50,8 +57,8 @@ export class WebAudioService implements AudioService {
     if (!this.isAvailable(packId)) return;
     try {
       await Promise.all(events.map((event) => this.backend.load(sources[packId][event])));
-    } catch {
-      this.#unavailable.add(packId);
+    } catch (error) {
+      if (error instanceof AudioAssetUnavailableError) this.#unavailable.add(packId);
     }
   }
 
@@ -68,8 +75,8 @@ export class WebAudioService implements AudioService {
     if (!this.isAvailable(packId)) return;
     try {
       await this.backend.play(sources[packId][event], clampVolume(volume));
-    } catch {
-      this.#unavailable.add(packId);
+    } catch (error) {
+      if (error instanceof AudioAssetUnavailableError) this.#unavailable.add(packId);
     }
   }
 }
@@ -77,6 +84,7 @@ export class WebAudioService implements AudioService {
 export class BrowserAudioBackend implements AudioBackend {
   readonly #buffers = new Map<string, Promise<AudioBuffer>>();
   #context: AudioContext | null = null;
+  #active: Readonly<{ source: AudioBufferSourceNode; gain: GainNode }> | null = null;
 
   async load(source: string): Promise<void> {
     await this.#buffer(source);
@@ -85,12 +93,30 @@ export class BrowserAudioBackend implements AudioBackend {
   async play(source: string, volume: number): Promise<void> {
     const context = this.#audioContext();
     if (context.state === 'suspended') await context.resume();
+    const buffer = await this.#buffer(source);
+    if (this.#active !== null) {
+      try {
+        this.#active.source.stop();
+      } catch {
+        // The previous one-shot may already have ended.
+      }
+      this.#active.source.disconnect();
+      this.#active.gain.disconnect();
+      this.#active = null;
+    }
     const node = context.createBufferSource();
     const gain = context.createGain();
-    node.buffer = await this.#buffer(source);
+    node.buffer = buffer;
     gain.gain.value = volume;
     node.connect(gain);
     gain.connect(context.destination);
+    const active = { source: node, gain };
+    this.#active = active;
+    node.onended = () => {
+      node.disconnect();
+      gain.disconnect();
+      if (this.#active === active) this.#active = null;
+    };
     node.start();
   }
 
@@ -104,10 +130,16 @@ export class BrowserAudioBackend implements AudioBackend {
     if (existing) return existing;
     const pending = fetch(source)
       .then((response) => {
-        if (!response.ok) throw new Error('Audio asset unavailable');
+        if (!response.ok) throw new AudioAssetUnavailableError('Audio asset unavailable');
         return response.arrayBuffer();
       })
-      .then((bytes) => this.#audioContext().decodeAudioData(bytes));
+      .then((bytes) => this.#audioContext().decodeAudioData(bytes))
+      .catch((error: unknown) => {
+        if (error instanceof AudioAssetUnavailableError) throw error;
+        throw new AudioAssetUnavailableError(
+          error instanceof Error ? `Audio asset could not be decoded: ${error.message}` : 'Audio asset could not be decoded',
+        );
+      });
     this.#buffers.set(source, pending);
     return pending;
   }
