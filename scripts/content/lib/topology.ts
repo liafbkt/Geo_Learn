@@ -164,8 +164,9 @@ export function buildTopology(features: readonly RegionFeature[], tolerance: num
   const verticesByLine = new Map<string, Map<string, Position>>();
   const registerRing = (ring: readonly Position[]): void => {
     for (let index = 0; index < ring.length - 1; index += 1) {
-      const start = ring[index]!;
-      const end = ring[index + 1]!;
+      const start = ring[index];
+      const end = ring[index + 1];
+      if (start === undefined || end === undefined) continue;
       const vertices = verticesByLine.get(lineKey(start, end)) ?? new Map<string, Position>();
       vertices.set(positionKey(start), start);
       vertices.set(positionKey(end), end);
@@ -183,8 +184,9 @@ export function buildTopology(features: readonly RegionFeature[], tolerance: num
   const encodeRing = (ring: readonly Position[]): readonly number[] => {
     const references: number[] = [];
     for (let index = 0; index < ring.length - 1; index += 1) {
-      const segmentStart = ring[index]!;
-      const segmentEnd = ring[index + 1]!;
+      const segmentStart = ring[index];
+      const segmentEnd = ring[index + 1];
+      if (segmentStart === undefined || segmentEnd === undefined) continue;
       const dx = segmentEnd[0] - segmentStart[0];
       const dy = segmentEnd[1] - segmentStart[1];
       const vertices = [...(verticesByLine.get(lineKey(segmentStart, segmentEnd))?.values() ?? [])]
@@ -193,8 +195,9 @@ export function buildTopology(features: readonly RegionFeature[], tolerance: num
           ((left[0] - segmentStart[0]) * dx + (left[1] - segmentStart[1]) * dy) -
           ((right[0] - segmentStart[0]) * dx + (right[1] - segmentStart[1]) * dy));
       for (let partIndex = 0; partIndex < vertices.length - 1; partIndex += 1) {
-        const start = vertices[partIndex]!;
-        const end = vertices[partIndex + 1]!;
+        const start = vertices[partIndex];
+        const end = vertices[partIndex + 1];
+        if (start === undefined || end === undefined) continue;
         const forward = `${positionKey(start)}>${positionKey(end)}`;
         const reverse = `${positionKey(end)}>${positionKey(start)}`;
         const forwardIndex = arcByDirection.get(forward);

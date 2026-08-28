@@ -311,6 +311,55 @@ describe('content pack validation', () => {
     expect(result).toEqual({ ok: true, packId: 'content-pipeline-fixture' });
   });
 
+  it('accepts optional point and hydrography layers from the frozen topology contract', async () => {
+    const outputDirectory = await makeTemporaryDirectory('optional-layers');
+    await transformFixture(outputDirectory);
+    const topology = await readJson<FixtureTopology>(join(outputDirectory, 'map.topojson'));
+    await replaceGeneratedJson(outputDirectory, 'map.topojson', {
+      ...topology,
+      objects: {
+        ...topology.objects,
+        places: {
+          type: 'GeometryCollection',
+          geometries: [{ type: 'Point', id: 'city-a', coordinates: [25, 50] }],
+        },
+        hydrography: {
+          type: 'GeometryCollection',
+          geometries: [{ type: 'LineString', id: 'river-a', arcs: [0] }],
+        },
+      },
+    });
+
+    await expect(validateContentPack(outputDirectory)).resolves.toEqual({
+      ok: true,
+      packId: 'content-pipeline-fixture',
+    });
+  });
+
+  it('rejects a duplicated topology point that disagrees with the entity coordinate', async () => {
+    const outputDirectory = await makeTemporaryDirectory('point-coordinate');
+    await transformFixture(outputDirectory);
+    const topology = await readJson<FixtureTopology>(join(outputDirectory, 'map.topojson'));
+    await replaceGeneratedJson(outputDirectory, 'map.topojson', {
+      ...topology,
+      objects: {
+        ...topology.objects,
+        places: {
+          type: 'GeometryCollection',
+          geometries: [{ type: 'Point', id: 'city-a', coordinates: [30, 50] }],
+        },
+      },
+    });
+
+    const result = await validateContentPack(outputDirectory);
+
+    expectInvalid(result);
+    expect(result.issues).toContainEqual(expect.objectContaining({
+      code: 'coordinate_mismatch',
+      path: 'map.topojson.points.city-a',
+    }));
+  });
+
   it('rejects a point outside its parent region', async () => {
     const outputDirectory = await makeTemporaryDirectory('outside');
     await transformFixture(outputDirectory);

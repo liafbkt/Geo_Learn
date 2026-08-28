@@ -74,7 +74,9 @@ function decodeRing(topology: ParsedTopology, references: unknown, path: string,
       issues.push(issue('invalid_topology', `${path}.${index}`, `Arc reference ${String(reference)} is out of range.`));
       return undefined;
     }
-    if (gridRing.length > 0 && !samePosition(gridRing[gridRing.length - 1]!, decoded[0]!)) {
+    const previous = gridRing[gridRing.length - 1];
+    const first = decoded[0];
+    if (previous !== undefined && (first === undefined || !samePosition(previous, first))) {
       issues.push(issue('invalid_topology', `${path}.${index}`, 'Polygon arc references must form a continuous chain.'));
       return undefined;
     }
@@ -100,9 +102,74 @@ function decodeRing(topology: ParsedTopology, references: unknown, path: string,
 
 type RegionShape = Readonly<{ type: 'Polygon'; coordinates: PolygonCoordinates }> | Readonly<{ type: 'MultiPolygon'; coordinates: MultiPolygonCoordinates }>;
 
-function extractRegions(topology: ParsedTopology, issues: PackValidationIssue[]): ReadonlyMap<string, RegionShape> {
+type TopologyPoint = Readonly<{ id: string; coordinate: Position }>;
+type TopologyExtraction = Readonly<{
+  regions: ReadonlyMap<string, RegionShape>;
+  points: readonly TopologyPoint[];
+}>;
+
+function decodePointCoordinate(
+  topology: ParsedTopology,
+  value: unknown,
+  path: string,
+  issues: PackValidationIssue[],
+): Position | undefined {
+  if (!isPosition(value) || !value.every(Number.isInteger)) {
+    issues.push(issue('invalid_topology', path, 'Quantized TopoJSON points must contain integer coordinate pairs.'));
+    return undefined;
+  }
+  const coordinate: Position = [
+    value[0] * topology.transform.scale[0] + topology.transform.translate[0],
+    value[1] * topology.transform.scale[1] + topology.transform.translate[1],
+  ];
+  if (coordinate[0] < -180 || coordinate[0] > 180 || coordinate[1] < -90 || coordinate[1] > 90) {
+    issues.push(issue('invalid_topology', path, 'Decoded coordinates must be valid longitude/latitude values.'));
+    return undefined;
+  }
+  return coordinate;
+}
+
+function decodeLine(
+  topology: ParsedTopology,
+  references: unknown,
+  path: string,
+  issues: PackValidationIssue[],
+): readonly Position[] | undefined {
+  if (!Array.isArray(references) || references.length === 0 || !references.every(Number.isInteger)) {
+    issues.push(issue('invalid_topology', path, 'LineString must contain integer arc references.'));
+    return undefined;
+  }
+  const gridLine: Position[] = [];
+  for (const [index, reference] of references.entries()) {
+    const decoded = decodeArcGrid(topology, reference as number);
+    if (decoded === undefined) {
+      issues.push(issue('invalid_topology', `${path}.${index}`, `Arc reference ${String(reference)} is out of range.`));
+      return undefined;
+    }
+    const previous = gridLine[gridLine.length - 1];
+    const first = decoded[0];
+    if (previous !== undefined && (first === undefined || !samePosition(previous, first))) {
+      issues.push(issue('invalid_topology', `${path}.${index}`, 'LineString arc references must form a continuous chain.'));
+      return undefined;
+    }
+    gridLine.push(...(gridLine.length === 0 ? decoded : decoded.slice(1)));
+  }
+  const line = gridLine.map(([x, y]) => [
+    x * topology.transform.scale[0] + topology.transform.translate[0],
+    y * topology.transform.scale[1] + topology.transform.translate[1],
+  ] as const);
+  if (line.some(([longitude, latitude]) => longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90)) {
+    issues.push(issue('invalid_topology', path, 'Decoded coordinates must be valid longitude/latitude values.'));
+    return undefined;
+  }
+  return line;
+}
+
+function extractTopology(topology: ParsedTopology, issues: PackValidationIssue[]): TopologyExtraction {
   const regions = new Map<string, RegionShape>();
-  const visit = (geometry: TopologyGeometry, path: string): void => {
+  const points: TopologyPoint[] = [];
+  const pointIds = new Set<string>();
+  const visit = (geometry: TopologyGeometry, path: string, regionLayer: boolean): void => {
     if (geometry.type === 'GeometryCollection') {
       if (!Array.isArray(geometry.geometries)) {
         issues.push(issue('invalid_topology', `${path}.geometries`, 'GeometryCollection must contain geometries.'));
@@ -111,16 +178,64 @@ function extractRegions(topology: ParsedTopology, issues: PackValidationIssue[])
       geometry.geometries.forEach((child, index) => {
         if (!isRecord(child) || typeof child.type !== 'string') {
           issues.push(issue('invalid_topology', `${path}.geometries.${index}`, 'Geometry must be an object.'));
-        } else visit(child as TopologyGeometry, `${path}.geometries.${index}`);
+        } else visit(child as TopologyGeometry, `${path}.geometries.${index}`, regionLayer);
       });
       return;
     }
-    if (typeof geometry.id !== 'string' || geometry.id.length === 0 || (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')) {
-      issues.push(issue('invalid_topology', path, 'Region geometries require a stable string ID and Polygon or MultiPolygon type.'));
+
+    if (geometry.type === 'Point') {
+      if (regionLayer) {
+        issues.push(issue('invalid_topology', `${path}.type`, 'The regions layer may contain only Polygon or MultiPolygon geometry.'));
+        return;
+      }
+      const coordinate = decodePointCoordinate(topology, (geometry as Record<string, unknown>).coordinates, `${path}.coordinates`, issues);
+      if (geometry.id === undefined) return;
+      if (typeof geometry.id !== 'string' || geometry.id.length === 0) {
+        issues.push(issue('invalid_topology', `${path}.id`, 'TopoJSON point IDs must be non-empty strings.'));
+      } else if (pointIds.has(geometry.id)) {
+        issues.push(issue('invalid_topology', `${path}.id`, `Duplicate topology point ID: ${geometry.id}.`));
+      } else if (coordinate !== undefined) {
+        pointIds.add(geometry.id);
+        points.push({ id: geometry.id, coordinate });
+      }
       return;
     }
-    if (regions.has(geometry.id)) {
-      issues.push(issue('invalid_topology', `${path}.id`, `Duplicate topology geometry ID: ${geometry.id}.`));
+
+    if (geometry.type === 'MultiPoint') {
+      if (regionLayer || !Array.isArray((geometry as Record<string, unknown>).coordinates)) {
+        issues.push(issue('invalid_topology', `${path}.coordinates`, 'MultiPoint geometry must contain coordinate pairs outside the regions layer.'));
+        return;
+      }
+      ((geometry as Record<string, unknown>).coordinates as unknown[]).forEach((coordinate, index) => {
+        decodePointCoordinate(topology, coordinate, `${path}.coordinates.${index}`, issues);
+      });
+      return;
+    }
+
+    if (geometry.type === 'LineString') {
+      if (regionLayer) {
+        issues.push(issue('invalid_topology', `${path}.type`, 'The regions layer may contain only Polygon or MultiPolygon geometry.'));
+        return;
+      }
+      decodeLine(topology, geometry.arcs, `${path}.arcs`, issues);
+      return;
+    }
+
+    if (geometry.type === 'MultiLineString') {
+      if (regionLayer || !Array.isArray(geometry.arcs)) {
+        issues.push(issue('invalid_topology', `${path}.arcs`, 'MultiLineString geometry must contain line arc arrays outside the regions layer.'));
+        return;
+      }
+      geometry.arcs.forEach((references, index) => decodeLine(topology, references, `${path}.arcs.${index}`, issues));
+      return;
+    }
+
+    if (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon') {
+      issues.push(issue('invalid_topology', `${path}.type`, `Unsupported TopoJSON geometry type: ${geometry.type}.`));
+      return;
+    }
+    if (regionLayer && (typeof geometry.id !== 'string' || geometry.id.length === 0)) {
+      issues.push(issue('invalid_topology', `${path}.id`, 'Region geometries require a stable string ID.'));
       return;
     }
     if (!Array.isArray(geometry.arcs) || geometry.arcs.length === 0) {
@@ -129,7 +244,13 @@ function extractRegions(topology: ParsedTopology, issues: PackValidationIssue[])
     }
     if (geometry.type === 'Polygon') {
       const rings = geometry.arcs.map((references, index) => decodeRing(topology, references, `${path}.arcs.${index}`, issues));
-      if (rings.every((ring) => ring !== undefined)) regions.set(geometry.id, { type: 'Polygon', coordinates: rings as PolygonCoordinates });
+      if (regionLayer && typeof geometry.id === 'string' && rings.every((ring) => ring !== undefined)) {
+        if (regions.has(geometry.id)) {
+          issues.push(issue('invalid_topology', `${path}.id`, `Duplicate topology geometry ID: ${geometry.id}.`));
+        } else {
+          regions.set(geometry.id, { type: 'Polygon', coordinates: rings as PolygonCoordinates });
+        }
+      }
       return;
     }
     const polygons = geometry.arcs.map((polygon, polygonIndex) => {
@@ -140,10 +261,18 @@ function extractRegions(topology: ParsedTopology, issues: PackValidationIssue[])
       const rings = polygon.map((references, ringIndex) => decodeRing(topology, references, `${path}.arcs.${polygonIndex}.${ringIndex}`, issues));
       return rings.every((ring) => ring !== undefined) ? rings as PolygonCoordinates : undefined;
     });
-    if (polygons.every((polygon) => polygon !== undefined)) regions.set(geometry.id, { type: 'MultiPolygon', coordinates: polygons as MultiPolygonCoordinates });
+    if (regionLayer && typeof geometry.id === 'string' && polygons.every((polygon) => polygon !== undefined)) {
+      if (regions.has(geometry.id)) {
+        issues.push(issue('invalid_topology', `${path}.id`, `Duplicate topology geometry ID: ${geometry.id}.`));
+      } else {
+        regions.set(geometry.id, { type: 'MultiPolygon', coordinates: polygons as MultiPolygonCoordinates });
+      }
+    }
   };
-  Object.entries(topology.objects).sort(([left], [right]) => compareOrdinal(left, right)).forEach(([objectId, geometry]) => visit(geometry, `map.topojson.objects.${objectId}`));
-  return regions;
+  Object.entries(topology.objects)
+    .sort(([left], [right]) => compareOrdinal(left, right))
+    .forEach(([objectId, geometry]) => visit(geometry, `map.topojson.objects.${objectId}`, objectId === 'regions'));
+  return { regions, points };
 }
 
 async function readJson(path: string): Promise<unknown> {
@@ -191,6 +320,25 @@ function validatePlaces(entities: readonly Entity[], regions: ReadonlyMap<string
   });
 }
 
+function validateTopologyPoints(
+  entities: readonly Entity[],
+  points: readonly TopologyPoint[],
+  issues: PackValidationIssue[],
+): void {
+  const entitiesById = new Map(entities.map((entity) => [entity.id, entity] as const));
+  points.forEach((point) => {
+    const entity = entitiesById.get(point.id);
+    if (entity === undefined || entity.kind !== 'place') {
+      issues.push(issue('missing_reference', `map.topojson.points.${point.id}`, `Topology point ${point.id} does not reference a place entity.`));
+      return;
+    }
+    if (Math.abs(entity.coordinate[0] - point.coordinate[0]) > 1e-6 ||
+        Math.abs(entity.coordinate[1] - point.coordinate[1]) > 1e-6) {
+      issues.push(issue('coordinate_mismatch', `map.topojson.points.${point.id}`, `Topology point ${point.id} does not match its entity coordinate within 1e-6 degrees.`));
+    }
+  });
+}
+
 export async function validateContentPack(directory: string): Promise<ValidationResult> {
   const [manifest, entities, sources, topologyValue, entityHash, topologyHash, sourceHash] = await Promise.all([
     readJson(join(directory, 'manifest.json')),
@@ -204,8 +352,14 @@ export async function validateContentPack(directory: string): Promise<Validation
   const topology = parseTopology(topologyValue);
   if ('code' in topology) return { ok: false, issues: [topology] };
   const topologyIssues: PackValidationIssue[] = [];
-  const regions = extractRegions(topology, topologyIssues);
-  const core = validatePack({ manifest, entities, sources, topologyObjectIds: [...regions.keys()], topologyPoints: [] });
+  const extracted = extractTopology(topology, topologyIssues);
+  const core = validatePack({
+    manifest,
+    entities,
+    sources,
+    topologyObjectIds: [...extracted.regions.keys()],
+    topologyPoints: extracted.points,
+  });
   const issues = core.ok ? [...topologyIssues] : [...core.issues, ...topologyIssues];
 
   if (isRecord(manifest) && isRecord(manifest.checksums)) {
@@ -216,7 +370,10 @@ export async function validateContentPack(directory: string): Promise<Validation
     });
   }
   validateSourceLedger(sources, entityHash, issues);
-  if (core.ok) validatePlaces(core.pack.entities, regions, issues);
+  if (core.ok) {
+    validateTopologyPoints(core.pack.entities, extracted.points, issues);
+    validatePlaces(core.pack.entities, extracted.regions, issues);
+  }
   return issues.length === 0
     ? { ok: true, packId: core.ok ? core.pack.manifest.packId : '' }
     : { ok: false, issues };

@@ -5,14 +5,18 @@ export function samePosition(left: Position, right: Position): boolean {
 }
 
 export function removeConsecutiveDuplicates(ring: readonly Position[]): readonly Position[] {
-  return ring.filter((position, index) => index === 0 || !samePosition(position, ring[index - 1]!));
+  return ring.filter((position, index) => {
+    const previous = ring[index - 1];
+    return previous === undefined || !samePosition(position, previous);
+  });
 }
 
 export function signedDoubleArea(ring: readonly Position[]): number {
   let area = 0;
   for (let index = 0; index < ring.length - 1; index += 1) {
-    const current = ring[index]!;
-    const next = ring[index + 1]!;
+    const current = ring[index];
+    const next = ring[index + 1];
+    if (current === undefined || next === undefined) continue;
     area += current[0] * next[1] - next[0] * current[1];
   }
   return area;
@@ -42,7 +46,9 @@ function segmentsIntersect(a: Position, b: Position, c: Position, d: Position): 
 
 export function validateSimpleClosedRing(ring: readonly Position[], label: string): void {
   if (ring.length < 4) throw new Error(`${label} must contain at least three vertices and a closing position.`);
-  if (!samePosition(ring[0]!, ring[ring.length - 1]!)) throw new Error(`${label} must be closed.`);
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  if (first === undefined || last === undefined || !samePosition(first, last)) throw new Error(`${label} must be closed.`);
   const unique = new Set(ring.slice(0, -1).map(([x, y]) => `${x},${y}`));
   if (unique.size < 3) throw new Error(`${label} must retain at least three distinct vertices.`);
   const edgeCount = ring.length - 1;
@@ -50,7 +56,12 @@ export function validateSimpleClosedRing(ring: readonly Position[], label: strin
     for (let right = left + 1; right < edgeCount; right += 1) {
       const adjacent = right === left + 1 || (left === 0 && right === edgeCount - 1);
       if (adjacent) continue;
-      if (segmentsIntersect(ring[left]!, ring[left + 1]!, ring[right]!, ring[right + 1]!)) {
+      const leftStart = ring[left];
+      const leftEnd = ring[left + 1];
+      const rightStart = ring[right];
+      const rightEnd = ring[right + 1];
+      if (leftStart !== undefined && leftEnd !== undefined && rightStart !== undefined && rightEnd !== undefined &&
+          segmentsIntersect(leftStart, leftEnd, rightStart, rightEnd)) {
         throw new Error(`${label} is self-intersecting.`);
       }
     }
