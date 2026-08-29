@@ -154,6 +154,30 @@ describe('deterministic content transformation', () => {
     expect([...aArcs].filter((arc) => bArcs.has(arc))).toHaveLength(2);
   });
 
+  it.each([11, 100_001])('nodes diagonal shared boundaries before grid %i quantization', (gridSize) => {
+    const topology = buildTopology([
+      {
+        id: 'a',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[[1, 1], [9.1, 7], [10, 0], [0, 0], [1, 1]]],
+        },
+      },
+      {
+        id: 'b',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[[9.1, 7], [3.7, 3], [1, 1], [0, 10], [10, 10], [9.1, 7]]],
+        },
+      },
+    ], 0, gridSize) as FixtureTopology;
+    const [a, b] = topology.objects.regions.geometries;
+    const aArcs = new Set((a?.arcs?.[0] ?? []).map(absoluteArcIndex));
+    const bArcs = new Set((b?.arcs?.[0] ?? []).map(absoluteArcIndex));
+
+    expect([...aArcs].filter((arc) => bArcs.has(arc))).toHaveLength(2);
+  });
+
   it('rejects empty, zero-area, self-intersecting, and quantization-collapsed rings', () => {
     expect(() => buildTopology([
       { id: 'empty', geometry: { type: 'Polygon', coordinates: [] } },
@@ -334,6 +358,60 @@ describe('content pack validation', () => {
       ok: true,
       packId: 'content-pipeline-fixture',
     });
+  });
+
+  it('rejects non-string IDs on every optional geometry kind', async () => {
+    const outputDirectory = await makeTemporaryDirectory('optional-layer-ids');
+    await transformFixture(outputDirectory);
+    const topology = await readJson<FixtureTopology>(join(outputDirectory, 'map.topojson'));
+    const ring = topology.objects.regions.geometries[0]?.arcs?.[0] ?? [];
+    await replaceGeneratedJson(outputDirectory, 'map.topojson', {
+      ...topology,
+      objects: {
+        ...topology.objects,
+        optional: {
+          type: 'GeometryCollection',
+          geometries: [
+            { type: 'MultiPoint', id: 1, coordinates: [[0, 0]] },
+            { type: 'LineString', id: 2, arcs: [0] },
+            { type: 'MultiLineString', id: 3, arcs: [[0]] },
+            { type: 'Polygon', id: 4, arcs: [ring] },
+            { type: 'MultiPolygon', id: 5, arcs: [[ring]] },
+            { type: 'GeometryCollection', id: 6, geometries: [] },
+          ],
+        },
+      },
+    });
+
+    const result = await validateContentPack(outputDirectory);
+
+    expectInvalid(result);
+    expect(result.issues.filter(({ path }) => path.endsWith('.id')).map(({ path }) => path)).toEqual([
+      'map.topojson.objects.optional.geometries.0.id',
+      'map.topojson.objects.optional.geometries.1.id',
+      'map.topojson.objects.optional.geometries.2.id',
+      'map.topojson.objects.optional.geometries.3.id',
+      'map.topojson.objects.optional.geometries.4.id',
+      'map.topojson.objects.optional.geometries.5.id',
+    ]);
+  });
+
+  it('rejects null top-level topology objects without throwing', async () => {
+    const outputDirectory = await makeTemporaryDirectory('null-topology-object');
+    await transformFixture(outputDirectory);
+    const topology = await readJson<FixtureTopology>(join(outputDirectory, 'map.topojson'));
+    await replaceGeneratedJson(outputDirectory, 'map.topojson', {
+      ...topology,
+      objects: { ...topology.objects, broken: null },
+    });
+
+    const result = await validateContentPack(outputDirectory);
+
+    expectInvalid(result);
+    expect(result.issues).toContainEqual(expect.objectContaining({
+      code: 'invalid_topology',
+      path: 'map.topojson.objects.broken',
+    }));
   });
 
   it('rejects a duplicated topology point that disagrees with the entity coordinate', async () => {

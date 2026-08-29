@@ -1,7 +1,6 @@
 import type { Position } from './pointInRegion';
 import { compareOrdinal } from './hash';
 import {
-  pointOnSegment,
   removeConsecutiveDuplicates,
   validateSimpleClosedRing,
 } from './ringGeometry';
@@ -89,6 +88,20 @@ function positionKey(position: readonly [number, number]): string {
   return `${position[0]},${position[1]}`;
 }
 
+function pointOnSourceSegment(point: Position, start: Position, end: Position): boolean {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  const pointDx = point[0] - start[0];
+  const pointDy = point[1] - start[1];
+  const crossProduct = dx * pointDy - dy * pointDx;
+  const arithmeticScale = Math.max(1, Math.abs(dx * pointDy) + Math.abs(dy * pointDx));
+  const tolerance = Number.EPSILON * 32 * arithmeticScale;
+  if (Math.abs(crossProduct) > tolerance) return false;
+  const projection = pointDx * dx + pointDy * dy;
+  const squaredLength = dx * dx + dy * dy;
+  return projection >= -tolerance && projection <= squaredLength + tolerance;
+}
+
 function deltaEncode(points: readonly (readonly [number, number])[]): readonly (readonly [number, number])[] {
   let previousX = 0;
   let previousY = 0;
@@ -106,18 +119,7 @@ export function buildTopology(features: readonly RegionFeature[], tolerance: num
   }
   const sorted = [...features].sort((left, right) => compareOrdinal(left.id, right.id));
   const quantization = createQuantization(sorted, gridSize);
-  const prepareRing = (ring: readonly Position[], label: string): readonly Position[] => {
-    const quantized = removeConsecutiveDuplicates(
-      normalizeRing(ring, tolerance, label).map(quantization.quantize),
-    );
-    try {
-      validateSimpleClosedRing(quantized, `${label} after quantization`);
-    } catch (error) {
-      throw new Error(`Geometry collapsed during quantization: ${error instanceof Error ? error.message : String(error)}`);
-    }
-    return quantized;
-  };
-  const prepared = sorted.map((feature) => {
+  const normalized = sorted.map((feature) => {
     if (feature.geometry.type === 'Polygon') {
       if (feature.geometry.coordinates.length === 0) {
         throw new Error(`Region ${feature.id} Polygon must contain at least one ring.`);
@@ -127,7 +129,7 @@ export function buildTopology(features: readonly RegionFeature[], tolerance: num
         geometry: {
           type: 'Polygon' as const,
           coordinates: feature.geometry.coordinates.map((ring, index) =>
-            prepareRing(ring, `Region ${feature.id} ring ${index}`)),
+            normalizeRing(ring, tolerance, `Region ${feature.id} ring ${index}`)),
         },
       };
     }
@@ -140,42 +142,64 @@ export function buildTopology(features: readonly RegionFeature[], tolerance: num
         type: 'MultiPolygon' as const,
         coordinates: feature.geometry.coordinates.map((polygon, polygonIndex) =>
           polygon.map((ring, ringIndex) =>
-            prepareRing(ring, `Region ${feature.id} polygon ${polygonIndex} ring ${ringIndex}`))),
+            normalizeRing(ring, tolerance, `Region ${feature.id} polygon ${polygonIndex} ring ${ringIndex}`))),
       },
     };
   });
 
-  const greatestCommonDivisor = (left: number, right: number): number => {
-    let a = Math.abs(left);
-    let b = Math.abs(right);
-    while (b !== 0) [a, b] = [b, a % b];
-    return a;
-  };
-  const lineKey = (start: Position, end: Position): string => {
-    const divisor = greatestCommonDivisor(end[0] - start[0], end[1] - start[1]);
-    let dx = (end[0] - start[0]) / divisor;
-    let dy = (end[1] - start[1]) / divisor;
-    if (dx < 0 || (dx === 0 && dy < 0)) {
-      dx = -dx;
-      dy = -dy;
-    }
-    return `${dx},${dy},${dx * start[1] - dy * start[0]}`;
-  };
-  const verticesByLine = new Map<string, Map<string, Position>>();
+  const sourceVertices = new Map<string, Position>();
   const registerRing = (ring: readonly Position[]): void => {
+    ring.slice(0, -1).forEach((position) => sourceVertices.set(positionKey(position), position));
+  };
+  normalized.forEach(({ geometry }) => {
+    const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+    polygons.forEach((polygon) => polygon.forEach(registerRing));
+  });
+
+  const nodeAndQuantizeRing = (ring: readonly Position[], label: string): readonly Position[] => {
+    const noded: Position[] = [];
     for (let index = 0; index < ring.length - 1; index += 1) {
       const start = ring[index];
       const end = ring[index + 1];
       if (start === undefined || end === undefined) continue;
-      const vertices = verticesByLine.get(lineKey(start, end)) ?? new Map<string, Position>();
-      vertices.set(positionKey(start), start);
-      vertices.set(positionKey(end), end);
-      verticesByLine.set(lineKey(start, end), vertices);
+      const dx = end[0] - start[0];
+      const dy = end[1] - start[1];
+      const segmentVertices = [...sourceVertices.values()]
+        .filter((point) => pointOnSourceSegment(point, start, end))
+        .sort((left, right) =>
+          ((left[0] - start[0]) * dx + (left[1] - start[1]) * dy) -
+          ((right[0] - start[0]) * dx + (right[1] - start[1]) * dy));
+      noded.push(...(noded.length === 0 ? segmentVertices : segmentVertices.slice(1)));
     }
+    const quantized = removeConsecutiveDuplicates(noded.map(quantization.quantize));
+    try {
+      validateSimpleClosedRing(quantized, `${label} after quantization`);
+    } catch (error) {
+      throw new Error(`Geometry collapsed during quantization: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    return quantized;
   };
-  prepared.forEach(({ geometry }) => {
-    const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
-    polygons.forEach((polygon) => polygon.forEach(registerRing));
+
+  const prepared = normalized.map((feature) => {
+    if (feature.geometry.type === 'Polygon') {
+      return {
+        id: feature.id,
+        geometry: {
+          type: 'Polygon' as const,
+          coordinates: feature.geometry.coordinates.map((ring, index) =>
+            nodeAndQuantizeRing(ring, `Region ${feature.id} ring ${index}`)),
+        },
+      };
+    }
+    return {
+      id: feature.id,
+      geometry: {
+        type: 'MultiPolygon' as const,
+        coordinates: feature.geometry.coordinates.map((polygon, polygonIndex) =>
+          polygon.map((ring, ringIndex) =>
+            nodeAndQuantizeRing(ring, `Region ${feature.id} polygon ${polygonIndex} ring ${ringIndex}`))),
+      },
+    };
   });
 
   const arcs: Array<readonly (readonly [number, number])[]> = [];
@@ -187,29 +211,17 @@ export function buildTopology(features: readonly RegionFeature[], tolerance: num
       const segmentStart = ring[index];
       const segmentEnd = ring[index + 1];
       if (segmentStart === undefined || segmentEnd === undefined) continue;
-      const dx = segmentEnd[0] - segmentStart[0];
-      const dy = segmentEnd[1] - segmentStart[1];
-      const vertices = [...(verticesByLine.get(lineKey(segmentStart, segmentEnd))?.values() ?? [])]
-        .filter((point) => pointOnSegment(point, segmentStart, segmentEnd))
-        .sort((left, right) =>
-          ((left[0] - segmentStart[0]) * dx + (left[1] - segmentStart[1]) * dy) -
-          ((right[0] - segmentStart[0]) * dx + (right[1] - segmentStart[1]) * dy));
-      for (let partIndex = 0; partIndex < vertices.length - 1; partIndex += 1) {
-        const start = vertices[partIndex];
-        const end = vertices[partIndex + 1];
-        if (start === undefined || end === undefined) continue;
-        const forward = `${positionKey(start)}>${positionKey(end)}`;
-        const reverse = `${positionKey(end)}>${positionKey(start)}`;
-        const forwardIndex = arcByDirection.get(forward);
-        const reverseIndex = arcByDirection.get(reverse);
-        if (forwardIndex !== undefined) references.push(forwardIndex);
-        else if (reverseIndex !== undefined) references.push(~reverseIndex);
-        else {
-          const arcIndex = arcs.length;
-          arcs.push(deltaEncode([start, end]));
-          arcByDirection.set(forward, arcIndex);
-          references.push(arcIndex);
-        }
+      const forward = `${positionKey(segmentStart)}>${positionKey(segmentEnd)}`;
+      const reverse = `${positionKey(segmentEnd)}>${positionKey(segmentStart)}`;
+      const forwardIndex = arcByDirection.get(forward);
+      const reverseIndex = arcByDirection.get(reverse);
+      if (forwardIndex !== undefined) references.push(forwardIndex);
+      else if (reverseIndex !== undefined) references.push(~reverseIndex);
+      else {
+        const arcIndex = arcs.length;
+        arcs.push(deltaEncode([segmentStart, segmentEnd]));
+        arcByDirection.set(forward, arcIndex);
+        references.push(arcIndex);
       }
     }
     if (references.length < 3) throw new Error('Polygon rings must retain at least three edges.');

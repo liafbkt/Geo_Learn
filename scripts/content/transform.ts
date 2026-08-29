@@ -1,4 +1,4 @@
-import { lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, rmdir, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { ContentSource, Entity } from '../../src/content/types';
@@ -202,6 +202,15 @@ async function inspectOutputDirectory(path: string): Promise<'missing' | 'empty'
   }
 }
 
+export async function publishStagedDirectory(
+  stagingDirectory: string,
+  outputDirectory: string,
+  outputState: 'missing' | 'empty',
+): Promise<void> {
+  if (outputState === 'empty') await rmdir(outputDirectory);
+  await rename(stagingDirectory, outputDirectory);
+}
+
 export async function transformContent(options: TransformContentOptions): Promise<void> {
   if (options.sourceCrs !== 'EPSG:4326') {
     throw new Error('Only EPSG:4326 input is supported; reproject authoritative source data explicitly before transformation.');
@@ -266,8 +275,7 @@ export async function transformContent(options: TransformContentOptions): Promis
     if (!stagedValidation.ok) {
       throw new Error(`Staged pack failed validation: ${stagedValidation.issues.map((entry) => `${entry.path}: ${entry.message}`).join('; ')}`);
     }
-    if (outputState === 'empty') await rm(resolvedOutputDirectory, { recursive: true });
-    await rename(stagingDirectory, resolvedOutputDirectory);
+    await publishStagedDirectory(stagingDirectory, resolvedOutputDirectory, outputState);
   } finally {
     await rm(stagingDirectory, { recursive: true, force: true });
   }

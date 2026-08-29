@@ -14,12 +14,11 @@ type ValidationResult =
   | Readonly<{ ok: false; issues: readonly PackValidationIssue[] }>;
 
 type TopologyTransform = Readonly<{ scale: Position; translate: Position }>;
-type TopologyGeometry = Readonly<{ type: string; id?: unknown; arcs?: unknown; geometries?: unknown }>;
 type ParsedTopology = Readonly<{
   type: 'Topology';
   transform: TopologyTransform;
   arcs: readonly (readonly Position[])[];
-  objects: Readonly<Record<string, TopologyGeometry>>;
+  objects: Readonly<Record<string, unknown>>;
 }>;
 
 function issue(code: PackValidationIssue['code'], path: string, message: string): PackValidationIssue {
@@ -169,17 +168,21 @@ function extractTopology(topology: ParsedTopology, issues: PackValidationIssue[]
   const regions = new Map<string, RegionShape>();
   const points: TopologyPoint[] = [];
   const pointIds = new Set<string>();
-  const visit = (geometry: TopologyGeometry, path: string, regionLayer: boolean): void => {
+  const visit = (geometry: unknown, path: string, regionLayer: boolean): void => {
+    if (!isRecord(geometry) || typeof geometry.type !== 'string') {
+      issues.push(issue('invalid_topology', path, 'Geometry must be an object with a type.'));
+      return;
+    }
+    if ('id' in geometry && (typeof geometry.id !== 'string' || geometry.id.length === 0)) {
+      issues.push(issue('invalid_topology', `${path}.id`, 'TopoJSON geometry IDs must be non-empty strings.'));
+      return;
+    }
     if (geometry.type === 'GeometryCollection') {
       if (!Array.isArray(geometry.geometries)) {
         issues.push(issue('invalid_topology', `${path}.geometries`, 'GeometryCollection must contain geometries.'));
         return;
       }
-      geometry.geometries.forEach((child, index) => {
-        if (!isRecord(child) || typeof child.type !== 'string') {
-          issues.push(issue('invalid_topology', `${path}.geometries.${index}`, 'Geometry must be an object.'));
-        } else visit(child as TopologyGeometry, `${path}.geometries.${index}`, regionLayer);
-      });
+      geometry.geometries.forEach((child, index) => visit(child, `${path}.geometries.${index}`, regionLayer));
       return;
     }
 
@@ -189,10 +192,8 @@ function extractTopology(topology: ParsedTopology, issues: PackValidationIssue[]
         return;
       }
       const coordinate = decodePointCoordinate(topology, (geometry as Record<string, unknown>).coordinates, `${path}.coordinates`, issues);
-      if (geometry.id === undefined) return;
-      if (typeof geometry.id !== 'string' || geometry.id.length === 0) {
-        issues.push(issue('invalid_topology', `${path}.id`, 'TopoJSON point IDs must be non-empty strings.'));
-      } else if (pointIds.has(geometry.id)) {
+      if (typeof geometry.id !== 'string') return;
+      if (pointIds.has(geometry.id)) {
         issues.push(issue('invalid_topology', `${path}.id`, `Duplicate topology point ID: ${geometry.id}.`));
       } else if (coordinate !== undefined) {
         pointIds.add(geometry.id);
