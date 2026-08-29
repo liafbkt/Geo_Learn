@@ -1,0 +1,2 @@
+scripts/content/fixtures/*.json text eol=lf
+scripts/content/fixtures/*.geojson text eol=lf
