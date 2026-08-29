@@ -76,6 +76,23 @@ describe('appReducer', () => {
     expect(completed.pendingHomeNavigation).toBe(false);
   });
 
+  it('does not resume or advance while any save is in flight', () => {
+    const paused = appReducer(inPractice(), {
+      type: 'ESCAPE_PRESSED',
+      now: '2026-08-28T00:00:03.000Z',
+    });
+    const saving = appReducer(paused, { type: 'SAVE_STARTED' });
+
+    expect(appReducer(saving, {
+      type: 'ESCAPE_PRESSED',
+      now: '2026-08-28T00:00:05.000Z',
+    })).toBe(saving);
+    expect(appReducer(saving, {
+      type: 'QUESTION_PRESENTED',
+      now: '2026-08-28T00:00:05.000Z',
+    })).toBe(saving);
+  });
+
   it('starts response timing again when each new question is presented', () => {
     const nextQuestion = appReducer(inPractice(), {
       type: 'QUESTION_PRESENTED',

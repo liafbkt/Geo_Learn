@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ProgressRepository } from '../persistence/ProgressRepository';
 import type { AudioSettings, SoundPackId } from './settings';
 import { ModalDialog } from './ModalDialog';
@@ -10,6 +10,7 @@ type Props = Readonly<{
   onChange: (settings: AudioSettings) => void;
   onPreview: (packId: SoundPackId, volume: number) => void;
   onBack: () => void;
+  onSavingChange: (saving: boolean) => void;
 }>;
 
 const PACKS: readonly Readonly<{ id: SoundPackId; label: string }>[] = [
@@ -18,21 +19,31 @@ const PACKS: readonly Readonly<{ id: SoundPackId; label: string }>[] = [
   { id: 'minimal', label: '极简' },
 ];
 
-export function OptionsPanel({ value, repository, unavailablePacks = [], onChange, onPreview, onBack }: Props) {
+export function OptionsPanel({ value, repository, unavailablePacks = [], onChange, onPreview, onBack, onSavingChange }: Props) {
   const [saveError, setSaveError] = useState(false);
   const [saving, setSaving] = useState(false);
+  const mounted = useRef(true);
+  const savingRef = useRef(false);
+  useEffect(() => () => { mounted.current = false; }, []);
   const persist = async (next: AudioSettings): Promise<void> => {
+    if (savingRef.current) return;
     const previous = value;
+    savingRef.current = true;
     onChange(next);
     setSaveError(false);
     setSaving(true);
+    onSavingChange(true);
     try {
       await repository.saveSettings({ audio: next });
     } catch {
-      onChange(previous);
-      setSaveError(true);
+      if (mounted.current) {
+        onChange(previous);
+        setSaveError(true);
+      }
     } finally {
-      setSaving(false);
+      savingRef.current = false;
+      if (mounted.current) setSaving(false);
+      onSavingChange(false);
     }
   };
   const updatePack = (packId: SoundPackId) => {
@@ -42,7 +53,14 @@ export function OptionsPanel({ value, repository, unavailablePacks = [], onChang
   };
   return (
     <ModalDialog labelledBy="options-title" className="options-card">
-      <button type="button" className="text-action" onClick={onBack}>返回暂停</button>
+      <button
+        type="button"
+        className="text-action"
+        disabled={saving}
+        onClick={() => { if (!savingRef.current) onBack(); }}
+      >
+        返回暂停
+      </button>
       <h2 id="options-title">选项</h2>
       <label className="toggle-row">
         <span>音效</span>

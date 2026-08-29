@@ -19,6 +19,7 @@ describe('OptionsPanel', () => {
         onChange={onChange}
         onPreview={vi.fn()}
         onBack={vi.fn()}
+        onSavingChange={vi.fn()}
       />,
     );
 
@@ -40,6 +41,7 @@ describe('OptionsPanel', () => {
         onChange={onChange}
         onPreview={vi.fn()}
         onBack={vi.fn()}
+        onSavingChange={vi.fn()}
       />,
     );
 
@@ -47,5 +49,57 @@ describe('OptionsPanel', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('设置未保存');
     expect(onChange).toHaveBeenLastCalledWith({ enabled: true, packId: 'crisp', volume: 0.7 });
+  });
+
+  it('locks navigation until a deferred save finishes', async () => {
+    let finishSave: (() => void) | undefined;
+    const saveSettings = vi.fn(() => new Promise<void>((resolve) => { finishSave = resolve; }));
+    const onBack = vi.fn();
+    const onSavingChange = vi.fn();
+    render(
+      <OptionsPanel
+        value={{ enabled: true, packId: 'crisp', volume: 0.7 }}
+        repository={repository(saveSettings)}
+        onChange={vi.fn()}
+        onPreview={vi.fn()}
+        onBack={onBack}
+        onSavingChange={onSavingChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('checkbox', { name: '音效' }));
+    const back = screen.getByRole('button', { name: '返回暂停' });
+    expect(back).toBeDisabled();
+    fireEvent.click(back);
+    expect(onBack).not.toHaveBeenCalled();
+    expect(onSavingChange).toHaveBeenCalledWith(true);
+
+    finishSave?.();
+    await waitFor(() => expect(back).toBeEnabled());
+    expect(onSavingChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('does not let a rejected save roll back state after the panel unmounts', async () => {
+    let rejectSave: ((reason: Error) => void) | undefined;
+    const saveSettings = vi.fn(() => new Promise<void>((_resolve, reject) => { rejectSave = reject; }));
+    const onChange = vi.fn();
+    const view = render(
+      <OptionsPanel
+        value={{ enabled: true, packId: 'crisp', volume: 0.7 }}
+        repository={repository(saveSettings)}
+        onChange={onChange}
+        onPreview={vi.fn()}
+        onBack={vi.fn()}
+        onSavingChange={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('checkbox', { name: '音效' }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    view.unmount();
+    rejectSave?.(new Error('late disk failure'));
+    await Promise.resolve();
+
+    expect(onChange).toHaveBeenCalledTimes(1);
   });
 });
