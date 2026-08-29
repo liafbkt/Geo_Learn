@@ -37,6 +37,7 @@ describe('OptionsPanel', () => {
   it('shows a save error and rolls back the optimistic change', async () => {
     const saveSettings = vi.fn(async () => { throw new Error('disk full'); });
     const onChange = vi.fn();
+    const onSavingChange = vi.fn();
     render(
       <StrictMode>
         <OptionsPanel
@@ -45,7 +46,7 @@ describe('OptionsPanel', () => {
           onChange={onChange}
           onPreview={vi.fn()}
           onBack={vi.fn()}
-          onSavingChange={vi.fn()}
+          onSavingChange={onSavingChange}
         />
       </StrictMode>,
     );
@@ -54,6 +55,8 @@ describe('OptionsPanel', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('设置未保存');
     expect(onChange).toHaveBeenLastCalledWith({ enabled: true, packId: 'crisp', volume: 0.7 });
+    expect(screen.getByRole('button', { name: '返回暂停' })).toBeEnabled();
+    expect(onSavingChange).toHaveBeenLastCalledWith(false);
   });
 
   it('locks navigation until a deferred save finishes', async () => {
