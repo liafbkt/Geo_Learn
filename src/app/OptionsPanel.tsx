@@ -24,7 +24,10 @@ export function OptionsPanel({ value, repository, unavailablePacks = [], onChang
   const [saving, setSaving] = useState(false);
   const mounted = useRef(true);
   const savingRef = useRef(false);
-  useEffect(() => () => { mounted.current = false; }, []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
   const persist = async (next: AudioSettings): Promise<void> => {
     if (savingRef.current) return;
     const previous = value;

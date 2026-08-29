@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { StrictMode } from 'react';
 import { vi } from 'vitest';
 import type { ProgressRepository } from '../persistence/ProgressRepository';
 import { OptionsPanel } from './OptionsPanel';
@@ -13,14 +14,16 @@ describe('OptionsPanel', () => {
     const saveSettings = vi.fn(async () => undefined);
     const onChange = vi.fn();
     render(
-      <OptionsPanel
-        value={{ enabled: true, packId: 'crisp', volume: 0.7 }}
-        repository={repository(saveSettings)}
-        onChange={onChange}
-        onPreview={vi.fn()}
-        onBack={vi.fn()}
-        onSavingChange={vi.fn()}
-      />,
+      <StrictMode>
+        <OptionsPanel
+          value={{ enabled: true, packId: 'crisp', volume: 0.7 }}
+          repository={repository(saveSettings)}
+          onChange={onChange}
+          onPreview={vi.fn()}
+          onBack={vi.fn()}
+          onSavingChange={vi.fn()}
+        />
+      </StrictMode>,
     );
 
     fireEvent.click(screen.getByRole('radio', { name: '柔和' }));
@@ -35,14 +38,16 @@ describe('OptionsPanel', () => {
     const saveSettings = vi.fn(async () => { throw new Error('disk full'); });
     const onChange = vi.fn();
     render(
-      <OptionsPanel
-        value={{ enabled: true, packId: 'crisp', volume: 0.7 }}
-        repository={repository(saveSettings)}
-        onChange={onChange}
-        onPreview={vi.fn()}
-        onBack={vi.fn()}
-        onSavingChange={vi.fn()}
-      />,
+      <StrictMode>
+        <OptionsPanel
+          value={{ enabled: true, packId: 'crisp', volume: 0.7 }}
+          repository={repository(saveSettings)}
+          onChange={onChange}
+          onPreview={vi.fn()}
+          onBack={vi.fn()}
+          onSavingChange={vi.fn()}
+        />
+      </StrictMode>,
     );
 
     fireEvent.click(screen.getByRole('checkbox', { name: '音效' }));
