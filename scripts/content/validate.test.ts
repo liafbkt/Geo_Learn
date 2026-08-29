@@ -378,6 +378,7 @@ describe('content pack validation', () => {
             { type: 'Polygon', id: 4, arcs: [ring] },
             { type: 'MultiPolygon', id: 5, arcs: [[ring]] },
             { type: 'GeometryCollection', id: 6, geometries: [] },
+            { type: 'LineString', id: '   ', arcs: [0] },
           ],
         },
       },
@@ -393,6 +394,7 @@ describe('content pack validation', () => {
       'map.topojson.objects.optional.geometries.3.id',
       'map.topojson.objects.optional.geometries.4.id',
       'map.topojson.objects.optional.geometries.5.id',
+      'map.topojson.objects.optional.geometries.6.id',
     ]);
   });
 

@@ -173,7 +173,7 @@ function extractTopology(topology: ParsedTopology, issues: PackValidationIssue[]
       issues.push(issue('invalid_topology', path, 'Geometry must be an object with a type.'));
       return;
     }
-    if ('id' in geometry && (typeof geometry.id !== 'string' || geometry.id.length === 0)) {
+    if ('id' in geometry && (typeof geometry.id !== 'string' || geometry.id.trim().length === 0)) {
       issues.push(issue('invalid_topology', `${path}.id`, 'TopoJSON geometry IDs must be non-empty strings.'));
       return;
     }
