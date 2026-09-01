@@ -87,4 +87,60 @@ describe('createE2EDependencies', () => {
     ]);
     expect(service.getState()).toMatchObject({ status: 'installationRequested' });
   });
+
+  it('uses imported mastery stage so a controlled identify question exercises text input', async () => {
+    const dependencies = createE2EDependencies(new MemoryStorage());
+    window.__GEOLEARN_E2E__.setBackupScenario({
+      kind: 'valid',
+      records: {
+        mastery: [{
+          learnerId: 'local-default',
+          packId: 'cn-provincial-divisions',
+          entityId: 'cn-110000',
+          skill: 'identify_region',
+          stage: 'solid',
+          scheduledIntervalMs: 86_400_000,
+          dueAt: '2026-09-02T00:00:00.000Z',
+          smoothedResponseMs: 100,
+          updatedAt: '2026-09-01T00:00:00.000Z',
+        }],
+        attempts: [],
+        sessions: [],
+        settings: { audio: { enabled: true, packId: 'crisp', volume: 0.7 } },
+      },
+    });
+    const summary = await dependencies.backupCommands.inspectBackup();
+    await dependencies.backupCommands.importBackup({
+      stagingId: summary!.stagingId,
+      mode: 'replace',
+      includeSettings: true,
+    });
+    window.__GEOLEARN_E2E__.setQuestionKinds(['identify_region']);
+    const loaded = await loadAvailablePacks(dependencies.contentSource);
+    const pack = loaded.available.find(
+      ({ manifest }) => manifest.packId === 'cn-provincial-divisions',
+    )!;
+    const masteryRecords = await dependencies.repository.loadSnapshot(
+      dependencies.learnerId,
+      pack.manifest.packId,
+    );
+
+    const planned = dependencies.planSession({
+      pack,
+      request: { mode: 'smart', packId: pack.manifest.packId },
+      learnerId: dependencies.learnerId,
+      sessionId: dependencies.createId('session'),
+      startedAt: dependencies.now(),
+      masteryRecords,
+      fragileKeys: [],
+      retryDebts: [],
+      random: dependencies.random,
+    });
+
+    expect(planned.questions).toEqual([expect.objectContaining({
+      kind: 'identify_region',
+      presentation: 'text',
+      entityId: 'cn-110000',
+    })]);
+  });
 });

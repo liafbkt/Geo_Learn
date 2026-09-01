@@ -16,7 +16,7 @@ export type E2EUpdateScenario =
 export type E2EBackupControlScenario =
   | Readonly<{ kind: 'cancel' }>
   | Readonly<{ kind: 'corrupt' }>
-  | Readonly<{ kind: 'valid'; records: BackupRecords }>;
+  | Readonly<{ kind: 'valid'; records: BackupRecords; failRefreshOnce?: boolean }>;
 
 export type E2EControlState = InMemoryProgressState &
   Readonly<{ updateActions: readonly ('check' | 'download' | 'install' | 'close')[] }>;
@@ -35,4 +35,3 @@ declare global {
     __GEOLEARN_E2E__: E2EControl;
   }
 }
-

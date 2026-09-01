@@ -29,11 +29,14 @@ function controlledQuestion(input: PlanSessionInput, kind: Skill): Question {
   const candidateOrder = input.pack.entities.map(({ id }) => id);
   for (const entity of input.pack.entities) {
     try {
+      const stage = input.masteryRecords.find(
+        (record) => record.entityId === entity.id && record.skill === kind,
+      )?.stage ?? 'new';
       return generateQuestion({
         pack: input.pack,
         entityId: entity.id,
         skill: kind,
-        stage: 'new',
+        stage,
         candidateOrder,
       });
     } catch {

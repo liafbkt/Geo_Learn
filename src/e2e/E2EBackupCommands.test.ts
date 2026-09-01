@@ -158,4 +158,25 @@ describe('E2EBackupCommands', () => {
 
     expect(repository.exportState()).toEqual(before);
   });
+
+  it('can inject one post-import refresh failure without rolling back the import', async () => {
+    const repository = new E2EProgressRepository(new MemoryStorage());
+    const commands = new E2EBackupCommands(repository, () => '2026-09-01T01:00:00.000Z');
+    commands.setScenario({
+      kind: 'valid',
+      records: records('imported'),
+      failRefreshOnce: true,
+    });
+    const summary = await commands.inspectBackup();
+
+    await commands.importBackup({
+      stagingId: summary!.stagingId,
+      mode: 'replace',
+      includeSettings: true,
+    });
+
+    await expect(repository.loadSnapshot('local-default', 'us-states')).rejects.toThrow(/refresh/i);
+    await expect(repository.loadSnapshot('local-default', 'us-states')).resolves.toEqual([]);
+    expect(repository.exportState().sessions.map(({ sessionId }) => sessionId)).toEqual(['imported']);
+  });
 });

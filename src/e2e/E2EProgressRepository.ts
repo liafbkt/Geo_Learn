@@ -12,6 +12,7 @@ const STORAGE_KEY = 'geolearn:e2e:progress:v1';
 export class E2EProgressRepository implements ProgressRepository {
   #inner: InMemoryProgressRepository;
   #failNextAttempt = false;
+  #failNextRefresh = false;
 
   constructor(private readonly storage: Storage) {
     const serialized = storage.getItem(STORAGE_KEY);
@@ -33,6 +34,10 @@ export class E2EProgressRepository implements ProgressRepository {
     this.#failNextAttempt = true;
   }
 
+  failNextRefresh(): void {
+    this.#failNextRefresh = true;
+  }
+
   exportState(): InMemoryProgressState {
     return this.#inner.exportState();
   }
@@ -44,6 +49,10 @@ export class E2EProgressRepository implements ProgressRepository {
   }
 
   loadSnapshot(learnerId: string, packId: string): Promise<readonly MasteryRecord[]> {
+    if (this.#failNextRefresh) {
+      this.#failNextRefresh = false;
+      return Promise.reject(new Error('Injected E2E refresh failure'));
+    }
     return this.#inner.loadSnapshot(learnerId, packId);
   }
 
@@ -95,6 +104,7 @@ export class E2EProgressRepository implements ProgressRepository {
   reset(): void {
     this.#inner = new InMemoryProgressRepository();
     this.#failNextAttempt = false;
+    this.#failNextRefresh = false;
     this.storage.removeItem(STORAGE_KEY);
   }
 

@@ -13,9 +13,13 @@ import { E2EProgressRepository } from './E2EProgressRepository';
 export type E2EBackupScenario =
   | Readonly<{ kind: 'cancel' }>
   | Readonly<{ kind: 'corrupt' }>
-  | Readonly<{ kind: 'valid'; records: BackupRecords }>;
+  | Readonly<{ kind: 'valid'; records: BackupRecords; failRefreshOnce?: boolean }>;
 
-type StagedBackup = Readonly<{ id: string; records: BackupRecords }>;
+type StagedBackup = Readonly<{
+  id: string;
+  records: BackupRecords;
+  failRefreshOnce: boolean;
+}>;
 
 function toBackupRecords(state: InMemoryProgressState, savedAt: string): BackupRecords {
   return {
@@ -63,7 +67,11 @@ export class E2EBackupCommands implements BackupCommands {
 
     const records = structuredClone(this.#scenario.records);
     const stagingId = `stage-${this.#nextStagingId++}`;
-    this.#staged = { id: stagingId, records };
+    this.#staged = {
+      id: stagingId,
+      records,
+      failRefreshOnce: this.#scenario.failRefreshOnce ?? false,
+    };
     return {
       stagingId,
       exportedAt: this.now(),
@@ -92,5 +100,6 @@ export class E2EBackupCommands implements BackupCommands {
         )
       : imported;
     await this.repository.replaceState(toProgressState(output));
+    if (staged.failRefreshOnce) this.repository.failNextRefresh();
   }
 }
