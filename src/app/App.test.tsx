@@ -161,7 +161,7 @@ async function openUsSmartPractice(user: ReturnType<typeof userEvent.setup>) {
   await user.click(await screen.findByRole('button', { name: '继续认识' }));
 }
 
-it('loads all three launch packs, isolates a bad pack, and checks updates without blocking home', async () => {
+it('loads all three launch packs, isolates a bad pack, and checks updates only on request', async () => {
   const user = userEvent.setup();
   const download = vi.fn(async () => undefined);
   const install = vi.fn(async () => undefined);
@@ -180,6 +180,8 @@ it('loads all three launch packs, isolates a bad pack, and checks updates withou
   expect(screen.getByRole('heading', { name: '上海行政区' })).toBeVisible();
   expect(screen.getByRole('heading', { name: '美国50州与州府' })).toBeVisible();
   expect(screen.getByText('1 个内容包未加载，其他内容仍可使用。')).toBeVisible();
+  expect(screen.queryByText('发现新版本 0.2.0')).not.toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: '检查更新' }));
   expect(await screen.findByText('发现新版本 0.2.0')).toBeVisible();
   await user.click(screen.getByRole('button', { name: '下载更新' }));
   expect(await screen.findByText('更新已下载并通过校验')).toBeVisible();

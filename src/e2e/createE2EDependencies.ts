@@ -110,6 +110,8 @@ export function createE2EDependencies(storage: Storage): AppDependencies {
       questionKinds = [];
       updateScenario = { kind: 'up-to-date' };
       updateActions.splice(0);
+      globalThis.performance?.clearMarks?.();
+      globalThis.performance?.clearMeasures?.();
     },
     failNextAttemptSave: () => repository.failNextAttemptSave(),
     setQuestionKinds(kinds): void {

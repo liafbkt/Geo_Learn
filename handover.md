@@ -27,5 +27,7 @@
 - Manual witness is the current Windows 10 Home 22H2 user account; Windows 11, fresh OS, and missing-WebView2 manual scenarios are excluded and must not be reported as passed.
 - Personal-use decision excludes named-human public-map/statutory approval from this release gate; existing compliance boxes remain unchecked.
 - No branch push, candidate, stable Release, installer, or updater smoke has yet occurred.
+- 更新检查边界已改为首页/总结页由用户显式触发；完全断网时不会因启动检查产生错误，主动检查失败不影响本地学习。
+- Playwright 固定 fixture 已覆盖冷启动、反馈、切题和地图帧门槛；这些浏览器数据不得标记为原生 Tauri 性能实测。
 - 本机缺少 MSVC `link.exe`：Rust clippy/test 的 exit-0 证据和真实 NSIS/updater 构建必须来自 GitHub Windows runner。
 - 自动化、资产、授权和当前用户实测的实时状态以 `docs/release/windows-v1-checklist.md` 与 `docs/release/windows-v1-smoke.md` 为准；尚未记录的结果不得宣称通过。

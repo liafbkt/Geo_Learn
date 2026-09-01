@@ -10,6 +10,7 @@ import type { ProgressRepository } from '../persistence/ProgressRepository';
 import { OptionsPanel } from '../app/OptionsPanel';
 import { PauseDialog } from '../app/PauseDialog';
 import type { AppSettings } from '../app/settings';
+import { markGeoPerformance } from '../app/performance';
 import { commitCurrentAttempt, type PracticeAction } from './actions';
 import { practiceReducer, type PracticeState } from './reducer';
 import { canContinue, canLeavePractice, canRetrySave, canSubmitAnswer } from './selectors';
@@ -165,10 +166,14 @@ export function PracticeScreen(props: PracticeScreenProps) {
     setPaused(false);
   };
 
-  const submit = () => dispatch({ type: 'ANSWER_SUBMITTED', now: props.now() });
+  const submit = () => {
+    markGeoPerformance('geo:answer-submitted');
+    dispatch({ type: 'ANSWER_SUBMITTED', now: props.now() });
+  };
   const requestHint = () => dispatch({ type: 'HINT_REQUESTED' });
   const continuePractice = () => {
     if (!canContinue(state)) return;
+    markGeoPerformance('geo:continue-requested');
     if (state.session.questionCursor >= state.session.questions.length) {
       void props.audio.play('complete', props.settings.audio);
       props.onComplete({ attempts: attempts.current, masteryAfter: state.masteryRecords, session: state.session });
@@ -244,9 +249,16 @@ export function PracticeScreen(props: PracticeScreenProps) {
   useEffect(() => {
     const feedback = state.feedback;
     if (feedback === null) return;
+    markGeoPerformance('geo:feedback-visible');
     const event = feedback.kind === 'correct' ? 'correct' : feedback.kind === 'revealed' ? 'reveal' : 'incorrect';
     void props.audio.play(event, props.settings.audio);
   }, [props.audio, props.settings.audio, state.feedback]);
+
+  useEffect(() => {
+    if (state.phase === 'presenting' || state.phase === 'answering') {
+      markGeoPerformance('geo:question-ready');
+    }
+  }, [state.phase, state.session.questionCursor]);
 
   const introductionId = state.session.introductions[state.session.introductionCursor];
   const introduction = introductionId === undefined ? undefined : entities.get(introductionId);

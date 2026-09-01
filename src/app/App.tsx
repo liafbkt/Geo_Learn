@@ -21,6 +21,7 @@ import type { UpdateService, UpdateState } from '../update/UpdateService';
 import { DataManagementScreen, type BackupCommands } from './DataManagementScreen';
 import { HomeScreen } from './HomeScreen';
 import { DEFAULT_APP_SETTINGS, type AppSettings } from './settings';
+import { markGeoPerformance } from './performance';
 import '../ui/tokens.css';
 import '../ui/global.css';
 
@@ -245,10 +246,12 @@ function fragileKeys(attempts: readonly AttemptEvent[], now: string): readonly s
 }
 
 function UpdateBanner({ service, state }: Readonly<{ service: UpdateService; state: UpdateState }>) {
-  if (state.status === 'idle' || state.status === 'disposed' || state.status === 'upToDate') return null;
+  if (state.status === 'disposed') return null;
   return (
     <aside className="update-banner" aria-live="polite">
+      {state.status === 'idle' ? <button type="button" onClick={() => void service.check()}>检查更新</button> : null}
       {state.status === 'checking' ? <span>正在后台检查更新…</span> : null}
+      {state.status === 'upToDate' ? <><span>已是最新版本</span><button type="button" onClick={() => void service.check()}>重新检查</button></> : null}
       {state.status === 'available' ? <><strong>发现新版本 {state.update.version}</strong><button type="button" onClick={() => void service.download()}>下载更新</button></> : null}
       {state.status === 'downloading' ? <span>正在下载更新{state.percent === null ? '…' : ` ${Math.round(state.percent)}%`}</span> : null}
       {state.status === 'ready' ? <><strong>更新已下载并通过校验</strong><button type="button" onClick={() => void service.install()}>安装更新</button></> : null}
@@ -310,12 +313,15 @@ export function App({ dependencies }: Readonly<{ dependencies: AppDependencies }
   useEffect(() => {
     const generation = ++updateLifecycle.current;
     const unsubscribe = updateService.subscribe(setUpdateState);
-    queueMicrotask(() => { if (updateLifecycle.current === generation) void updateService.check(); });
     return () => {
       unsubscribe();
       queueMicrotask(() => { if (updateLifecycle.current === generation) void updateService.dispose(); });
     };
   }, [updateService]);
+
+  useEffect(() => {
+    if (route.kind === 'home') markGeoPerformance('geo:home-ready');
+  }, [route.kind]);
 
   useEffect(() => {
     void dependencies.audio.preload(settings.audio.packId);
