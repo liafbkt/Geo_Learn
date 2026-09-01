@@ -23,7 +23,9 @@
 
 ## 剩余发布门禁
 
-- 本机缺少 MSVC `link.exe`：需在 Windows CI 或安装 Build Tools 后完成 Rust clippy/test、真实 NSIS 构建和 updater 签名验签。
-- 需执行远程 release workflow，并在干净 Windows 环境验证安装、升级、离线、下载中断、错误签名、WebView2 处理和数据库保留。
-- 三个内容包仍标记 `development-only`；公开发布前需具名人工完成实际地图渲染、法定边界与合规审批。
-- 需在真实 Tauri 窗口完成键盘、屏幕阅读器、高 DPI 与 1024×700 最小尺寸验收。
+- Windows v1 qualification design: `baa3c73`; implementation/release evidence pending.
+- Manual witness is the current Windows 10 Home 22H2 user account; Windows 11, fresh OS, and missing-WebView2 manual scenarios are excluded and must not be reported as passed.
+- Personal-use decision excludes named-human public-map/statutory approval from this release gate; existing compliance boxes remain unchecked.
+- No branch push, candidate, stable Release, installer, or updater smoke has yet occurred.
+- 本机缺少 MSVC `link.exe`：Rust clippy/test 的 exit-0 证据和真实 NSIS/updater 构建必须来自 GitHub Windows runner。
+- 自动化、资产、授权和当前用户实测的实时状态以 `docs/release/windows-v1-checklist.md` 与 `docs/release/windows-v1-smoke.md` 为准；尚未记录的结果不得宣称通过。
