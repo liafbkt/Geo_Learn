@@ -1,0 +1,33 @@
+{
+  "packId": "cn-shanghai-districts",
+  "geometry": {
+    "regions": 16,
+    "rings": 22,
+    "vertices": 3103,
+    "reversedRings": 22,
+    "removedVertices": 0,
+    "movedCoordinates": 0
+  },
+  "rawSourceFiles": 9,
+  "hashes": {
+    "manifest.json": "199cba0fe3730659fa39dc711ae9c87e8ac54205e54e269e0b9bf0f48170087b",
+    "entities.json": "23fb8d4ae315c1129404ebb7728b98a297a0363d45e8ce1ae5e99bca7cdcd825",
+    "map.topojson": "5f2ec50c4031511968eb476af0e2bdd90d91ec085c24615f832c5ed0fa8e0b70",
+    "sources.json": "82643a6ba766ea588dacda3c4cd6da3c5347aae51eef4fa2776c6c5461d89e9c"
+  },
+  "validations": [
+    {
+      "ok": true,
+      "packId": "cn-shanghai-districts"
+    },
+    {
+      "ok": true,
+      "packId": "cn-shanghai-districts"
+    }
+  ],
+  "unchangedAfterValidation": true,
+  "generatedTwiceIdentical": true,
+  "retainedInputsIdentical": true,
+  "scratchOutsideResources": true,
+  "scratchCleaned": true
+}

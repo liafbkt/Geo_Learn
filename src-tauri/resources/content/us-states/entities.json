@@ -1,0 +1,1818 @@
+[
+  {
+    "aliases": [
+      "AK",
+      "阿拉斯加"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ak-capital",
+    "id": "us-ak",
+    "kind": "region",
+    "names": {
+      "en": "Alaska",
+      "zh": "阿拉斯加州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -134.178445,
+      58.37291
+    ],
+    "id": "us-ak-capital",
+    "kind": "place",
+    "names": {
+      "en": "Juneau",
+      "zh": "朱诺"
+    },
+    "parentId": "us-ak"
+  },
+  {
+    "aliases": [
+      "AL",
+      "阿拉巴马"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-al-capital",
+    "id": "us-al",
+    "kind": "region",
+    "names": {
+      "en": "Alabama",
+      "zh": "阿拉巴马州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -86.267307,
+      32.348503
+    ],
+    "id": "us-al-capital",
+    "kind": "place",
+    "names": {
+      "en": "Montgomery",
+      "zh": "蒙哥马利"
+    },
+    "parentId": "us-al"
+  },
+  {
+    "aliases": [
+      "AR",
+      "阿肯色"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ar-capital",
+    "id": "us-ar",
+    "kind": "region",
+    "names": {
+      "en": "Arkansas",
+      "zh": "阿肯色州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -92.358556,
+      34.725393
+    ],
+    "id": "us-ar-capital",
+    "kind": "place",
+    "names": {
+      "en": "Little Rock",
+      "zh": "小石城"
+    },
+    "parentId": "us-ar"
+  },
+  {
+    "aliases": [
+      "AZ",
+      "亚利桑那"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-az-capital",
+    "id": "us-az",
+    "kind": "region",
+    "names": {
+      "en": "Arizona",
+      "zh": "亚利桑那州"
+    }
+  },
+  {
+    "aliases": [
+      "凤凰城"
+    ],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -112.090132,
+      33.572154
+    ],
+    "id": "us-az-capital",
+    "kind": "place",
+    "names": {
+      "en": "Phoenix",
+      "zh": "菲尼克斯"
+    },
+    "parentId": "us-az"
+  },
+  {
+    "aliases": [
+      "CA",
+      "加利福尼亚",
+      "加州"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ca-capital",
+    "id": "us-ca",
+    "kind": "region",
+    "names": {
+      "en": "California",
+      "zh": "加利福尼亚州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -121.468161,
+      38.567694
+    ],
+    "id": "us-ca-capital",
+    "kind": "place",
+    "names": {
+      "en": "Sacramento",
+      "zh": "萨克拉门托"
+    },
+    "parentId": "us-ca"
+  },
+  {
+    "aliases": [
+      "CO",
+      "科罗拉多"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-co-capital",
+    "id": "us-co",
+    "kind": "region",
+    "names": {
+      "en": "Colorado",
+      "zh": "科罗拉多州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -104.881105,
+      39.76185
+    ],
+    "id": "us-co-capital",
+    "kind": "place",
+    "names": {
+      "en": "Denver",
+      "zh": "丹佛"
+    },
+    "parentId": "us-co"
+  },
+  {
+    "aliases": [
+      "CT",
+      "康涅狄格"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ct-capital",
+    "id": "us-ct",
+    "kind": "region",
+    "names": {
+      "en": "Connecticut",
+      "zh": "康涅狄格州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -72.681579,
+      41.765933
+    ],
+    "id": "us-ct-capital",
+    "kind": "place",
+    "names": {
+      "en": "Hartford",
+      "zh": "哈特福德"
+    },
+    "parentId": "us-ct"
+  },
+  {
+    "aliases": [
+      "DE",
+      "特拉华"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-de-capital",
+    "id": "us-de",
+    "kind": "region",
+    "names": {
+      "en": "Delaware",
+      "zh": "特拉华州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -75.521659,
+      39.160602
+    ],
+    "id": "us-de-capital",
+    "kind": "place",
+    "names": {
+      "en": "Dover",
+      "zh": "多佛"
+    },
+    "parentId": "us-de"
+  },
+  {
+    "aliases": [
+      "FL",
+      "佛罗里达"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-fl-capital",
+    "id": "us-fl",
+    "kind": "region",
+    "names": {
+      "en": "Florida",
+      "zh": "佛罗里达州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -84.252272,
+      30.453529
+    ],
+    "id": "us-fl-capital",
+    "kind": "place",
+    "names": {
+      "en": "Tallahassee",
+      "zh": "塔拉哈西"
+    },
+    "parentId": "us-fl"
+  },
+  {
+    "aliases": [
+      "GA",
+      "佐治亚"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ga-capital",
+    "id": "us-ga",
+    "kind": "region",
+    "names": {
+      "en": "Georgia",
+      "zh": "佐治亚州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -84.422675,
+      33.762909
+    ],
+    "id": "us-ga-capital",
+    "kind": "place",
+    "names": {
+      "en": "Atlanta",
+      "zh": "亚特兰大"
+    },
+    "parentId": "us-ga"
+  },
+  {
+    "aliases": [
+      "HI",
+      "夏威夷"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-hi-capital",
+    "id": "us-hi",
+    "kind": "region",
+    "names": {
+      "en": "Hawaii",
+      "zh": "夏威夷州"
+    }
+  },
+  {
+    "aliases": [
+      "火奴鲁鲁"
+    ],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -157.847645293,
+      21.324342866
+    ],
+    "id": "us-hi-capital",
+    "kind": "place",
+    "names": {
+      "en": "Honolulu",
+      "zh": "檀香山"
+    },
+    "parentId": "us-hi"
+  },
+  {
+    "aliases": [
+      "IA",
+      "艾奥瓦",
+      "爱荷华州",
+      "爱荷华"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ia-capital",
+    "id": "us-ia",
+    "kind": "region",
+    "names": {
+      "en": "Iowa",
+      "zh": "艾奥瓦州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -93.610243,
+      41.57259
+    ],
+    "id": "us-ia-capital",
+    "kind": "place",
+    "names": {
+      "en": "Des Moines",
+      "zh": "得梅因"
+    },
+    "parentId": "us-ia"
+  },
+  {
+    "aliases": [
+      "ID",
+      "爱达荷"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-id-capital",
+    "id": "us-id",
+    "kind": "region",
+    "names": {
+      "en": "Idaho",
+      "zh": "爱达荷州"
+    }
+  },
+  {
+    "aliases": [
+      "Boise City"
+    ],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -116.231596,
+      43.59805
+    ],
+    "id": "us-id-capital",
+    "kind": "place",
+    "names": {
+      "en": "Boise",
+      "zh": "博伊西"
+    },
+    "parentId": "us-id"
+  },
+  {
+    "aliases": [
+      "IL",
+      "伊利诺伊"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-il-capital",
+    "id": "us-il",
+    "kind": "region",
+    "names": {
+      "en": "Illinois",
+      "zh": "伊利诺伊州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -89.644572,
+      39.791063
+    ],
+    "id": "us-il-capital",
+    "kind": "place",
+    "names": {
+      "en": "Springfield",
+      "zh": "斯普林菲尔德"
+    },
+    "parentId": "us-il"
+  },
+  {
+    "aliases": [
+      "IN",
+      "印第安纳"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-in-capital",
+    "id": "us-in",
+    "kind": "region",
+    "names": {
+      "en": "Indiana",
+      "zh": "印第安纳州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -86.145935,
+      39.776664
+    ],
+    "id": "us-in-capital",
+    "kind": "place",
+    "names": {
+      "en": "Indianapolis",
+      "zh": "印第安纳波利斯"
+    },
+    "parentId": "us-in"
+  },
+  {
+    "aliases": [
+      "KS",
+      "堪萨斯"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ks-capital",
+    "id": "us-ks",
+    "kind": "region",
+    "names": {
+      "en": "Kansas",
+      "zh": "堪萨斯州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -95.696191,
+      39.034673
+    ],
+    "id": "us-ks-capital",
+    "kind": "place",
+    "names": {
+      "en": "Topeka",
+      "zh": "托皮卡"
+    },
+    "parentId": "us-ks"
+  },
+  {
+    "aliases": [
+      "KY",
+      "肯塔基"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ky-capital",
+    "id": "us-ky",
+    "kind": "region",
+    "names": {
+      "en": "Kentucky",
+      "zh": "肯塔基州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -84.865877,
+      38.194966
+    ],
+    "id": "us-ky-capital",
+    "kind": "place",
+    "names": {
+      "en": "Frankfort",
+      "zh": "法兰克福"
+    },
+    "parentId": "us-ky"
+  },
+  {
+    "aliases": [
+      "LA",
+      "路易斯安那"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-la-capital",
+    "id": "us-la",
+    "kind": "region",
+    "names": {
+      "en": "Louisiana",
+      "zh": "路易斯安那州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -91.130894,
+      30.442174
+    ],
+    "id": "us-la-capital",
+    "kind": "place",
+    "names": {
+      "en": "Baton Rouge",
+      "zh": "巴吞鲁日"
+    },
+    "parentId": "us-la"
+  },
+  {
+    "aliases": [
+      "MA",
+      "马萨诸塞",
+      "麻省"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ma-capital",
+    "id": "us-ma",
+    "kind": "region",
+    "names": {
+      "en": "Massachusetts",
+      "zh": "马萨诸塞州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -71.018253,
+      42.338551
+    ],
+    "id": "us-ma-capital",
+    "kind": "place",
+    "names": {
+      "en": "Boston",
+      "zh": "波士顿"
+    },
+    "parentId": "us-ma"
+  },
+  {
+    "aliases": [
+      "MD",
+      "马里兰"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-md-capital",
+    "id": "us-md",
+    "kind": "region",
+    "names": {
+      "en": "Maryland",
+      "zh": "马里兰州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -76.505332,
+      38.972152
+    ],
+    "id": "us-md-capital",
+    "kind": "place",
+    "names": {
+      "en": "Annapolis",
+      "zh": "安纳波利斯"
+    },
+    "parentId": "us-md"
+  },
+  {
+    "aliases": [
+      "ME",
+      "缅因"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-me-capital",
+    "id": "us-me",
+    "kind": "region",
+    "names": {
+      "en": "Maine",
+      "zh": "缅因州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -69.734199,
+      44.334904
+    ],
+    "id": "us-me-capital",
+    "kind": "place",
+    "names": {
+      "en": "Augusta",
+      "zh": "奥古斯塔"
+    },
+    "parentId": "us-me"
+  },
+  {
+    "aliases": [
+      "MI",
+      "密歇根"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-mi-capital",
+    "id": "us-mi",
+    "kind": "region",
+    "names": {
+      "en": "Michigan",
+      "zh": "密歇根州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -84.560889,
+      42.714341
+    ],
+    "id": "us-mi-capital",
+    "kind": "place",
+    "names": {
+      "en": "Lansing",
+      "zh": "兰辛"
+    },
+    "parentId": "us-mi"
+  },
+  {
+    "aliases": [
+      "MN",
+      "明尼苏达"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-mn-capital",
+    "id": "us-mn",
+    "kind": "region",
+    "names": {
+      "en": "Minnesota",
+      "zh": "明尼苏达州"
+    }
+  },
+  {
+    "aliases": [
+      "St. Paul",
+      "St Paul"
+    ],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -93.104063,
+      44.948901
+    ],
+    "id": "us-mn-capital",
+    "kind": "place",
+    "names": {
+      "en": "Saint Paul",
+      "zh": "圣保罗"
+    },
+    "parentId": "us-mn"
+  },
+  {
+    "aliases": [
+      "MO",
+      "密苏里"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-mo-capital",
+    "id": "us-mo",
+    "kind": "region",
+    "names": {
+      "en": "Missouri",
+      "zh": "密苏里州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -92.175254,
+      38.567461
+    ],
+    "id": "us-mo-capital",
+    "kind": "place",
+    "names": {
+      "en": "Jefferson City",
+      "zh": "杰斐逊城"
+    },
+    "parentId": "us-mo"
+  },
+  {
+    "aliases": [
+      "MS",
+      "密西西比"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ms-capital",
+    "id": "us-ms",
+    "kind": "region",
+    "names": {
+      "en": "Mississippi",
+      "zh": "密西西比州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -90.21285,
+      32.315834
+    ],
+    "id": "us-ms-capital",
+    "kind": "place",
+    "names": {
+      "en": "Jackson",
+      "zh": "杰克逊"
+    },
+    "parentId": "us-ms"
+  },
+  {
+    "aliases": [
+      "MT",
+      "蒙大拿"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-mt-capital",
+    "id": "us-mt",
+    "kind": "region",
+    "names": {
+      "en": "Montana",
+      "zh": "蒙大拿州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -112.018746,
+      46.595465
+    ],
+    "id": "us-mt-capital",
+    "kind": "place",
+    "names": {
+      "en": "Helena",
+      "zh": "海伦娜"
+    },
+    "parentId": "us-mt"
+  },
+  {
+    "aliases": [
+      "NC",
+      "北卡罗来纳"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-nc-capital",
+    "id": "us-nc",
+    "kind": "region",
+    "names": {
+      "en": "North Carolina",
+      "zh": "北卡罗来纳州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -78.641042,
+      35.831868
+    ],
+    "id": "us-nc-capital",
+    "kind": "place",
+    "names": {
+      "en": "Raleigh",
+      "zh": "罗利"
+    },
+    "parentId": "us-nc"
+  },
+  {
+    "aliases": [
+      "ND",
+      "北达科他"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-nd-capital",
+    "id": "us-nd",
+    "kind": "region",
+    "names": {
+      "en": "North Dakota",
+      "zh": "北达科他州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -100.768568,
+      46.814572
+    ],
+    "id": "us-nd-capital",
+    "kind": "place",
+    "names": {
+      "en": "Bismarck",
+      "zh": "俾斯麦"
+    },
+    "parentId": "us-nd"
+  },
+  {
+    "aliases": [
+      "NE",
+      "内布拉斯加"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ne-capital",
+    "id": "us-ne",
+    "kind": "region",
+    "names": {
+      "en": "Nebraska",
+      "zh": "内布拉斯加州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -96.674856,
+      40.810284
+    ],
+    "id": "us-ne-capital",
+    "kind": "place",
+    "names": {
+      "en": "Lincoln",
+      "zh": "林肯"
+    },
+    "parentId": "us-ne"
+  },
+  {
+    "aliases": [
+      "NH",
+      "新罕布什尔"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-nh-capital",
+    "id": "us-nh",
+    "kind": "region",
+    "names": {
+      "en": "New Hampshire",
+      "zh": "新罕布什尔州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -71.561252,
+      43.232493
+    ],
+    "id": "us-nh-capital",
+    "kind": "place",
+    "names": {
+      "en": "Concord",
+      "zh": "康科德"
+    },
+    "parentId": "us-nh"
+  },
+  {
+    "aliases": [
+      "NJ",
+      "新泽西"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-nj-capital",
+    "id": "us-nj",
+    "kind": "region",
+    "names": {
+      "en": "New Jersey",
+      "zh": "新泽西州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -74.763624,
+      40.223841
+    ],
+    "id": "us-nj-capital",
+    "kind": "place",
+    "names": {
+      "en": "Trenton",
+      "zh": "特伦顿"
+    },
+    "parentId": "us-nj"
+  },
+  {
+    "aliases": [
+      "NM",
+      "新墨西哥"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-nm-capital",
+    "id": "us-nm",
+    "kind": "region",
+    "names": {
+      "en": "New Mexico",
+      "zh": "新墨西哥州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -105.981815,
+      35.661981
+    ],
+    "id": "us-nm-capital",
+    "kind": "place",
+    "names": {
+      "en": "Santa Fe",
+      "zh": "圣菲"
+    },
+    "parentId": "us-nm"
+  },
+  {
+    "aliases": [
+      "NV",
+      "内华达"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-nv-capital",
+    "id": "us-nv",
+    "kind": "region",
+    "names": {
+      "en": "Nevada",
+      "zh": "内华达州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -119.747368,
+      39.15306
+    ],
+    "id": "us-nv-capital",
+    "kind": "place",
+    "names": {
+      "en": "Carson City",
+      "zh": "卡森城"
+    },
+    "parentId": "us-nv"
+  },
+  {
+    "aliases": [
+      "NY",
+      "纽约"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ny-capital",
+    "id": "us-ny",
+    "kind": "region",
+    "names": {
+      "en": "New York",
+      "zh": "纽约州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -73.798353,
+      42.665745
+    ],
+    "id": "us-ny-capital",
+    "kind": "place",
+    "names": {
+      "en": "Albany",
+      "zh": "奥尔巴尼"
+    },
+    "parentId": "us-ny"
+  },
+  {
+    "aliases": [
+      "OH",
+      "俄亥俄"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-oh-capital",
+    "id": "us-oh",
+    "kind": "region",
+    "names": {
+      "en": "Ohio",
+      "zh": "俄亥俄州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -82.985594,
+      39.985531
+    ],
+    "id": "us-oh-capital",
+    "kind": "place",
+    "names": {
+      "en": "Columbus",
+      "zh": "哥伦布"
+    },
+    "parentId": "us-oh"
+  },
+  {
+    "aliases": [
+      "OK",
+      "俄克拉何马"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ok-capital",
+    "id": "us-ok",
+    "kind": "region",
+    "names": {
+      "en": "Oklahoma",
+      "zh": "俄克拉何马州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -97.513657,
+      35.467079
+    ],
+    "id": "us-ok-capital",
+    "kind": "place",
+    "names": {
+      "en": "Oklahoma City",
+      "zh": "俄克拉何马城"
+    },
+    "parentId": "us-ok"
+  },
+  {
+    "aliases": [
+      "OR",
+      "俄勒冈"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-or-capital",
+    "id": "us-or",
+    "kind": "region",
+    "names": {
+      "en": "Oregon",
+      "zh": "俄勒冈州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -123.023007,
+      44.9239
+    ],
+    "id": "us-or-capital",
+    "kind": "place",
+    "names": {
+      "en": "Salem",
+      "zh": "塞勒姆"
+    },
+    "parentId": "us-or"
+  },
+  {
+    "aliases": [
+      "PA",
+      "宾夕法尼亚"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-pa-capital",
+    "id": "us-pa",
+    "kind": "region",
+    "names": {
+      "en": "Pennsylvania",
+      "zh": "宾夕法尼亚州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -76.88502,
+      40.275891
+    ],
+    "id": "us-pa-capital",
+    "kind": "place",
+    "names": {
+      "en": "Harrisburg",
+      "zh": "哈里斯堡"
+    },
+    "parentId": "us-pa"
+  },
+  {
+    "aliases": [
+      "RI",
+      "罗得岛",
+      "罗德岛州"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ri-capital",
+    "id": "us-ri",
+    "kind": "region",
+    "names": {
+      "en": "Rhode Island",
+      "zh": "罗得岛州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -71.418784,
+      41.823056
+    ],
+    "id": "us-ri-capital",
+    "kind": "place",
+    "names": {
+      "en": "Providence",
+      "zh": "普罗维登斯"
+    },
+    "parentId": "us-ri"
+  },
+  {
+    "aliases": [
+      "SC",
+      "南卡罗来纳"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-sc-capital",
+    "id": "us-sc",
+    "kind": "region",
+    "names": {
+      "en": "South Carolina",
+      "zh": "南卡罗来纳州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -80.906099,
+      34.040519
+    ],
+    "id": "us-sc-capital",
+    "kind": "place",
+    "names": {
+      "en": "Columbia",
+      "zh": "哥伦比亚"
+    },
+    "parentId": "us-sc"
+  },
+  {
+    "aliases": [
+      "SD",
+      "南达科他"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-sd-capital",
+    "id": "us-sd",
+    "kind": "region",
+    "names": {
+      "en": "South Dakota",
+      "zh": "南达科他州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -100.319996,
+      44.375163
+    ],
+    "id": "us-sd-capital",
+    "kind": "place",
+    "names": {
+      "en": "Pierre",
+      "zh": "皮尔"
+    },
+    "parentId": "us-sd"
+  },
+  {
+    "aliases": [
+      "TN",
+      "田纳西"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-tn-capital",
+    "id": "us-tn",
+    "kind": "region",
+    "names": {
+      "en": "Tennessee",
+      "zh": "田纳西州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -86.785002,
+      36.1718
+    ],
+    "id": "us-tn-capital",
+    "kind": "place",
+    "names": {
+      "en": "Nashville",
+      "zh": "纳什维尔"
+    },
+    "parentId": "us-tn"
+  },
+  {
+    "aliases": [
+      "TX",
+      "得克萨斯",
+      "德克萨斯州",
+      "德州"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-tx-capital",
+    "id": "us-tx",
+    "kind": "region",
+    "names": {
+      "en": "Texas",
+      "zh": "得克萨斯州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -97.754134,
+      30.298622
+    ],
+    "id": "us-tx-capital",
+    "kind": "place",
+    "names": {
+      "en": "Austin",
+      "zh": "奥斯汀"
+    },
+    "parentId": "us-tx"
+  },
+  {
+    "aliases": [
+      "UT",
+      "犹他"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-ut-capital",
+    "id": "us-ut",
+    "kind": "region",
+    "names": {
+      "en": "Utah",
+      "zh": "犹他州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -111.930991,
+      40.776928
+    ],
+    "id": "us-ut-capital",
+    "kind": "place",
+    "names": {
+      "en": "Salt Lake City",
+      "zh": "盐湖城"
+    },
+    "parentId": "us-ut"
+  },
+  {
+    "aliases": [
+      "VA",
+      "弗吉尼亚"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-va-capital",
+    "id": "us-va",
+    "kind": "region",
+    "names": {
+      "en": "Virginia",
+      "zh": "弗吉尼亚州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -77.476009,
+      37.531399
+    ],
+    "id": "us-va-capital",
+    "kind": "place",
+    "names": {
+      "en": "Richmond",
+      "zh": "里士满"
+    },
+    "parentId": "us-va"
+  },
+  {
+    "aliases": [
+      "VT",
+      "佛蒙特"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-vt-capital",
+    "id": "us-vt",
+    "kind": "region",
+    "names": {
+      "en": "Vermont",
+      "zh": "佛蒙特州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -72.571524,
+      44.266448
+    ],
+    "id": "us-vt-capital",
+    "kind": "place",
+    "names": {
+      "en": "Montpelier",
+      "zh": "蒙彼利埃"
+    },
+    "parentId": "us-vt"
+  },
+  {
+    "aliases": [
+      "WA",
+      "华盛顿"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-wa-capital",
+    "id": "us-wa",
+    "kind": "region",
+    "names": {
+      "en": "Washington",
+      "zh": "华盛顿州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -122.895,
+      47.040604
+    ],
+    "id": "us-wa-capital",
+    "kind": "place",
+    "names": {
+      "en": "Olympia",
+      "zh": "奥林匹亚"
+    },
+    "parentId": "us-wa"
+  },
+  {
+    "aliases": [
+      "WI",
+      "威斯康星"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-wi-capital",
+    "id": "us-wi",
+    "kind": "region",
+    "names": {
+      "en": "Wisconsin",
+      "zh": "威斯康星州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -89.429856,
+      43.087815
+    ],
+    "id": "us-wi-capital",
+    "kind": "place",
+    "names": {
+      "en": "Madison",
+      "zh": "麦迪逊"
+    },
+    "parentId": "us-wi"
+  },
+  {
+    "aliases": [
+      "WV",
+      "西弗吉尼亚"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-wv-capital",
+    "id": "us-wv",
+    "kind": "region",
+    "names": {
+      "en": "West Virginia",
+      "zh": "西弗吉尼亚州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -81.632324,
+      38.348692
+    ],
+    "id": "us-wv-capital",
+    "kind": "place",
+    "names": {
+      "en": "Charleston",
+      "zh": "查尔斯顿"
+    },
+    "parentId": "us-wv"
+  },
+  {
+    "aliases": [
+      "WY",
+      "怀俄明"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region",
+      "associate_capital"
+    ],
+    "capitalId": "us-wy-capital",
+    "id": "us-wy",
+    "kind": "region",
+    "names": {
+      "en": "Wyoming",
+      "zh": "怀俄明州"
+    }
+  },
+  {
+    "aliases": [],
+    "capabilities": [
+      "locate_place",
+      "identify_place"
+    ],
+    "coordinate": [
+      -104.799155,
+      41.128275
+    ],
+    "id": "us-wy-capital",
+    "kind": "place",
+    "names": {
+      "en": "Cheyenne",
+      "zh": "夏延"
+    },
+    "parentId": "us-wy"
+  }
+]

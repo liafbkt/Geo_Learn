@@ -1,0 +1,31 @@
+{
+  "capabilities": [
+    "locate_region",
+    "identify_region"
+  ],
+  "checksums": {
+    "entities": "23fb8d4ae315c1129404ebb7728b98a297a0363d45e8ce1ae5e99bca7cdcd825",
+    "sources": "82643a6ba766ea588dacda3c4cd6da3c5347aae51eef4fa2776c6c5461d89e9c",
+    "topology": "5f2ec50c4031511968eb476af0e2bdd90d91ec085c24615f832c5ed0fa8e0b70"
+  },
+  "contentVersion": "1.0.0-dev.1",
+  "defaultViewport": {
+    "center": [
+      121.5,
+      31.2
+    ],
+    "scale": 800
+  },
+  "distributionStatus": "development-only",
+  "expectedEntityCounts": {
+    "place": 0,
+    "region": 16
+  },
+  "packId": "cn-shanghai-districts",
+  "primaryAnswerLanguage": "zh",
+  "schemaVersion": 1,
+  "title": {
+    "en": "Shanghai Districts",
+    "zh": "上海行政区"
+  }
+}

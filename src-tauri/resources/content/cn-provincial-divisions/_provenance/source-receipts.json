@@ -1,0 +1,100 @@
+[
+  {
+    "file": "ADM1-api.json",
+    "url": "https://www.geoboundaries.org/api/current/gbOpen/CHN/ADM1/",
+    "retrievedAt": "2026-08-31",
+    "bytes": 1697,
+    "sha256": "b5816c51ebefc26b1154872e663cd5a8eda830008f738a965d5dd610e72b09d0",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "ADM1-simplified.geojson",
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM1/geoBoundaries-CHN-ADM1_simplified.geojson",
+    "retrievedAt": "2026-08-31",
+    "bytes": 263343,
+    "sha256": "bc4afc7eacf4351ae5b3ae7a612327987ce1123cb5deb8574fb49107091c6623",
+    "role": "geometry"
+  },
+  {
+    "file": "china-names-zh.html",
+    "url": "https://www.locpg.gov.cn/2022-06/07/c_1211652713.htm",
+    "retrievedAt": "2026-08-31",
+    "bytes": 5540,
+    "sha256": "5864f007837f0caf2acb5ef5309d3ceb38be509b2cc1baeab7851e7cab6209a1",
+    "role": "name-facts"
+  },
+  {
+    "file": "CHN_ADM1-source.zip",
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/sourceData/gbOpen/CHN_ADM1.zip",
+    "retrievedAt": "2026-08-31",
+    "bytes": 636274,
+    "sha256": "9cf4cb357ea388cc135b47664b40f9483c80bf29c625d3a69f9bc70011704ea4",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "geoboundaries-citation.txt",
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM1/CITATION-AND-USE-geoBoundaries.txt",
+    "retrievedAt": "2026-08-31",
+    "bytes": 4316,
+    "sha256": "f6ea7572bea6036c4cdcacf8c0ca7bf09098d4e600d19546d7432533e9a290d5",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "geoboundaries-use.html",
+    "url": "https://www.geoboundaries.org/index.html",
+    "retrievedAt": "2026-08-31",
+    "bytes": 12237,
+    "sha256": "f1e52073eebfc138e1d8fdf7574499f5ca5c407ac7fa8ba0ec904ebbe02354ed",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "miit-names-zh.html",
+    "url": "https://www.miit.gov.cn/zwgk/zcwj/wjfb/gg/art/2020/art_e6ae132e19d541348f930d1dd6654f3d.html",
+    "retrievedAt": "2026-08-31",
+    "bytes": 12263,
+    "sha256": "c47355821d77fa39ad723db6cffbb742c91b67f71e0572293fa79c7b868e0af8",
+    "role": "name-facts"
+  },
+  {
+    "file": "nbs-names-en.html",
+    "url": "https://www.stats.gov.cn/sj/ndsj/2025/html/notee.htm",
+    "retrievedAt": "2026-08-31",
+    "bytes": 8375,
+    "sha256": "6bc2517581a2288fc1429a0cf6caafaba0bf53cf4144e771edbdc89d1c404e89",
+    "role": "name-facts"
+  },
+  {
+    "file": "upstream-author-license.html",
+    "url": "https://commons.wikimedia.org/w/index.php?title=File:China_blank_province_map.svg&oldid=1013050215",
+    "retrievedAt": "2026-08-31",
+    "bytes": 111680,
+    "sha256": "763968776e3248ad2e7abaeb3dbcd97275596ace67af859636cf7bb5896c19e3",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "upstream-license.png",
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/sourceData/gbOpen/CHN_ADM1.zip#license.png",
+    "retrievedAt": "2026-08-31",
+    "bytes": 685270,
+    "sha256": "2ab8b268947740026e96457b64d2146168ce1315db847427ff571714a7a27cfb",
+    "role": "license-or-provenance",
+    "extractedFrom": "CHN_ADM1-source.zip"
+  },
+  {
+    "file": "upstream-meta.txt",
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/sourceData/gbOpen/CHN_ADM1.zip#meta.txt",
+    "retrievedAt": "2026-08-31",
+    "bytes": 597,
+    "sha256": "077b577697299a746b893b06542c132d3ce0d3a05a6f2448f62d356124b9cf26",
+    "role": "license-or-provenance",
+    "extractedFrom": "CHN_ADM1-source.zip"
+  },
+  {
+    "file": "upstream-reference.svg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/China_blank_province_map.svg",
+    "retrievedAt": "2026-08-31",
+    "bytes": 60783,
+    "sha256": "24d84e54f8e332fb9e48fe6eb131c0bc866411ddd8d671010630a265b09d5926",
+    "role": "visual-reference-only"
+  }
+]

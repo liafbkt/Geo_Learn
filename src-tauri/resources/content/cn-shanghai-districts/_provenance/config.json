@@ -1,0 +1,29 @@
+{
+  "packId": "cn-shanghai-districts",
+  "contentVersion": "1.0.0-dev.1",
+  "title": {
+    "zh": "上海行政区",
+    "en": "Shanghai Districts"
+  },
+  "count": 16,
+  "rawFeatureCount": 2864,
+  "geometryFile": "ADM3-simplified.geojson.gz",
+  "metadataFile": "ADM3-api.json",
+  "rosterSha256": "0360a029529e11de2f12de21a178fb2f5823f7dba6d5a30a069d8a144e6a765e",
+  "receiptSha256": "2fd12653e85c53206319aa8288802e1d0f456cb89ac5ae0b4aa149ee23e650bd",
+  "upstreamCommit": "9469f09592ced973a3448cf66b6100b741b64c0d",
+  "sourceYear": "2017",
+  "center": [
+    121.5,
+    31.2
+  ],
+  "organization": "OpenStreetMap contributors / Lee Beryman / geoBoundaries, William & Mary geoLab",
+  "license": "Open Data Commons Open Database License 1.0 (ODbL); derived Shanghai database under ODbL 1.0; geoBoundaries CC BY 4.0 attribution also retained.",
+  "attribution": "© OpenStreetMap contributors — https://www.openstreetmap.org/copyright ; ODbL 1.0 https://opendatacommons.org/licenses/odbl/1-0/ ; geoBoundaries https://www.geoboundaries.org (Runfola et al., 2020)",
+  "limitations": [
+    "2017 simplified OSM-derived geometry; 16 district identities checked against 2026-07-27 Shanghai Civil Affairs list, not a claim that geometry represents 2026 coastlines.",
+    "22 retained rings include source island components; no metre-accuracy or full offshore-island guarantee.",
+    "No authoritative district-seat points retained; place/capital/hydro capabilities disabled.",
+    "No synthetic Shanghai parent entity: the fixed roster is 16 districts and parentId only refers within a pack."
+  ]
+}

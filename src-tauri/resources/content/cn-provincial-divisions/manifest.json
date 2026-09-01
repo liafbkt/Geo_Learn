@@ -1,0 +1,31 @@
+{
+  "capabilities": [
+    "locate_region",
+    "identify_region"
+  ],
+  "checksums": {
+    "entities": "71dd217bbd37d6fb5270dc4ff7ebba1ea829557404529b8148886b2c67b05950",
+    "sources": "0139192621394ca45f5fb3c01a93a591276fd0ae02cf0103a467edfd2261812d",
+    "topology": "ad9aa941eb3390bc6dba27e500af5866ba0f83a58129aa78730a6e7b59019740"
+  },
+  "contentVersion": "1.0.0-dev.1",
+  "defaultViewport": {
+    "center": [
+      104,
+      35
+    ],
+    "scale": 800
+  },
+  "distributionStatus": "development-only",
+  "expectedEntityCounts": {
+    "place": 0,
+    "region": 34
+  },
+  "packId": "cn-provincial-divisions",
+  "primaryAnswerLanguage": "zh",
+  "schemaVersion": 1,
+  "title": {
+    "en": "China Provincial Divisions",
+    "zh": "中国省级行政区"
+  }
+}

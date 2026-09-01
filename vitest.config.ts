@@ -6,6 +6,6 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    exclude: ['**/node_modules/**', '**/dist/**', '**/.superpowers/**', '**/.pnpm-store/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.superpowers/**', '**/.pnpm-store/**', '**/e2e/**'],
   },
 });

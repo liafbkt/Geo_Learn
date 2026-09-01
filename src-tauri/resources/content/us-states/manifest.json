@@ -1,0 +1,34 @@
+{
+  "capabilities": [
+    "locate_region",
+    "identify_region",
+    "associate_capital",
+    "locate_place",
+    "identify_place"
+  ],
+  "checksums": {
+    "entities": "26bf9137cbfdffce6872750f6bb8eb636d41e8a1066d1045aa7dc7c7fad7e194",
+    "sources": "de836d790a951460f60ea56c037fae4a2a5cb4293a379043d351595d00d23ae8",
+    "topology": "7ab140dec05bdd95d118da0ca51d66acde2895e4494a9de41df9b38a15b646c4"
+  },
+  "contentVersion": "1.0.0-dev.1",
+  "defaultViewport": {
+    "center": [
+      -98,
+      39
+    ],
+    "scale": 800
+  },
+  "distributionStatus": "development-only",
+  "expectedEntityCounts": {
+    "place": 50,
+    "region": 50
+  },
+  "packId": "us-states",
+  "primaryAnswerLanguage": "en",
+  "schemaVersion": 1,
+  "title": {
+    "en": "US States and Capitals",
+    "zh": "美国50州与州府"
+  }
+}

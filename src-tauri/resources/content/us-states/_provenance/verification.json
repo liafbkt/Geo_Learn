@@ -1,0 +1,34 @@
+{
+  "generatedTwiceIdentical": true,
+  "validation1": {
+    "ok": true,
+    "packId": "us-states"
+  },
+  "validation2": {
+    "ok": true,
+    "packId": "us-states"
+  },
+  "unchangedAfterValidation": true,
+  "hashes": {
+    "manifest.json": "3655366c800e2fb5dec3fa97c8e1eb9bf10112867f706e18edc0fcaad4b88b5b",
+    "entities.json": "26bf9137cbfdffce6872750f6bb8eb636d41e8a1066d1045aa7dc7c7fad7e194",
+    "map.topojson": "7ab140dec05bdd95d118da0ca51d66acde2895e4494a9de41df9b38a15b646c4",
+    "sources.json": "de836d790a951460f60ea56c037fae4a2a5cb4293a379043d351595d00d23ae8"
+  },
+  "sourceEvidence": {
+    "rawFiles": 5,
+    "processedFiles": 3,
+    "hashes": {
+      "cb_2025_us_state_20m.zip": "efddd884f1442ef233b1ba9c12dddbd66b6fdf94da6a373e1556aefe3dbc5751",
+      "2025_Gaz_place_national.zip": "49644173a453469d9bd77fb7a493b027f87567e209edaf2078aac7543ac2ee29",
+      "gpo-states-capitals.pdf": "2f832de6bf5a2ebcb5ffd9f79939e0bb41da2f53d09a8f2fb99ffe2c605b1f9f",
+      "census-tiger2025-techdoc.pdf": "21476bdba82fe8072f8994ae59bda484260d1b932c13f31991f6414f8e04d551",
+      "govinfo-about.html": "6794de83f2aead8c0dfe8806ce82c630a1fb6a770c5924dab66c1ca6ac326a05",
+      "regions.geojson": "3992d8cac35c85eceb73529cdec93d5dc10e834cf5747d1b6dd90dba2a7ff318",
+      "entities.input.json": "26bf9137cbfdffce6872750f6bb8eb636d41e8a1066d1045aa7dc7c7fad7e194",
+      "points-audit.json": "12482ca2686fe48d712e8314cc582d567e9c7e32eed10ba328bc17c11d36256d"
+    }
+  },
+  "scratchOutsideResources": true,
+  "scratchCleaned": true
+}

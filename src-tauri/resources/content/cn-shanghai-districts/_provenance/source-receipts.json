@@ -1,0 +1,77 @@
+[
+  {
+    "file": "ADM3-api.json",
+    "url": "https://www.geoboundaries.org/api/current/gbOpen/CHN/ADM3/",
+    "retrievedAt": "2026-08-31",
+    "bytes": 1748,
+    "sha256": "1c56fc94bc9d1fb41473b74dda9e66a9f5ff252c81a6b0b6bc79fa0989dcea01",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "ADM3-simplified.geojson.gz",
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM3/geoBoundaries-CHN-ADM3_simplified.geojson",
+    "retrievedAt": "2026-08-31",
+    "bytes": 12940636,
+    "sha256": "21ea33e5ef2ca3cfd524b7f7ad29f61e67a7f8987868c6092b48a875280e8f8a",
+    "role": "geometry",
+    "storage": "gzip-lossless",
+    "uncompressedSha256": "ea64fe24f193e319ce48895f229a5b3f46d2a60f3f3df67e6172ab037e4cc8fd",
+    "uncompressedBytes": 34557636
+  },
+  {
+    "file": "geoboundaries-citation.txt",
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM1/CITATION-AND-USE-geoBoundaries.txt",
+    "retrievedAt": "2026-08-31",
+    "bytes": 4316,
+    "sha256": "f6ea7572bea6036c4cdcacf8c0ca7bf09098d4e600d19546d7432533e9a290d5",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "geoboundaries-use.html",
+    "url": "https://www.geoboundaries.org/index.html",
+    "retrievedAt": "2026-08-31",
+    "bytes": 12237,
+    "sha256": "f1e52073eebfc138e1d8fdf7574499f5ca5c407ac7fa8ba0ec904ebbe02354ed",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "odbl-1.0.html",
+    "url": "https://opendatacommons.org/licenses/odbl/1-0/",
+    "retrievedAt": "2026-08-31",
+    "bytes": 51535,
+    "sha256": "058a4f42571027bab20c80fcbfa0530efe7ccc142a4bbd081bfdabf55e0e2beb",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "osm-copyright.html",
+    "url": "https://www.openstreetmap.org/copyright",
+    "retrievedAt": "2026-08-31",
+    "bytes": 21344,
+    "sha256": "48bb7a76ec00a4725dfcc1ebd725e5bdf562508952359aec2d21f2244da2da43",
+    "role": "license-or-provenance"
+  },
+  {
+    "file": "shanghai-codes.html",
+    "url": "https://mzj.sh.gov.cn/MZ_zhuzhan1539_0-2-8-1459/20260727/535996b5abd045baac0c65552f4527d9.html",
+    "retrievedAt": "2026-08-31",
+    "bytes": 87949,
+    "sha256": "b1f3f03acb12d826c5f09505215b849660dc5019a22d32411cbf7491656b9834",
+    "role": "name-facts"
+  },
+  {
+    "file": "shanghai-names-en-1.html",
+    "url": "https://english.shanghai.gov.cn/en-AdministrativeDistricts/",
+    "retrievedAt": "2026-08-31",
+    "bytes": 15790,
+    "sha256": "bfdc728a14aca33036cef397e1b14fbba513244c53fcd214f11578fc8f1fa79e",
+    "role": "name-facts"
+  },
+  {
+    "file": "shanghai-names-en-2.html",
+    "url": "https://english.shanghai.gov.cn/en-AdministrativeDistricts/index_2.html",
+    "retrievedAt": "2026-08-31",
+    "bytes": 13739,
+    "sha256": "6796973f5e53bfa94a525b2510305af6e7b6f90f7ab4ef4ba6609f60c13522a7",
+    "role": "name-facts"
+  }
+]

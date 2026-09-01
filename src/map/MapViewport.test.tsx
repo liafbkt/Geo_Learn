@@ -76,6 +76,14 @@ describe('MapViewport accessibility and labels', () => {
     expect(screen.queryByRole('option', { name: '首府 / Capital' })).not.toBeInTheDocument();
   });
 
+  it('renders a contextual map without exposing answer options or a Tab stop', () => {
+    renderMap({ interactive: false, selection: { kind: 'region', entityId: 'center' } });
+
+    expect(screen.getByRole('img', { name: '测试地图' })).not.toHaveAttribute('tabindex');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
+  });
+
   it('announces the current map selection', () => {
     renderMap({ selection: { kind: 'region', entityId: 'center' } });
 

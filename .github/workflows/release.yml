@@ -1,0 +1,101 @@
+name: Windows x64 draft release
+
+on:
+  push:
+    tags: ['v*']
+  # Select an existing vMAJOR.MINOR.PATCH tag in the Run workflow ref picker.
+  # Branch dispatches are rejected by preflight; no arbitrary URL/path inputs.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: pwsh
+
+env:
+  CI: 'true'
+  RUSTUP_TOOLCHAIN: '1.98.0'
+  CARGO_TERM_COLOR: always
+
+jobs:
+  tests:
+    name: Windows quality gates
+    runs-on: windows-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Validate release identity
+        run: node scripts/release/preflight.mjs --identity-only
+      - name: Install pinned package manager
+        run: npm install --global pnpm@11.19.0 --ignore-scripts
+      - run: pnpm install --frozen-lockfile
+      - name: Install pinned Rust toolchain using runner rustup
+        run: rustup toolchain install 1.98.0 --profile minimal --component rustfmt --component clippy --target x86_64-pc-windows-msvc
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm exec vitest run --coverage
+      - run: pnpm build
+      - run: pnpm exec playwright install chromium
+      - run: pnpm exec playwright test
+      - run: cargo +1.98.0 fmt --manifest-path src-tauri/Cargo.toml --all -- --check
+      - run: cargo +1.98.0 clippy --locked --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+      - run: cargo +1.98.0 test --locked --manifest-path src-tauri/Cargo.toml --all-targets
+
+  release:
+    name: Sign and upload draft (human publication required)
+    needs: [tests]
+    runs-on: windows-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Require real content packs, configured public key, and signing secrets
+        run: node scripts/release/preflight.mjs --secrets
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - name: Install pinned package manager
+        run: npm install --global pnpm@11.19.0 --ignore-scripts
+      - run: pnpm install --frozen-lockfile
+      - name: Validate complete packaged content
+        run: pnpm content:validate -- --all
+      - name: Install pinned Rust toolchain using runner rustup
+        run: rustup toolchain install 1.98.0 --profile minimal --component rustfmt --component clippy --target x86_64-pc-windows-msvc
+      - name: Build and sign NSIS updater artifacts
+        run: pnpm tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci -- --locked
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - name: Verify installer signature against the committed updater public key
+        run: cargo +1.98.0 run --locked --manifest-path src-tauri/Cargo.toml --example verify_update_artifact
+      - name: Prepare installer, signature, and latest.json
+        run: node scripts/release/prepare-artifacts.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-release
+          path: release-artifacts/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload three assets to a new GitHub draft release
+        run: node scripts/release/publish-draft.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}

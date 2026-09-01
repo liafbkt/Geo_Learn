@@ -1,0 +1,33 @@
+{
+  "packId": "cn-provincial-divisions",
+  "geometry": {
+    "regions": 34,
+    "rings": 48,
+    "vertices": 5731,
+    "reversedRings": 48,
+    "removedVertices": 0,
+    "movedCoordinates": 0
+  },
+  "rawSourceFiles": 12,
+  "hashes": {
+    "manifest.json": "9ccdf5c9c1b8f4513c0e57608942a9a3d5c4a1662447c04a205073044a36c899",
+    "entities.json": "71dd217bbd37d6fb5270dc4ff7ebba1ea829557404529b8148886b2c67b05950",
+    "map.topojson": "ad9aa941eb3390bc6dba27e500af5866ba0f83a58129aa78730a6e7b59019740",
+    "sources.json": "0139192621394ca45f5fb3c01a93a591276fd0ae02cf0103a467edfd2261812d"
+  },
+  "validations": [
+    {
+      "ok": true,
+      "packId": "cn-provincial-divisions"
+    },
+    {
+      "ok": true,
+      "packId": "cn-provincial-divisions"
+    }
+  ],
+  "unchangedAfterValidation": true,
+  "generatedTwiceIdentical": true,
+  "retainedInputsIdentical": true,
+  "scratchOutsideResources": true,
+  "scratchCleaned": true
+}

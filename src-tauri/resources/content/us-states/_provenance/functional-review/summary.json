@@ -1,0 +1,80 @@
+{
+  "date": "2026-08-31",
+  "pack": "us-states",
+  "status": "development-data-ready; default-pointer-UX-incomplete",
+  "entityCounts": {
+    "region": 50,
+    "place": 50
+  },
+  "primaryAnswerLanguage": "en",
+  "questions": {
+    "map": 200,
+    "choice": 150,
+    "text": 150,
+    "total": 500
+  },
+  "tests": {
+    "usPassed": 9,
+    "otherPackSkipped": 13,
+    "existingBaselinePassed": 290,
+    "baselineCommand": "node node_modules/vitest/vitest.mjs run --exclude scripts/content/launch-packs.test.ts",
+    "baselineEvidence": "Observed process exit 0, 24 test files / 290 tests passed on 2026-08-31 at 18:32:46; not the unfiltered three-pack suite."
+  },
+  "regionInteraction": {
+    "firstPointerPass": 42,
+    "firstPointerFailures": [
+      "us-ct",
+      "us-de",
+      "us-ma",
+      "us-nh",
+      "us-nj",
+      "us-ri",
+      "us-sc",
+      "us-vt"
+    ],
+    "keyboardFallbackPass": 8,
+    "coveredEntities": 50
+  },
+  "capitalInteraction": {
+    "firstCenterPointerPass": 42,
+    "visibleEdgeRetargetPass": 6,
+    "zoomPanRetargetPass": 2,
+    "coveredEntities": 50
+  },
+  "reproducibility": {
+    "generatedTwiceIdentical": true,
+    "validation1": {
+      "ok": true,
+      "packId": "us-states"
+    },
+    "validation2": {
+      "ok": true,
+      "packId": "us-states"
+    },
+    "unchangedAfterValidation": true,
+    "hashes": {
+      "manifest.json": "3655366c800e2fb5dec3fa97c8e1eb9bf10112867f706e18edc0fcaad4b88b5b",
+      "entities.json": "26bf9137cbfdffce6872750f6bb8eb636d41e8a1066d1045aa7dc7c7fad7e194",
+      "map.topojson": "7ab140dec05bdd95d118da0ca51d66acde2895e4494a9de41df9b38a15b646c4",
+      "sources.json": "de836d790a951460f60ea56c037fae4a2a5cb4293a379043d351595d00d23ae8"
+    }
+  },
+  "browser": {
+    "date": "2026-08-31",
+    "url": "http://127.0.0.1:1437/.superpowers/launch-task/render.html?pack=us-states",
+    "viewport": {
+      "devicePixelRatio": 1.25,
+      "height": 720,
+      "width": 1280
+    },
+    "svgViewBox": "0 0 1200 800",
+    "resetTransform": "translate(0 0) scale(1)",
+    "errors": [],
+    "limitations": [
+      "Temporary harness mounts unchanged projectMap/MapViewport, not packaged Tauri E2E.",
+      "Region pointer selection is not 50/50: keyboard fallback used for 8.",
+      "Capital center pointer selection is not 50/50: visible edge targeting and zoom/pan required."
+    ]
+  },
+  "review": "Independent read-only agent review: no Critical/Important source-data defect; UI issues remain. AI review is not named-human/legal release approval."
+}

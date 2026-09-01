@@ -1,0 +1,22 @@
+{
+  "date": "2026-08-31",
+  "scope": "US development resource package completion, not application UX or public release",
+  "status": "resource-data-and-reproduction-complete",
+  "branch": "codex/v1-launch-packs",
+  "base": "a3026a055e1ec6e25dcc3dc16d863eb8201188c9",
+  "runtimeFilesUnchanged": true,
+  "counts": { "region": 50, "place": 50, "rawSourceFiles": 5, "checkedProcessingFiles": 3 },
+  "primaryAnswerLanguage": "en",
+  "distributionStatus": "development-only",
+  "newRegressionCycle": { "before": "2 failed: generated scratch inside resources; source verifier absent", "after": "2 passed" },
+  "latestUsTests": { "passed": 11, "failed": 0, "otherPackTestsSkipped": 13, "report": "functional-review/completion-vitest.json" },
+  "existingBaseline": { "passed": 290, "files": 24, "failed": 0, "command": "node node_modules/vitest/vitest.mjs run --exclude scripts/content/launch-packs.test.ts", "observedStartLocal": "2026-08-31 20:39:43" },
+  "staticChecks": { "projectTypeScriptConfigurations": 3, "verifierStandaloneTypecheck": true, "targetedESLintWithNoIgnore": true },
+  "reproducibilityEvidence": "verification.json",
+  "newInspectionPageSmokeEvidence": "functional-review/completion-browser.json",
+  "inspectionTemplates": ["functional-review/render.html.txt", "functional-review/render.tsx.txt"],
+  "recoverableArchive": { "directoryRelativeToRepository": ".superpowers/launch-task/archived-us-verification", "directoriesMoved": 4, "duplicateJsonFiles": 32, "allDuplicateHashesMatchedRuntimeBeforeMove": true, "originalSourcesDeleted": false },
+  "developmentZip": { "pathRelativeToRepository": ".superpowers/launch-task/us-resource-delivery/us-states-1.0.0-dev.1.zip", "bytes": 175388, "sha256": "97e74ce56cf34934c2ddef747445053307793164853596ee1f7220590882607a", "entries": ["us-states/manifest.json", "us-states/entities.json", "us-states/map.topojson", "us-states/sources.json"], "extractedFilesHashMatched": true, "extractedPackValidated": true, "notAnInstaller": true },
+  "independentReview": { "criticalIssues": 0, "importantIssues": 0, "remainingMinor": "Successful cleanup is tested; conversion-failure cleanup and content-local TMP refusal do not yet have dedicated regression cases." },
+  "notCompleted": ["Default pointer UX for all states/capitals", "Packaged Tauri installer E2E", "Named human/cartographic/public-release approval", "Original three-pack completion and merge"]
+}

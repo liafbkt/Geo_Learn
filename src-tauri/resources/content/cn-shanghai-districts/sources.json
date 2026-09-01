@@ -1,0 +1,234 @@
+[
+  {
+    "coordinateReferenceSystem": "EPSG:4326",
+    "id": "cn-shanghai-districts-geoboundaries",
+    "license": "Open Data Commons Open Database License 1.0 (ODbL); derived Shanghai database under ODbL 1.0; geoBoundaries CC BY 4.0 attribution also retained.",
+    "organization": "OpenStreetMap contributors / Lee Beryman / geoBoundaries, William & Mary geoLab",
+    "processing": [
+      {
+        "operation": "pin-original-sources-and-permissions",
+        "parameters": {
+          "commit": "9469f09592ced973a3448cf66b6100b741b64c0d",
+          "receiptSha256": "2fd12653e85c53206319aa8288802e1d0f456cb89ac5ae0b4aa149ee23e650bd"
+        }
+      },
+      {
+        "operation": "pin-source-file",
+        "parameters": {
+          "bytes": 1748,
+          "file": "ADM3-api.json",
+          "retrievedAt": "2026-08-31",
+          "role": "license-or-provenance",
+          "sha256": "1c56fc94bc9d1fb41473b74dda9e66a9f5ff252c81a6b0b6bc79fa0989dcea01",
+          "uncompressedBytes": null,
+          "uncompressedSha256": null,
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/CHN/ADM3/"
+        }
+      },
+      {
+        "operation": "pin-source-file",
+        "parameters": {
+          "bytes": 12940636,
+          "file": "ADM3-simplified.geojson.gz",
+          "retrievedAt": "2026-08-31",
+          "role": "geometry",
+          "sha256": "21ea33e5ef2ca3cfd524b7f7ad29f61e67a7f8987868c6092b48a875280e8f8a",
+          "uncompressedBytes": 34557636,
+          "uncompressedSha256": "ea64fe24f193e319ce48895f229a5b3f46d2a60f3f3df67e6172ab037e4cc8fd",
+          "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM3/geoBoundaries-CHN-ADM3_simplified.geojson"
+        }
+      },
+      {
+        "operation": "pin-source-file",
+        "parameters": {
+          "bytes": 4316,
+          "file": "geoboundaries-citation.txt",
+          "retrievedAt": "2026-08-31",
+          "role": "license-or-provenance",
+          "sha256": "f6ea7572bea6036c4cdcacf8c0ca7bf09098d4e600d19546d7432533e9a290d5",
+          "uncompressedBytes": null,
+          "uncompressedSha256": null,
+          "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM1/CITATION-AND-USE-geoBoundaries.txt"
+        }
+      },
+      {
+        "operation": "pin-source-file",
+        "parameters": {
+          "bytes": 12237,
+          "file": "geoboundaries-use.html",
+          "retrievedAt": "2026-08-31",
+          "role": "license-or-provenance",
+          "sha256": "f1e52073eebfc138e1d8fdf7574499f5ca5c407ac7fa8ba0ec904ebbe02354ed",
+          "uncompressedBytes": null,
+          "uncompressedSha256": null,
+          "url": "https://www.geoboundaries.org/index.html"
+        }
+      },
+      {
+        "operation": "pin-source-file",
+        "parameters": {
+          "bytes": 51535,
+          "file": "odbl-1.0.html",
+          "retrievedAt": "2026-08-31",
+          "role": "license-or-provenance",
+          "sha256": "058a4f42571027bab20c80fcbfa0530efe7ccc142a4bbd081bfdabf55e0e2beb",
+          "uncompressedBytes": null,
+          "uncompressedSha256": null,
+          "url": "https://opendatacommons.org/licenses/odbl/1-0/"
+        }
+      },
+      {
+        "operation": "pin-source-file",
+        "parameters": {
+          "bytes": 21344,
+          "file": "osm-copyright.html",
+          "retrievedAt": "2026-08-31",
+          "role": "license-or-provenance",
+          "sha256": "48bb7a76ec00a4725dfcc1ebd725e5bdf562508952359aec2d21f2244da2da43",
+          "uncompressedBytes": null,
+          "uncompressedSha256": null,
+          "url": "https://www.openstreetmap.org/copyright"
+        }
+      },
+      {
+        "operation": "pin-source-file",
+        "parameters": {
+          "bytes": 87949,
+          "file": "shanghai-codes.html",
+          "retrievedAt": "2026-08-31",
+          "role": "name-facts",
+          "sha256": "b1f3f03acb12d826c5f09505215b849660dc5019a22d32411cbf7491656b9834",
+          "uncompressedBytes": null,
+          "uncompressedSha256": null,
+          "url": "https://mzj.sh.gov.cn/MZ_zhuzhan1539_0-2-8-1459/20260727/535996b5abd045baac0c65552f4527d9.html"
+        }
+      },
+      {
+        "operation": "pin-source-file",
+        "parameters": {
+          "bytes": 15790,
+          "file": "shanghai-names-en-1.html",
+          "retrievedAt": "2026-08-31",
+          "role": "name-facts",
+          "sha256": "bfdc728a14aca33036cef397e1b14fbba513244c53fcd214f11578fc8f1fa79e",
+          "uncompressedBytes": null,
+          "uncompressedSha256": null,
+          "url": "https://english.shanghai.gov.cn/en-AdministrativeDistricts/"
+        }
+      },
+      {
+        "operation": "pin-source-file",
+        "parameters": {
+          "bytes": 13739,
+          "file": "shanghai-names-en-2.html",
+          "retrievedAt": "2026-08-31",
+          "role": "name-facts",
+          "sha256": "6796973f5e53bfa94a525b2510305af6e7b6f90f7ab4ef4ba6609f60c13522a7",
+          "uncompressedBytes": null,
+          "uncompressedSha256": null,
+          "url": "https://english.shanghai.gov.cn/en-AdministrativeDistricts/index_2.html"
+        }
+      },
+      {
+        "operation": "bind-reviewed-roster",
+        "parameters": {
+          "configSha256": "b6661e71677367512b2fc8e0773d529e6f360c3845801f3098700fbaebaa7b2f",
+          "count": 16,
+          "naming": "Official Chinese/English facts; explicit geographic short names. Guangdong and Ningxia source typos corrected, not accepted as aliases.",
+          "rosterSha256": "0360a029529e11de2f12de21a178fb2f5823f7dba6d5a30a069d8a144e6a765e",
+          "selection": "unique shapeID plus exact original name and bbox"
+        }
+      },
+      {
+        "operation": "select-source-features",
+        "parameters": {
+          "originalFeatureCount": 2864,
+          "originalFileSha256": "ea64fe24f193e319ce48895f229a5b3f46d2a60f3f3df67e6172ab037e4cc8fd",
+          "selectedFeatureCount": 16,
+          "yearRepresented": "2017"
+        }
+      },
+      {
+        "operation": "adapt-declared-crs84-to-project-wgs84-lonlat",
+        "parameters": {
+          "coordinateValuesUnchanged": true,
+          "input": "urn:ogc:def:crs:OGC:1.3:CRS84",
+          "output": "EPSG:4326 longitude,latitude array contract",
+          "reference": "https://www.rfc-editor.org/rfc/rfc7946#section-4"
+        }
+      },
+      {
+        "operation": "normalize-d3-ring-winding",
+        "parameters": {
+          "movedCoordinates": 0,
+          "regions": 16,
+          "removedVertices": 0,
+          "reversedRings": 22,
+          "rings": 22,
+          "vertices": 3103
+        }
+      },
+      {
+        "operation": "retain-attribution-and-limitations",
+        "parameters": {
+          "attribution": "© OpenStreetMap contributors — https://www.openstreetmap.org/copyright ; ODbL 1.0 https://opendatacommons.org/licenses/odbl/1-0/ ; geoBoundaries https://www.geoboundaries.org (Runfola et al., 2020)",
+          "entityInputSha256": "23fb8d4ae315c1129404ebb7728b98a297a0363d45e8ce1ae5e99bca7cdcd825",
+          "geometryInputSha256": "993ce9ed030d17a929eaa29d78eb2493f0e07a086c7d33a731b13d68f5907e6e",
+          "limitations": "2017 simplified OSM-derived geometry; 16 district identities checked against 2026-07-27 Shanghai Civil Affairs list, not a claim that geometry represents 2026 coastlines. 22 retained rings include source island components; no metre-accuracy or full offshore-island guarantee. No authoritative district-seat points retained; place/capital/hydro capabilities disabled. No synthetic Shanghai parent entity: the fixed roster is 16 districts and parentId only refers within a pack.",
+          "reviewStatus": "development-only; no named-human or statutory public-release approval"
+        }
+      },
+      {
+        "operation": "normalize-coordinate-reference-system",
+        "parameters": {
+          "from": "EPSG:4326",
+          "to": "EPSG:4326"
+        }
+      },
+      {
+        "operation": "normalize-longitude-latitude",
+        "parameters": {
+          "latitudeRange": "[-90,90]",
+          "longitudeRange": "[-180,180]"
+        }
+      },
+      {
+        "operation": "simplify-geometry",
+        "parameters": {
+          "algorithm": "douglas-peucker",
+          "tolerance": 0
+        }
+      },
+      {
+        "operation": "quantize-coordinates",
+        "parameters": {
+          "gridSize": 1000000
+        }
+      },
+      {
+        "operation": "build-topology",
+        "parameters": {
+          "sharedBoundaryStrategy": "node-collinear-segments-and-deduplicate"
+        }
+      },
+      {
+        "operation": "bind-entity-input",
+        "parameters": {
+          "inputSha256": "23fb8d4ae315c1129404ebb7728b98a297a0363d45e8ce1ae5e99bca7cdcd825",
+          "outputSha256": "23fb8d4ae315c1129404ebb7728b98a297a0363d45e8ce1ae5e99bca7cdcd825"
+        }
+      }
+    ],
+    "quantization": {
+      "gridSize": 1000000
+    },
+    "retrievedAt": "2026-08-31",
+    "reviewIdentifier": null,
+    "sha256": "993ce9ed030d17a929eaa29d78eb2493f0e07a086c7d33a731b13d68f5907e6e",
+    "simplification": {
+      "algorithm": "douglas-peucker",
+      "tolerance": 0
+    },
+    "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM3/geoBoundaries-CHN-ADM3_simplified.geojson"
+  }
+]

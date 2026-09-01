@@ -1,9 +1,11 @@
 import type { AppSettings } from '../app/settings';
 import type { AttemptEvent, MasteryRecord } from '../learning/types';
-import type { PracticeSession } from '../practice/session';
+import type { PracticeSession, RetryDebt } from '../practice/session';
 
 export interface ProgressRepository {
   loadSnapshot(learnerId: string, packId: string): Promise<readonly MasteryRecord[]>;
+  loadAttemptHistory(learnerId: string, packId: string): Promise<readonly AttemptEvent[]>;
+  loadRetryDebts(learnerId: string, packId: string): Promise<readonly RetryDebt[]>;
   saveAttempt(
     input: Readonly<{
       event: AttemptEvent;

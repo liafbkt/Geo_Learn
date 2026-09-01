@@ -69,6 +69,7 @@ export function MapViewport({
   map,
   mode,
   selection,
+  interactive = true,
   answerEntityId,
   selectableKind,
   reducedMotion,
@@ -149,6 +150,7 @@ export function MapViewport({
 
   const selectActive = () => {
     if (
+      !interactive ||
       active === undefined ||
       (selectableKind !== undefined && active.kind !== selectableKind) ||
       !selectableEntities.some(
@@ -162,6 +164,7 @@ export function MapViewport({
   };
 
   const selectFromPointer = (kind: MapSelection['kind'], entityId: string) => {
+    if (!interactive) return;
     if (dragged.current) {
       dragged.current = false;
       return;
@@ -288,11 +291,11 @@ export function MapViewport({
   return (
     <div className={['map-viewport', className].filter(Boolean).join(' ')}>
       <svg
-        role="listbox"
+        role={interactive ? 'listbox' : 'img'}
         aria-label={pack.manifest.title.zh}
-        aria-activedescendant={activeDescendant}
-        aria-describedby={statusId}
-        tabIndex={0}
+        aria-activedescendant={interactive ? activeDescendant : undefined}
+        aria-describedby={interactive ? statusId : undefined}
+        tabIndex={interactive ? 0 : undefined}
         viewBox={map.viewBox}
         onKeyDown={handleKeyDown}
         onPointerDown={handlePointerDown}
@@ -312,7 +315,7 @@ export function MapViewport({
               const entity = entities.get(entityId);
               if (entity?.kind !== 'region') return null;
               const selected = selection?.kind === 'region' && selection.entityId === entityId;
-              const selectable = selectableKind === undefined || selectableKind === 'region';
+              const selectable = interactive && (selectableKind === undefined || selectableKind === 'region');
               return (
                 <path
                   id={entityDomIds.get(selectionKey({ kind: 'region', entityId }))}
@@ -337,7 +340,7 @@ export function MapViewport({
             map={map}
             activeEntityId={active?.entity.id ?? null}
             selection={selection}
-            selectable={selectableKind === undefined || selectableKind === 'place'}
+            selectable={interactive && (selectableKind === undefined || selectableKind === 'place')}
             domIdFor={(entityId) => entityDomIds.get(selectionKey({ kind: 'place', entityId }))}
             onSelect={(entityId) => selectFromPointer('place', entityId)}
           />
@@ -349,9 +352,7 @@ export function MapViewport({
           />
         </g>
       </svg>
-      <span id={statusId} role="status" className="map-sr-only">
-        {status}
-      </span>
+      {interactive ? <span id={statusId} role="status" className="map-sr-only">{status}</span> : null}
     </div>
   );
 }

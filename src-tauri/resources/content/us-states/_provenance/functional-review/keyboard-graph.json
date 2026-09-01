@@ -1,0 +1,302 @@
+{
+  "us-ak": {
+    "ArrowUp": "us-ak",
+    "ArrowDown": "us-wa",
+    "ArrowLeft": "us-hi",
+    "ArrowRight": "us-wa"
+  },
+  "us-al": {
+    "ArrowUp": "us-tn",
+    "ArrowDown": "us-ms",
+    "ArrowLeft": "us-ms",
+    "ArrowRight": "us-ga"
+  },
+  "us-ar": {
+    "ArrowUp": "us-mo",
+    "ArrowDown": "us-ms",
+    "ArrowLeft": "us-mo",
+    "ArrowRight": "us-ms"
+  },
+  "us-az": {
+    "ArrowUp": "us-nm",
+    "ArrowDown": "us-tx",
+    "ArrowLeft": "us-ut",
+    "ArrowRight": "us-nm"
+  },
+  "us-ca": {
+    "ArrowUp": "us-nv",
+    "ArrowDown": "us-az",
+    "ArrowLeft": "us-or",
+    "ArrowRight": "us-nv"
+  },
+  "us-co": {
+    "ArrowUp": "us-wy",
+    "ArrowDown": "us-nm",
+    "ArrowLeft": "us-wy",
+    "ArrowRight": "us-ne"
+  },
+  "us-ct": {
+    "ArrowUp": "us-ri",
+    "ArrowDown": "us-nj",
+    "ArrowLeft": "us-nj",
+    "ArrowRight": "us-ri"
+  },
+  "us-de": {
+    "ArrowUp": "us-nj",
+    "ArrowDown": "us-md",
+    "ArrowLeft": "us-md",
+    "ArrowRight": "us-nj"
+  },
+  "us-fl": {
+    "ArrowUp": "us-ga",
+    "ArrowDown": "us-hi",
+    "ArrowLeft": "us-ga",
+    "ArrowRight": "us-sc"
+  },
+  "us-ga": {
+    "ArrowUp": "us-sc",
+    "ArrowDown": "us-fl",
+    "ArrowLeft": "us-al",
+    "ArrowRight": "us-sc"
+  },
+  "us-hi": {
+    "ArrowUp": "us-ca",
+    "ArrowDown": "us-hi",
+    "ArrowLeft": "us-hi",
+    "ArrowRight": "us-ca"
+  },
+  "us-ia": {
+    "ArrowUp": "us-wi",
+    "ArrowDown": "us-mo",
+    "ArrowLeft": "us-mn",
+    "ArrowRight": "us-mo"
+  },
+  "us-id": {
+    "ArrowUp": "us-mt",
+    "ArrowDown": "us-or",
+    "ArrowLeft": "us-or",
+    "ArrowRight": "us-mt"
+  },
+  "us-il": {
+    "ArrowUp": "us-ia",
+    "ArrowDown": "us-in",
+    "ArrowLeft": "us-mo",
+    "ArrowRight": "us-in"
+  },
+  "us-in": {
+    "ArrowUp": "us-il",
+    "ArrowDown": "us-ky",
+    "ArrowLeft": "us-il",
+    "ArrowRight": "us-ky"
+  },
+  "us-ks": {
+    "ArrowUp": "us-ne",
+    "ArrowDown": "us-ok",
+    "ArrowLeft": "us-ne",
+    "ArrowRight": "us-ok"
+  },
+  "us-ky": {
+    "ArrowUp": "us-in",
+    "ArrowDown": "us-tn",
+    "ArrowLeft": "us-tn",
+    "ArrowRight": "us-oh"
+  },
+  "us-la": {
+    "ArrowUp": "us-ms",
+    "ArrowDown": "us-fl",
+    "ArrowLeft": "us-ar",
+    "ArrowRight": "us-ms"
+  },
+  "us-ma": {
+    "ArrowUp": "us-nh",
+    "ArrowDown": "us-ri",
+    "ArrowLeft": "us-ct",
+    "ArrowRight": "us-ri"
+  },
+  "us-md": {
+    "ArrowUp": "us-de",
+    "ArrowDown": "us-va",
+    "ArrowLeft": "us-pa",
+    "ArrowRight": "us-de"
+  },
+  "us-me": {
+    "ArrowUp": "us-mn",
+    "ArrowDown": "us-nh",
+    "ArrowLeft": "us-nh",
+    "ArrowRight": "us-me"
+  },
+  "us-mi": {
+    "ArrowUp": "us-wi",
+    "ArrowDown": "us-in",
+    "ArrowLeft": "us-wi",
+    "ArrowRight": "us-oh"
+  },
+  "us-mn": {
+    "ArrowUp": "us-nd",
+    "ArrowDown": "us-wi",
+    "ArrowLeft": "us-nd",
+    "ArrowRight": "us-wi"
+  },
+  "us-mo": {
+    "ArrowUp": "us-il",
+    "ArrowDown": "us-ar",
+    "ArrowLeft": "us-ia",
+    "ArrowRight": "us-il"
+  },
+  "us-ms": {
+    "ArrowUp": "us-al",
+    "ArrowDown": "us-la",
+    "ArrowLeft": "us-la",
+    "ArrowRight": "us-al"
+  },
+  "us-mt": {
+    "ArrowUp": "us-nd",
+    "ArrowDown": "us-wy",
+    "ArrowLeft": "us-id",
+    "ArrowRight": "us-wy"
+  },
+  "us-nc": {
+    "ArrowUp": "us-va",
+    "ArrowDown": "us-sc",
+    "ArrowLeft": "us-sc",
+    "ArrowRight": "us-va"
+  },
+  "us-nd": {
+    "ArrowUp": "us-ak",
+    "ArrowDown": "us-sd",
+    "ArrowLeft": "us-mt",
+    "ArrowRight": "us-sd"
+  },
+  "us-ne": {
+    "ArrowUp": "us-sd",
+    "ArrowDown": "us-ks",
+    "ArrowLeft": "us-sd",
+    "ArrowRight": "us-ks"
+  },
+  "us-nh": {
+    "ArrowUp": "us-vt",
+    "ArrowDown": "us-ma",
+    "ArrowLeft": "us-vt",
+    "ArrowRight": "us-ri"
+  },
+  "us-nj": {
+    "ArrowUp": "us-ct",
+    "ArrowDown": "us-de",
+    "ArrowLeft": "us-de",
+    "ArrowRight": "us-ct"
+  },
+  "us-nm": {
+    "ArrowUp": "us-co",
+    "ArrowDown": "us-az",
+    "ArrowLeft": "us-az",
+    "ArrowRight": "us-co"
+  },
+  "us-nv": {
+    "ArrowUp": "us-id",
+    "ArrowDown": "us-ca",
+    "ArrowLeft": "us-ca",
+    "ArrowRight": "us-ut"
+  },
+  "us-ny": {
+    "ArrowUp": "us-vt",
+    "ArrowDown": "us-ct",
+    "ArrowLeft": "us-pa",
+    "ArrowRight": "us-vt"
+  },
+  "us-oh": {
+    "ArrowUp": "us-pa",
+    "ArrowDown": "us-wv",
+    "ArrowLeft": "us-in",
+    "ArrowRight": "us-wv"
+  },
+  "us-ok": {
+    "ArrowUp": "us-ks",
+    "ArrowDown": "us-ar",
+    "ArrowLeft": "us-ks",
+    "ArrowRight": "us-ar"
+  },
+  "us-or": {
+    "ArrowUp": "us-wa",
+    "ArrowDown": "us-nv",
+    "ArrowLeft": "us-hi",
+    "ArrowRight": "us-wa"
+  },
+  "us-pa": {
+    "ArrowUp": "us-ny",
+    "ArrowDown": "us-md",
+    "ArrowLeft": "us-wv",
+    "ArrowRight": "us-md"
+  },
+  "us-ri": {
+    "ArrowUp": "us-ma",
+    "ArrowDown": "us-ct",
+    "ArrowLeft": "us-ma",
+    "ArrowRight": "us-me"
+  },
+  "us-sc": {
+    "ArrowUp": "us-nc",
+    "ArrowDown": "us-ga",
+    "ArrowLeft": "us-ga",
+    "ArrowRight": "us-nc"
+  },
+  "us-sd": {
+    "ArrowUp": "us-nd",
+    "ArrowDown": "us-ne",
+    "ArrowLeft": "us-nd",
+    "ArrowRight": "us-ne"
+  },
+  "us-tn": {
+    "ArrowUp": "us-ky",
+    "ArrowDown": "us-al",
+    "ArrowLeft": "us-al",
+    "ArrowRight": "us-ky"
+  },
+  "us-tx": {
+    "ArrowUp": "us-ok",
+    "ArrowDown": "us-la",
+    "ArrowLeft": "us-nm",
+    "ArrowRight": "us-ok"
+  },
+  "us-ut": {
+    "ArrowUp": "us-nv",
+    "ArrowDown": "us-co",
+    "ArrowLeft": "us-nv",
+    "ArrowRight": "us-co"
+  },
+  "us-va": {
+    "ArrowUp": "us-wv",
+    "ArrowDown": "us-nc",
+    "ArrowLeft": "us-wv",
+    "ArrowRight": "us-md"
+  },
+  "us-vt": {
+    "ArrowUp": "us-me",
+    "ArrowDown": "us-nh",
+    "ArrowLeft": "us-ny",
+    "ArrowRight": "us-nh"
+  },
+  "us-wa": {
+    "ArrowUp": "us-nd",
+    "ArrowDown": "us-or",
+    "ArrowLeft": "us-or",
+    "ArrowRight": "us-id"
+  },
+  "us-wi": {
+    "ArrowUp": "us-mn",
+    "ArrowDown": "us-mi",
+    "ArrowLeft": "us-mn",
+    "ArrowRight": "us-mi"
+  },
+  "us-wv": {
+    "ArrowUp": "us-oh",
+    "ArrowDown": "us-va",
+    "ArrowLeft": "us-oh",
+    "ArrowRight": "us-va"
+  },
+  "us-wy": {
+    "ArrowUp": "us-mt",
+    "ArrowDown": "us-co",
+    "ArrowLeft": "us-mt",
+    "ArrowRight": "us-co"
+  }
+}

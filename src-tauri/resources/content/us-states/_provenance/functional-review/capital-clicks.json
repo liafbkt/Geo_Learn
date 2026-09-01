@@ -1,0 +1,302 @@
+[
+  {
+    "label": "朱诺 / Juneau",
+    "selected": "us-ak-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "蒙哥马利 / Montgomery",
+    "selected": "us-al-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "小石城 / Little Rock",
+    "selected": "us-ar-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "菲尼克斯 / Phoenix",
+    "selected": "us-az-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "萨克拉门托 / Sacramento",
+    "selected": "us-nv-capital",
+    "passed": false,
+    "error": null
+  },
+  {
+    "label": "丹佛 / Denver",
+    "selected": "us-wy-capital",
+    "passed": false,
+    "error": null
+  },
+  {
+    "label": "哈特福德 / Hartford",
+    "selected": "us-ri-capital",
+    "passed": false,
+    "error": null
+  },
+  {
+    "label": "多佛 / Dover",
+    "selected": "us-pa-capital",
+    "passed": false,
+    "error": null
+  },
+  {
+    "label": "塔拉哈西 / Tallahassee",
+    "selected": "us-fl-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "亚特兰大 / Atlanta",
+    "selected": "us-ga-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "檀香山 / Honolulu",
+    "selected": "us-hi-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "得梅因 / Des Moines",
+    "selected": "us-ia-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "博伊西 / Boise",
+    "selected": "us-id-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "斯普林菲尔德 / Springfield",
+    "selected": "us-il-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "印第安纳波利斯 / Indianapolis",
+    "selected": "us-in-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "托皮卡 / Topeka",
+    "selected": "us-ks-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "法兰克福 / Frankfort",
+    "selected": "us-ky-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "巴吞鲁日 / Baton Rouge",
+    "selected": "us-la-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "波士顿 / Boston",
+    "selected": "us-ri-capital",
+    "passed": false,
+    "error": null
+  },
+  {
+    "label": "安纳波利斯 / Annapolis",
+    "selected": "us-va-capital",
+    "passed": false,
+    "error": null
+  },
+  {
+    "label": "奥古斯塔 / Augusta",
+    "selected": "us-me-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "兰辛 / Lansing",
+    "selected": "us-mi-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "圣保罗 / Saint Paul",
+    "selected": "us-mn-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "杰斐逊城 / Jefferson City",
+    "selected": "us-mo-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "杰克逊 / Jackson",
+    "selected": "us-ms-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "海伦娜 / Helena",
+    "selected": "us-mt-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "罗利 / Raleigh",
+    "selected": "us-nc-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "俾斯麦 / Bismarck",
+    "selected": "us-nd-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "林肯 / Lincoln",
+    "selected": "us-ne-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "康科德 / Concord",
+    "selected": "us-vt-capital",
+    "passed": false,
+    "error": null
+  },
+  {
+    "label": "特伦顿 / Trenton",
+    "selected": "us-pa-capital",
+    "passed": false,
+    "error": null
+  },
+  {
+    "label": "圣菲 / Santa Fe",
+    "selected": "us-nm-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "卡森城 / Carson City",
+    "selected": "us-nv-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "奥尔巴尼 / Albany",
+    "selected": "us-ny-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "哥伦布 / Columbus",
+    "selected": "us-oh-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "俄克拉何马城 / Oklahoma City",
+    "selected": "us-ok-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "塞勒姆 / Salem",
+    "selected": "us-or-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "哈里斯堡 / Harrisburg",
+    "selected": "us-pa-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "普罗维登斯 / Providence",
+    "selected": "us-ri-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "哥伦比亚 / Columbia",
+    "selected": "us-sc-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "皮尔 / Pierre",
+    "selected": "us-sd-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "纳什维尔 / Nashville",
+    "selected": "us-tn-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "奥斯汀 / Austin",
+    "selected": "us-tx-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "盐湖城 / Salt Lake City",
+    "selected": "us-ut-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "里士满 / Richmond",
+    "selected": "us-va-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "蒙彼利埃 / Montpelier",
+    "selected": "us-vt-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "奥林匹亚 / Olympia",
+    "selected": "us-wa-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "麦迪逊 / Madison",
+    "selected": "us-wi-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "查尔斯顿 / Charleston",
+    "selected": "us-wv-capital",
+    "passed": true,
+    "error": null
+  },
+  {
+    "label": "夏延 / Cheyenne",
+    "selected": "us-wy-capital",
+    "passed": true,
+    "error": null
+  }
+]

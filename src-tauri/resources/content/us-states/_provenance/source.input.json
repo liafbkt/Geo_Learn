@@ -1,0 +1,103 @@
+{
+  "coordinateReferenceSystem": "EPSG:4326",
+  "id": "us-census-2025-states-and-official-capitals",
+  "license": "Census cartographic boundaries: free use with acknowledgement; intended small-scale display (1:20,000,000), not precise geographic analysis/geocoding. GPO government work: public domain in US (17 USC 105); https://www.govinfo.gov/about. See pinned archive ISO use constraints.",
+  "organization": "U.S. Census Bureau; U.S. Government Publishing Office",
+  "processing": [
+    {
+      "operation": "pin-authoritative-input",
+      "parameters": {
+        "coordinateReferenceSystem": "WGS84 KML longitude/latitude (EPSG:4326)",
+        "file": "cb_2025_us_state_20m.zip",
+        "license": "Census archive ISO metadata: free to use in products/publications with Census acknowledgement; visual display at 1:20,000,000 or smaller scales only, not precise geographic analysis/geocoding.",
+        "licenseUrl": "https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_state_20m.zip#cb_2025_us_state_20m.kml.iso.xml",
+        "organization": "U.S. Census Bureau",
+        "retrievedAt": "2026-08-30",
+        "sha256": "efddd884f1442ef233b1ba9c12dddbd66b6fdf94da6a373e1556aefe3dbc5751",
+        "url": "https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_state_20m.zip"
+      }
+    },
+    {
+      "operation": "pin-authoritative-input",
+      "parameters": {
+        "coordinateReferenceSystem": "NAD83 (EPSG:4269)",
+        "file": "2025_Gaz_place_national.zip",
+        "license": "U.S. federal government work; public domain in the United States (17 USC 105)",
+        "licenseUrl": "https://www.govinfo.gov/about",
+        "organization": "U.S. Census Bureau",
+        "retrievedAt": "2026-08-30",
+        "sha256": "49644173a453469d9bd77fb7a493b027f87567e209edaf2078aac7543ac2ee29",
+        "url": "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2025_Gazetteer/2025_Gaz_place_national.zip"
+      }
+    },
+    {
+      "operation": "pin-authoritative-input",
+      "parameters": {
+        "coordinateReferenceSystem": "not applicable",
+        "file": "gpo-states-capitals.pdf",
+        "license": "U.S. federal government work; public domain in the United States (17 USC 105)",
+        "licenseUrl": "https://www.govinfo.gov/about",
+        "organization": "U.S. Government Publishing Office",
+        "retrievedAt": "2026-08-30",
+        "sha256": "2f832de6bf5a2ebcb5ffd9f79939e0bb41da2f53d09a8f2fb99ffe2c605b1f9f",
+        "url": "https://www.govinfo.gov/content/pkg/GPO-STYLEMANUAL-2016/pdf/GPO-STYLEMANUAL-2016-20.pdf"
+      }
+    },
+    {
+      "operation": "pin-authoritative-input",
+      "parameters": {
+        "coordinateReferenceSystem": "not applicable; documents NAD83 source data",
+        "file": "census-tiger2025-techdoc.pdf",
+        "license": "U.S. federal government work; public domain in the United States (17 USC 105)",
+        "licenseUrl": "https://www.govinfo.gov/about",
+        "organization": "U.S. Census Bureau",
+        "retrievedAt": "2026-08-30",
+        "sha256": "21476bdba82fe8072f8994ae59bda484260d1b932c13f31991f6414f8e04d551",
+        "url": "https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2025/TGRSHP2025_TechDoc.pdf"
+      }
+    },
+    {
+      "operation": "pin-authoritative-input",
+      "parameters": {
+        "coordinateReferenceSystem": "not applicable",
+        "file": "govinfo-about.html",
+        "license": "U.S. federal government work; public domain in the United States (17 USC 105)",
+        "licenseUrl": "https://www.govinfo.gov/about",
+        "organization": "U.S. Government Publishing Office",
+        "retrievedAt": "2026-08-30",
+        "sha256": "6794de83f2aead8c0dfe8806ce82c630a1fb6a770c5924dab66c1ca6ac326a05",
+        "url": "https://www.govinfo.gov/about"
+      }
+    },
+    {
+      "operation": "extract-kml-and-select-50-states",
+      "parameters": {
+        "filter": "50 USPS state codes; exclude DC and territories",
+        "geometryChanges": "ring order only; preserve every source vertex, island, hole and antimeridian part",
+        "kmlSha256": "641d444d51e493800fcbd9cd60c4e4a86431597258115fe3806afe49a20771fa",
+        "outputSha256": "3992d8cac35c85eceb73529cdec93d5dc10e834cf5747d1b6dd90dba2a7ff318",
+        "ringOrientation": "D3: clockwise exteriors and counterclockwise holes",
+        "ringsReversed": 126
+      }
+    },
+    {
+      "operation": "join-official-capital-and-gazetteer",
+      "parameters": {
+        "algorithm": "pyproj 3.7.2 / PROJ Transformer.from_crs(always_xy=True,allow_ballpark=False); round to 9 decimals",
+        "association": "GPO 2016 Style Manual chapter 18; St. Paul canonicalized to Saint Paul",
+        "auditSha256": "12482ca2686fe48d712e8314cc582d567e9c7e32eed10ba328bc17c11d36256d",
+        "entityOutputSha256": "26bf9137cbfdffce6872750f6bb8eb636d41e8a1066d1045aa7dc7c7fad7e194",
+        "gazetteerTextSha256": "15f4977a010cc42308f4d5ddc5e19f26ef63fc035f20745333a14b78aa08d3fa",
+        "sourceCRS": "EPSG:4269",
+        "targetCRS": "EPSG:4326",
+        "translations": "editorial Simplified Chinese translations and accepted aliases"
+      }
+    }
+  ],
+  "quantization": null,
+  "retrievedAt": "2026-08-30",
+  "reviewIdentifier": null,
+  "sha256": "3992d8cac35c85eceb73529cdec93d5dc10e834cf5747d1b6dd90dba2a7ff318",
+  "simplification": null,
+  "url": "https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_state_20m.zip"
+}

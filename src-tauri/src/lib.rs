@@ -2,6 +2,8 @@ pub mod backup;
 mod content;
 mod db;
 mod progress;
+#[cfg(windows)]
+mod update;
 
 use tauri::Manager;
 
@@ -11,6 +13,11 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(std::sync::Mutex::new(backup::BackupStages::default()))
         .setup(|app| {
+            #[cfg(windows)]
+            app.handle()
+                .plugin(tauri_plugin_updater::Builder::new().build())?;
+            #[cfg(windows)]
+            app.handle().plugin(update::init())?;
             let database = db::Database::open(app.handle()).map_err(std::io::Error::other)?;
             app.manage(database);
             Ok(())
@@ -19,6 +26,8 @@ pub fn run() {
             content::list_content_pack_ids,
             content::read_content_resource,
             progress::load_progress_snapshot,
+            progress::load_attempt_history,
+            progress::load_retry_debts,
             progress::save_attempt_transaction,
             progress::save_practice_session,
             progress::load_resumable_session,

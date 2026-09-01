@@ -284,6 +284,20 @@ export class TauriProgressRepository implements ProgressRepository {
     return array(response, 'mastery snapshot').map(parseMastery);
   }
 
+  async loadAttemptHistory(learnerId: string, packId: string): Promise<readonly AttemptEvent[]> {
+    const response = await invoke<unknown>('load_attempt_history', {
+      learnerId: requireId(learnerId, 'Learner'), packId: requireId(packId, 'Pack'),
+    });
+    return array(response, 'attempt history').map(parseEvent);
+  }
+
+  async loadRetryDebts(learnerId: string, packId: string): Promise<readonly RetryDebt[]> {
+    const response = await invoke<unknown>('load_retry_debts', {
+      learnerId: requireId(learnerId, 'Learner'), packId: requireId(packId, 'Pack'),
+    });
+    return array(response, 'retry debts').map(parseRetryDebt);
+  }
+
   async saveAttempt(input: Readonly<{ event: AttemptEvent; session: PracticeSession;
     mastery: MasteryRecord }>): Promise<void> {
     await invoke('save_attempt_transaction', { input: {

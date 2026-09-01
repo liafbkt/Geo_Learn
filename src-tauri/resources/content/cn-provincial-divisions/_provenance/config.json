@@ -1,0 +1,29 @@
+{
+  "packId": "cn-provincial-divisions",
+  "contentVersion": "1.0.0-dev.1",
+  "title": {
+    "zh": "中国省级行政区",
+    "en": "China Provincial Divisions"
+  },
+  "count": 34,
+  "rawFeatureCount": 34,
+  "geometryFile": "ADM1-simplified.geojson",
+  "metadataFile": "ADM1-api.json",
+  "rosterSha256": "4005f4e59d8b3c27dfb419ad59a0849ba893e27781b9d111dd5d681eec0776e5",
+  "receiptSha256": "adf88c1479fa7514015f9045f132a43a26525f36bee3c9a7f0ac217d488c5e23",
+  "upstreamCommit": "9469f09592ced973a3448cf66b6100b741b64c0d",
+  "sourceYear": "2019",
+  "center": [
+    104,
+    35
+  ],
+  "organization": "Newfraferz87 / Wikimedia Commons / geoBoundaries, William & Mary geoLab",
+  "license": "Upstream vector by Newfraferz87 dedicated to Public Domain (PD-self); geoBoundaries derivative CC BY 4.0, attribution required.",
+  "attribution": "Newfraferz87 (2019), China blank province map.svg, Public Domain; geoBoundaries https://www.geoboundaries.org (Runfola et al., 2020), CC BY 4.0. Selected and normalized for this teaching pack.",
+  "limitations": [
+    "2019 highly simplified provincial teaching geometry, not a complete national standard map or certified border depiction.",
+    "All 34 requested region identities are present, but South China Sea islands/inset and maritime line layers are absent; Macau is extremely coarse.",
+    "Source metadata describes disputed areas; this learning roster is not evidence about actual administration or boundary adjudication.",
+    "No authoritative capital points retained; place/capital/hydro capabilities disabled."
+  ]
+}

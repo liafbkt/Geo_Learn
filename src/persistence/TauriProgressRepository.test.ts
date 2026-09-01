@@ -70,12 +70,16 @@ function session(): PracticeSession {
 describe('TauriProgressRepository', () => {
   beforeEach(() => invokeMock.mockReset());
 
-  it('uses exactly the six progress commands with explicit camelCase payloads and preserves a fractional EMA', async () => {
+  it('uses the progress commands with explicit camelCase payloads and restores learning history', async () => {
     const repository = new TauriProgressRepository();
     invokeMock.mockResolvedValueOnce([mastery()]);
     await expect(repository.loadSnapshot('learner-1', 'china-provinces')).resolves.toEqual([
       mastery(),
     ]);
+    invokeMock.mockResolvedValueOnce([event()]);
+    await expect(repository.loadAttemptHistory('learner-1', 'china-provinces')).resolves.toEqual([event()]);
+    invokeMock.mockResolvedValueOnce(session().carryoverRetryDebts);
+    await expect(repository.loadRetryDebts('learner-1', 'china-provinces')).resolves.toEqual(session().carryoverRetryDebts);
 
     invokeMock.mockResolvedValueOnce(undefined);
     await repository.saveAttempt({ event: event(), session: session(), mastery: mastery() });
@@ -98,6 +102,8 @@ describe('TauriProgressRepository', () => {
 
     expect(invokeMock.mock.calls).toEqual([
       ['load_progress_snapshot', { learnerId: 'learner-1', packId: 'china-provinces' }],
+      ['load_attempt_history', { learnerId: 'learner-1', packId: 'china-provinces' }],
+      ['load_retry_debts', { learnerId: 'learner-1', packId: 'china-provinces' }],
       [
         'save_attempt_transaction',
         { input: { event: event(), session: session(), mastery: mastery() } },

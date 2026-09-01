@@ -1,0 +1,13 @@
+{
+  "date": "2026-08-31",
+  "method": "New scratch page mechanically copied from retained render.html.txt/render.tsx.txt templates; unchanged projectMap and MapViewport.",
+  "url": "http://127.0.0.1:1441/.superpowers/us-resource-review/render.html?pack=us-states",
+  "checks": {
+    "regionOptions": 50,
+    "regionSelection": "us-ak",
+    "capitalOptions": 50,
+    "capitalSelection": "us-ak-capital",
+    "errors": []
+  },
+  "coverage": "Fresh reconstruction smoke test only; full 50-state/50-capital interaction observations are retained separately, with their failures and retries."
+}

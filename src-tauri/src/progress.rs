@@ -51,7 +51,7 @@ pub struct MasteryDto {
     updated_at: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AttemptEventDto {
     attempt_id: String,
@@ -682,6 +682,76 @@ pub fn load_resumable_session(
             .then_with(|| right.1.session_id.cmp(&left.1.session_id))
     });
     Ok(eligible.into_iter().next().map(|(_, session)| session))
+}
+
+#[tauri::command]
+pub fn load_attempt_history(
+    database: State<'_, Database>,
+    learner_id: String,
+    pack_id: String,
+) -> Result<Vec<AttemptEventDto>, ProgressError> {
+    validate_id(&learner_id, "Learner")?;
+    validate_id(&pack_id, "Pack")?;
+    let connection = lock_database(&database)?;
+    let mut statement = connection
+        .prepare(
+            "SELECT attempt_id, session_id, learner_id, pack_id, entity_id, skill,
+                    question_kind, scheduled_review, delayed_retry, answer_attempt_count,
+                    correct, used_hint, response_ms, completed_at, mode, independent_correct
+             FROM attempt_event
+             WHERE learner_id = ?1 AND pack_id = ?2
+             ORDER BY completed_at ASC, attempt_id ASC",
+        )
+        .map_err(|_| ProgressError::persistence())?;
+    let rows = statement
+        .query_map(params![learner_id, pack_id], |row| {
+            Ok(AttemptEventDto {
+                attempt_id: row.get(0)?,
+                session_id: row.get(1)?,
+                learner_id: row.get(2)?,
+                pack_id: row.get(3)?,
+                entity_id: row.get(4)?,
+                skill: row.get(5)?,
+                question_kind: row.get(6)?,
+                scheduled_review: row.get::<_, i64>(7)? != 0,
+                delayed_retry: row.get::<_, i64>(8)? != 0,
+                answer_attempt_count: row.get(9)?,
+                correct: row.get::<_, i64>(10)? != 0,
+                used_hint: row.get::<_, i64>(11)? != 0,
+                response_ms: row.get(12)?,
+                completed_at: row.get(13)?,
+                mode: row.get(14)?,
+                independent_correct: row.get::<_, i64>(15)? != 0,
+            })
+        })
+        .map_err(|_| ProgressError::persistence())?;
+    rows.collect::<Result<Vec<_>, _>>()
+        .map_err(|_| ProgressError::persistence())
+}
+
+#[tauri::command]
+pub fn load_retry_debts(
+    database: State<'_, Database>,
+    learner_id: String,
+    pack_id: String,
+) -> Result<Vec<RetryDebtDto>, ProgressError> {
+    validate_id(&learner_id, "Learner")?;
+    validate_id(&pack_id, "Pack")?;
+    let connection = lock_database(&database)?;
+    let value = connection
+        .query_row(
+            "SELECT retry_debts_json FROM practice_session
+             WHERE learner_id = ?1 AND pack_id = ?2
+             ORDER BY started_at DESC, session_id DESC LIMIT 1",
+            params![learner_id, pack_id],
+            |row| row.get::<_, String>(0),
+        )
+        .optional()
+        .map_err(|_| ProgressError::persistence())?;
+    match value {
+        Some(value) => serde_json::from_str(&value).map_err(|_| ProgressError::persistence()),
+        None => Ok(Vec::new()),
+    }
 }
 
 fn default_settings() -> AppSettingsDto {

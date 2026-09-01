@@ -29,7 +29,10 @@ uuid = { version = "1", features = ["v4"] }
 zip = { version = "2.4", default-features = false, features = ["deflate"] }
 
 [dev-dependencies]
+base64 = "0.22"
+minisign-verify = "0.2"
 tempfile = "3"
 
 [target.'cfg(windows)'.dependencies]
+tauri-plugin-updater = "2"
 windows-sys = { version = "0.59", features = ["Win32_Storage_FileSystem"] }

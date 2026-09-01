@@ -1,0 +1,502 @@
+[
+  {
+    "id": "us-ak",
+    "screen": {
+      "x": 166.63844410652408,
+      "y": 220.51983639419308
+    },
+    "selected": "us-ak",
+    "passed": true,
+    "clearance": 32.210645161290316
+  },
+  {
+    "id": "us-al",
+    "screen": {
+      "x": 361.44522088071756,
+      "y": 385.5189391616132
+    },
+    "selected": "us-al",
+    "passed": true,
+    "clearance": 1.7484118181894708
+  },
+  {
+    "id": "us-ar",
+    "screen": {
+      "x": 341.4971219559864,
+      "y": 377.74057000297057
+    },
+    "selected": "us-ar",
+    "passed": true,
+    "clearance": 1.3377511183794304
+  },
+  {
+    "id": "us-az",
+    "screen": {
+      "x": 290.98714174093266,
+      "y": 378.625571461792
+    },
+    "selected": "us-az",
+    "passed": true,
+    "clearance": 4.243589351653119
+  },
+  {
+    "id": "us-ca",
+    "screen": {
+      "x": 265.59421313878215,
+      "y": 378.2564365929388
+    },
+    "selected": "us-ca",
+    "passed": true,
+    "clearance": 6.354315644189291
+  },
+  {
+    "id": "us-co",
+    "screen": {
+      "x": 299.71110260114773,
+      "y": 369.4474030598204
+    },
+    "selected": "us-co",
+    "passed": true,
+    "clearance": 4.401877466812785
+  },
+  {
+    "id": "us-ct",
+    "screen": {
+      "x": 404.55764238609396,
+      "y": 358.46420545839123
+    },
+    "selected": "us-co",
+    "passed": false,
+    "clearance": -1.9530472452999184
+  },
+  {
+    "id": "us-de",
+    "screen": {
+      "x": 400.22090131082507,
+      "y": 368.7189357950543
+    },
+    "selected": "us-co",
+    "passed": false,
+    "clearance": -3.2645751255543103
+  },
+  {
+    "id": "us-fl",
+    "screen": {
+      "x": 381.16776883770683,
+      "y": 410.38726333967395
+    },
+    "selected": "us-fl",
+    "passed": true,
+    "clearance": 3.3550892999348108
+  },
+  {
+    "id": "us-ga",
+    "screen": {
+      "x": 379.1346036764165,
+      "y": 393.67074894825106
+    },
+    "selected": "us-ga",
+    "passed": true,
+    "clearance": 2.590517576663658
+  },
+  {
+    "id": "us-hi",
+    "screen": {
+      "x": 152.34866346136278,
+      "y": 435.5955287288592
+    },
+    "selected": "us-hi",
+    "passed": true,
+    "clearance": 1.4356553603453288
+  },
+  {
+    "id": "us-ia",
+    "screen": {
+      "x": 336.4099490527606,
+      "y": 351.19754981706933
+    },
+    "selected": "us-ia",
+    "passed": true,
+    "clearance": 2.410683859433988
+  },
+  {
+    "id": "us-id",
+    "screen": {
+      "x": 285.1047383000724,
+      "y": 348.6446010934596
+    },
+    "selected": "us-id",
+    "passed": true,
+    "clearance": 4.550119164868802
+  },
+  {
+    "id": "us-il",
+    "screen": {
+      "x": 357.95635722480364,
+      "y": 371.04319068735674
+    },
+    "selected": "us-il",
+    "passed": true,
+    "clearance": 1.9599041558624912
+  },
+  {
+    "id": "us-in",
+    "screen": {
+      "x": 363.12708109577136,
+      "y": 357.11409040033897
+    },
+    "selected": "us-in",
+    "passed": true,
+    "clearance": 1.120118698213836
+  },
+  {
+    "id": "us-ks",
+    "screen": {
+      "x": 324.5282135688896,
+      "y": 368.45857478480923
+    },
+    "selected": "us-ks",
+    "passed": true,
+    "clearance": 6.05088131524637
+  },
+  {
+    "id": "us-ky",
+    "screen": {
+      "x": 357.82623636458857,
+      "y": 374.811829279352
+    },
+    "selected": "us-ky",
+    "passed": true,
+    "clearance": 0.8628699022808506
+  },
+  {
+    "id": "us-la",
+    "screen": {
+      "x": 344.7837653968466,
+      "y": 392.3665925250121
+    },
+    "selected": "us-la",
+    "passed": true,
+    "clearance": 2.9003811805601587
+  },
+  {
+    "id": "us-ma",
+    "screen": {
+      "x": 415.93892711727676,
+      "y": 357.611298700692
+    },
+    "selected": "us-la",
+    "passed": false,
+    "clearance": -1.0949774626848003
+  },
+  {
+    "id": "us-md",
+    "screen": {
+      "x": 387.94739851512617,
+      "y": 364.31115153751495
+    },
+    "selected": "us-md",
+    "passed": true,
+    "clearance": 0.4877556256674494
+  },
+  {
+    "id": "us-me",
+    "screen": {
+      "x": 419.4922557194273,
+      "y": 335.85521387521555
+    },
+    "selected": "us-me",
+    "passed": true,
+    "clearance": 3.362313812795084
+  },
+  {
+    "id": "us-mi",
+    "screen": {
+      "x": 371.4680084075993,
+      "y": 342.31037133611864
+    },
+    "selected": "us-mi",
+    "passed": true,
+    "clearance": 2.8749575591130334
+  },
+  {
+    "id": "us-mn",
+    "screen": {
+      "x": 339.6618101280294,
+      "y": 331.28655912718
+    },
+    "selected": "us-mn",
+    "passed": true,
+    "clearance": 6.145702490761499
+  },
+  {
+    "id": "us-mo",
+    "screen": {
+      "x": 353.70319765491115,
+      "y": 374.3008181199055
+    },
+    "selected": "us-mo",
+    "passed": true,
+    "clearance": 2.309744921494455
+  },
+  {
+    "id": "us-ms",
+    "screen": {
+      "x": 357.2796737839434,
+      "y": 384.4520270133677
+    },
+    "selected": "us-ms",
+    "passed": true,
+    "clearance": 2.396791660777993
+  },
+  {
+    "id": "us-mt",
+    "screen": {
+      "x": 301.44612883770685,
+      "y": 333.1239578634496
+    },
+    "selected": "us-mt",
+    "passed": true,
+    "clearance": 9.199852658104344
+  },
+  {
+    "id": "us-nc",
+    "screen": {
+      "x": 397.2719430312552,
+      "y": 379.79579129214625
+    },
+    "selected": "us-nc",
+    "passed": true,
+    "clearance": 1.7524034630143805
+  },
+  {
+    "id": "us-nd",
+    "screen": {
+      "x": 328.0917112032983,
+      "y": 327.35329395692645
+    },
+    "selected": "us-nd",
+    "passed": true,
+    "clearance": 3.667336925010608
+  },
+  {
+    "id": "us-ne",
+    "screen": {
+      "x": 322.2461972248036,
+      "y": 356.365102070726
+    },
+    "selected": "us-ne",
+    "passed": true,
+    "clearance": 5.944424188373662
+  },
+  {
+    "id": "us-nh",
+    "screen": {
+      "x": 412.2068922785671,
+      "y": 340.8556049548069
+    },
+    "selected": "us-ne",
+    "passed": false,
+    "clearance": -0.17332851152121498
+  },
+  {
+    "id": "us-nj",
+    "screen": {
+      "x": 401.86709356888963,
+      "y": 357.53935282453233
+    },
+    "selected": "us-ne",
+    "passed": false,
+    "clearance": -1.8029274781817368
+  },
+  {
+    "id": "us-nm",
+    "screen": {
+      "x": 300.36610432157784,
+      "y": 389.53434966585223
+    },
+    "selected": "us-nm",
+    "passed": true,
+    "clearance": 4.753516129032278
+  },
+  {
+    "id": "us-nv",
+    "screen": {
+      "x": 273.6665619559864,
+      "y": 360.8009806432342
+    },
+    "selected": "us-nv",
+    "passed": true,
+    "clearance": 6.565736931909001
+  },
+  {
+    "id": "us-ny",
+    "screen": {
+      "x": 391.27630604200795,
+      "y": 351.54292666739434
+    },
+    "selected": "us-ny",
+    "passed": true,
+    "clearance": 2.653984061290699
+  },
+  {
+    "id": "us-oh",
+    "screen": {
+      "x": 381.73503593448106,
+      "y": 357.4564135207761
+    },
+    "selected": "us-oh",
+    "passed": true,
+    "clearance": 1.8059354838709396
+  },
+  {
+    "id": "us-ok",
+    "screen": {
+      "x": 338.03397098824456,
+      "y": 376.6002156509203
+    },
+    "selected": "us-ok",
+    "passed": true,
+    "clearance": 1.9587498734638982
+  },
+  {
+    "id": "us-or",
+    "screen": {
+      "x": 261.4686398054488,
+      "y": 349.2714096902564
+    },
+    "selected": "us-or",
+    "passed": true,
+    "clearance": 5.624258064516141
+  },
+  {
+    "id": "us-pa",
+    "screen": {
+      "x": 386.33681313878213,
+      "y": 357.4811792701672
+    },
+    "selected": "us-pa",
+    "passed": true,
+    "clearance": 3.0550967741935438
+  },
+  {
+    "id": "us-ri",
+    "screen": {
+      "x": 410.9228458269542,
+      "y": 358.07516027066873
+    },
+    "selected": "us-pa",
+    "passed": false,
+    "clearance": -3.4162357102392273
+  },
+  {
+    "id": "us-sc",
+    "screen": {
+      "x": 376.6271279774918,
+      "y": 382.53636118007046
+    },
+    "selected": "us-pa",
+    "passed": false,
+    "clearance": 0.44456413224048263
+  },
+  {
+    "id": "us-sd",
+    "screen": {
+      "x": 331.37542303125525,
+      "y": 346.32114017092795
+    },
+    "selected": "us-sd",
+    "passed": true,
+    "clearance": 3.156025689104302
+  },
+  {
+    "id": "us-tn",
+    "screen": {
+      "x": 372.22350948286817,
+      "y": 378.28080535744454
+    },
+    "selected": "us-tn",
+    "passed": true,
+    "clearance": 2.155617451312511
+  },
+  {
+    "id": "us-tx",
+    "screen": {
+      "x": 321.22562948286816,
+      "y": 390.12149031140484
+    },
+    "selected": "us-tx",
+    "passed": true,
+    "clearance": 6.819212670566135
+  },
+  {
+    "id": "us-ut",
+    "screen": {
+      "x": 288.6123215258789,
+      "y": 370.042116955495
+    },
+    "selected": "us-ut",
+    "passed": true,
+    "clearance": 4.75707915129206
+  },
+  {
+    "id": "us-va",
+    "screen": {
+      "x": 383.0331907731907,
+      "y": 375.57681915357773
+    },
+    "selected": "us-va",
+    "passed": true,
+    "clearance": 0.700005362729219
+  },
+  {
+    "id": "us-vt",
+    "screen": {
+      "x": 411.05143980544875,
+      "y": 342.08008956526976
+    },
+    "selected": "us-va",
+    "passed": false,
+    "clearance": -1.8789155518118794
+  },
+  {
+    "id": "us-wa",
+    "screen": {
+      "x": 265.11895593448105,
+      "y": 331.3390222066547
+    },
+    "selected": "us-wa",
+    "passed": true,
+    "clearance": 6.153003574068085
+  },
+  {
+    "id": "us-wi",
+    "screen": {
+      "x": 354.15271163340583,
+      "y": 339.8966421580998
+    },
+    "selected": "us-wi",
+    "passed": true,
+    "clearance": 3.86418831535665
+  },
+  {
+    "id": "us-wv",
+    "screen": {
+      "x": 388.16827722480366,
+      "y": 366.30279417042397
+    },
+    "selected": "us-wv",
+    "passed": true,
+    "clearance": 1.1199771724483831
+  },
+  {
+    "id": "us-wy",
+    "screen": {
+      "x": 297.0318221710402,
+      "y": 349.9798444869577
+    },
+    "selected": "us-wy",
+    "passed": true,
+    "clearance": 8.04604018377343
+  }
+]

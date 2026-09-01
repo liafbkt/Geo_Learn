@@ -1,0 +1,550 @@
+[
+  {
+    "aliases": [
+      "北京",
+      "Beijing Municipality"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-110000",
+    "kind": "region",
+    "names": {
+      "en": "Beijing",
+      "zh": "北京市"
+    }
+  },
+  {
+    "aliases": [
+      "天津",
+      "Tianjin Municipality"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-120000",
+    "kind": "region",
+    "names": {
+      "en": "Tianjin",
+      "zh": "天津市"
+    }
+  },
+  {
+    "aliases": [
+      "河北",
+      "Hebei Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-130000",
+    "kind": "region",
+    "names": {
+      "en": "Hebei",
+      "zh": "河北省"
+    }
+  },
+  {
+    "aliases": [
+      "山西",
+      "Shanxi Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-140000",
+    "kind": "region",
+    "names": {
+      "en": "Shanxi",
+      "zh": "山西省"
+    }
+  },
+  {
+    "aliases": [
+      "内蒙古",
+      "Inner Mongolia Autonomous Region"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-150000",
+    "kind": "region",
+    "names": {
+      "en": "Inner Mongolia",
+      "zh": "内蒙古自治区"
+    }
+  },
+  {
+    "aliases": [
+      "辽宁",
+      "Liaoning Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-210000",
+    "kind": "region",
+    "names": {
+      "en": "Liaoning",
+      "zh": "辽宁省"
+    }
+  },
+  {
+    "aliases": [
+      "吉林",
+      "Jilin Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-220000",
+    "kind": "region",
+    "names": {
+      "en": "Jilin",
+      "zh": "吉林省"
+    }
+  },
+  {
+    "aliases": [
+      "黑龙江",
+      "Heilongjiang Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-230000",
+    "kind": "region",
+    "names": {
+      "en": "Heilongjiang",
+      "zh": "黑龙江省"
+    }
+  },
+  {
+    "aliases": [
+      "上海",
+      "Shanghai Municipality"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310000",
+    "kind": "region",
+    "names": {
+      "en": "Shanghai",
+      "zh": "上海市"
+    }
+  },
+  {
+    "aliases": [
+      "江苏",
+      "Jiangsu Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-320000",
+    "kind": "region",
+    "names": {
+      "en": "Jiangsu",
+      "zh": "江苏省"
+    }
+  },
+  {
+    "aliases": [
+      "浙江",
+      "Zhejiang Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-330000",
+    "kind": "region",
+    "names": {
+      "en": "Zhejiang",
+      "zh": "浙江省"
+    }
+  },
+  {
+    "aliases": [
+      "安徽",
+      "Anhui Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-340000",
+    "kind": "region",
+    "names": {
+      "en": "Anhui",
+      "zh": "安徽省"
+    }
+  },
+  {
+    "aliases": [
+      "福建",
+      "Fujian Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-350000",
+    "kind": "region",
+    "names": {
+      "en": "Fujian",
+      "zh": "福建省"
+    }
+  },
+  {
+    "aliases": [
+      "江西",
+      "Jiangxi Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-360000",
+    "kind": "region",
+    "names": {
+      "en": "Jiangxi",
+      "zh": "江西省"
+    }
+  },
+  {
+    "aliases": [
+      "山东",
+      "Shandong Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-370000",
+    "kind": "region",
+    "names": {
+      "en": "Shandong",
+      "zh": "山东省"
+    }
+  },
+  {
+    "aliases": [
+      "河南",
+      "Henan Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-410000",
+    "kind": "region",
+    "names": {
+      "en": "Henan",
+      "zh": "河南省"
+    }
+  },
+  {
+    "aliases": [
+      "湖北",
+      "Hubei Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-420000",
+    "kind": "region",
+    "names": {
+      "en": "Hubei",
+      "zh": "湖北省"
+    }
+  },
+  {
+    "aliases": [
+      "湖南",
+      "Hunan Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-430000",
+    "kind": "region",
+    "names": {
+      "en": "Hunan",
+      "zh": "湖南省"
+    }
+  },
+  {
+    "aliases": [
+      "广东",
+      "Guangdong Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-440000",
+    "kind": "region",
+    "names": {
+      "en": "Guangdong",
+      "zh": "广东省"
+    }
+  },
+  {
+    "aliases": [
+      "广西",
+      "Guangxi Zhuang Autonomous Region"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-450000",
+    "kind": "region",
+    "names": {
+      "en": "Guangxi",
+      "zh": "广西壮族自治区"
+    }
+  },
+  {
+    "aliases": [
+      "海南",
+      "Hainan Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-460000",
+    "kind": "region",
+    "names": {
+      "en": "Hainan",
+      "zh": "海南省"
+    }
+  },
+  {
+    "aliases": [
+      "重庆",
+      "Chongqing Municipality"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-500000",
+    "kind": "region",
+    "names": {
+      "en": "Chongqing",
+      "zh": "重庆市"
+    }
+  },
+  {
+    "aliases": [
+      "四川",
+      "Sichuan Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-510000",
+    "kind": "region",
+    "names": {
+      "en": "Sichuan",
+      "zh": "四川省"
+    }
+  },
+  {
+    "aliases": [
+      "贵州",
+      "Guizhou Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-520000",
+    "kind": "region",
+    "names": {
+      "en": "Guizhou",
+      "zh": "贵州省"
+    }
+  },
+  {
+    "aliases": [
+      "云南",
+      "Yunnan Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-530000",
+    "kind": "region",
+    "names": {
+      "en": "Yunnan",
+      "zh": "云南省"
+    }
+  },
+  {
+    "aliases": [
+      "西藏",
+      "Tibet",
+      "Tibet Autonomous Region",
+      "Xizang Autonomous Region"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-540000",
+    "kind": "region",
+    "names": {
+      "en": "Xizang",
+      "zh": "西藏自治区"
+    }
+  },
+  {
+    "aliases": [
+      "陕西",
+      "Shaanxi Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-610000",
+    "kind": "region",
+    "names": {
+      "en": "Shaanxi",
+      "zh": "陕西省"
+    }
+  },
+  {
+    "aliases": [
+      "甘肃",
+      "Gansu Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-620000",
+    "kind": "region",
+    "names": {
+      "en": "Gansu",
+      "zh": "甘肃省"
+    }
+  },
+  {
+    "aliases": [
+      "青海",
+      "Qinghai Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-630000",
+    "kind": "region",
+    "names": {
+      "en": "Qinghai",
+      "zh": "青海省"
+    }
+  },
+  {
+    "aliases": [
+      "宁夏",
+      "Ningxia Hui Autonomous Region"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-640000",
+    "kind": "region",
+    "names": {
+      "en": "Ningxia",
+      "zh": "宁夏回族自治区"
+    }
+  },
+  {
+    "aliases": [
+      "新疆",
+      "Xinjiang Uyghur Autonomous Region"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-650000",
+    "kind": "region",
+    "names": {
+      "en": "Xinjiang",
+      "zh": "新疆维吾尔自治区"
+    }
+  },
+  {
+    "aliases": [
+      "台湾",
+      "Taiwan Province"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-710000",
+    "kind": "region",
+    "names": {
+      "en": "Taiwan",
+      "zh": "台湾省"
+    }
+  },
+  {
+    "aliases": [
+      "香港",
+      "Hong Kong Special Administrative Region"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-810000",
+    "kind": "region",
+    "names": {
+      "en": "Hong Kong",
+      "zh": "香港特别行政区"
+    }
+  },
+  {
+    "aliases": [
+      "澳门",
+      "Macau",
+      "Macao Special Administrative Region",
+      "Macau Special Administrative Region"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-820000",
+    "kind": "region",
+    "names": {
+      "en": "Macao",
+      "zh": "澳门特别行政区"
+    }
+  }
+]

@@ -52,6 +52,7 @@ export type MapViewportProps = Readonly<{
   map: ProjectedMap;
   mode: MapMode;
   selection: MapSelection | null;
+  interactive?: boolean;
   answerEntityId?: string;
   selectableKind?: MapSelection['kind'];
   reducedMotion?: boolean;

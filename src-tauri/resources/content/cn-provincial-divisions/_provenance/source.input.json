@@ -1,0 +1,226 @@
+{
+  "coordinateReferenceSystem": "EPSG:4326",
+  "id": "cn-provincial-divisions-geoboundaries",
+  "license": "Upstream vector by Newfraferz87 dedicated to Public Domain (PD-self); geoBoundaries derivative CC BY 4.0, attribution required.",
+  "organization": "Newfraferz87 / Wikimedia Commons / geoBoundaries, William & Mary geoLab",
+  "processing": [
+    {
+      "operation": "pin-original-sources-and-permissions",
+      "parameters": {
+        "commit": "9469f09592ced973a3448cf66b6100b741b64c0d",
+        "receiptSha256": "adf88c1479fa7514015f9045f132a43a26525f36bee3c9a7f0ac217d488c5e23"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 1697,
+        "file": "ADM1-api.json",
+        "retrievedAt": "2026-08-31",
+        "role": "license-or-provenance",
+        "sha256": "b5816c51ebefc26b1154872e663cd5a8eda830008f738a965d5dd610e72b09d0",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/CHN/ADM1/"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 263343,
+        "file": "ADM1-simplified.geojson",
+        "retrievedAt": "2026-08-31",
+        "role": "geometry",
+        "sha256": "bc4afc7eacf4351ae5b3ae7a612327987ce1123cb5deb8574fb49107091c6623",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM1/geoBoundaries-CHN-ADM1_simplified.geojson"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 5540,
+        "file": "china-names-zh.html",
+        "retrievedAt": "2026-08-31",
+        "role": "name-facts",
+        "sha256": "5864f007837f0caf2acb5ef5309d3ceb38be509b2cc1baeab7851e7cab6209a1",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://www.locpg.gov.cn/2022-06/07/c_1211652713.htm"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 636274,
+        "file": "CHN_ADM1-source.zip",
+        "retrievedAt": "2026-08-31",
+        "role": "license-or-provenance",
+        "sha256": "9cf4cb357ea388cc135b47664b40f9483c80bf29c625d3a69f9bc70011704ea4",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/sourceData/gbOpen/CHN_ADM1.zip"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 4316,
+        "file": "geoboundaries-citation.txt",
+        "retrievedAt": "2026-08-31",
+        "role": "license-or-provenance",
+        "sha256": "f6ea7572bea6036c4cdcacf8c0ca7bf09098d4e600d19546d7432533e9a290d5",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM1/CITATION-AND-USE-geoBoundaries.txt"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 12237,
+        "file": "geoboundaries-use.html",
+        "retrievedAt": "2026-08-31",
+        "role": "license-or-provenance",
+        "sha256": "f1e52073eebfc138e1d8fdf7574499f5ca5c407ac7fa8ba0ec904ebbe02354ed",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://www.geoboundaries.org/index.html"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 12263,
+        "file": "miit-names-zh.html",
+        "retrievedAt": "2026-08-31",
+        "role": "name-facts",
+        "sha256": "c47355821d77fa39ad723db6cffbb742c91b67f71e0572293fa79c7b868e0af8",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://www.miit.gov.cn/zwgk/zcwj/wjfb/gg/art/2020/art_e6ae132e19d541348f930d1dd6654f3d.html"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 8375,
+        "file": "nbs-names-en.html",
+        "retrievedAt": "2026-08-31",
+        "role": "name-facts",
+        "sha256": "6bc2517581a2288fc1429a0cf6caafaba0bf53cf4144e771edbdc89d1c404e89",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://www.stats.gov.cn/sj/ndsj/2025/html/notee.htm"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 111680,
+        "file": "upstream-author-license.html",
+        "retrievedAt": "2026-08-31",
+        "role": "license-or-provenance",
+        "sha256": "763968776e3248ad2e7abaeb3dbcd97275596ace67af859636cf7bb5896c19e3",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://commons.wikimedia.org/w/index.php?title=File:China_blank_province_map.svg&oldid=1013050215"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 685270,
+        "file": "upstream-license.png",
+        "retrievedAt": "2026-08-31",
+        "role": "license-or-provenance",
+        "sha256": "2ab8b268947740026e96457b64d2146168ce1315db847427ff571714a7a27cfb",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/sourceData/gbOpen/CHN_ADM1.zip#license.png"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 597,
+        "file": "upstream-meta.txt",
+        "retrievedAt": "2026-08-31",
+        "role": "license-or-provenance",
+        "sha256": "077b577697299a746b893b06542c132d3ce0d3a05a6f2448f62d356124b9cf26",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/sourceData/gbOpen/CHN_ADM1.zip#meta.txt"
+      }
+    },
+    {
+      "operation": "pin-source-file",
+      "parameters": {
+        "bytes": 60783,
+        "file": "upstream-reference.svg",
+        "retrievedAt": "2026-08-31",
+        "role": "visual-reference-only",
+        "sha256": "24d84e54f8e332fb9e48fe6eb131c0bc866411ddd8d671010630a265b09d5926",
+        "uncompressedBytes": null,
+        "uncompressedSha256": null,
+        "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/China_blank_province_map.svg"
+      }
+    },
+    {
+      "operation": "bind-reviewed-roster",
+      "parameters": {
+        "configSha256": "a46dc335f284b373ff57ef95c072826b9d5dbca023451605f229668bbf4f8f35",
+        "count": 34,
+        "naming": "Official Chinese/English facts; explicit geographic short names. Guangdong and Ningxia source typos corrected, not accepted as aliases.",
+        "rosterSha256": "4005f4e59d8b3c27dfb419ad59a0849ba893e27781b9d111dd5d681eec0776e5",
+        "selection": "unique shapeID plus exact original name and bbox"
+      }
+    },
+    {
+      "operation": "select-source-features",
+      "parameters": {
+        "originalFeatureCount": 34,
+        "originalFileSha256": "bc4afc7eacf4351ae5b3ae7a612327987ce1123cb5deb8574fb49107091c6623",
+        "selectedFeatureCount": 34,
+        "yearRepresented": "2019"
+      }
+    },
+    {
+      "operation": "adapt-declared-crs84-to-project-wgs84-lonlat",
+      "parameters": {
+        "coordinateValuesUnchanged": true,
+        "input": "urn:ogc:def:crs:OGC:1.3:CRS84",
+        "output": "EPSG:4326 longitude,latitude array contract",
+        "reference": "https://www.rfc-editor.org/rfc/rfc7946#section-4"
+      }
+    },
+    {
+      "operation": "normalize-d3-ring-winding",
+      "parameters": {
+        "movedCoordinates": 0,
+        "regions": 34,
+        "removedVertices": 0,
+        "reversedRings": 48,
+        "rings": 48,
+        "vertices": 5731
+      }
+    },
+    {
+      "operation": "retain-attribution-and-limitations",
+      "parameters": {
+        "attribution": "Newfraferz87 (2019), China blank province map.svg, Public Domain; geoBoundaries https://www.geoboundaries.org (Runfola et al., 2020), CC BY 4.0. Selected and normalized for this teaching pack.",
+        "entityInputSha256": "71dd217bbd37d6fb5270dc4ff7ebba1ea829557404529b8148886b2c67b05950",
+        "geometryInputSha256": "9bac4b3763a0dd441ac9eda9d1a5b00164d7669575c5a8332a34faff5af19444",
+        "limitations": "2019 highly simplified provincial teaching geometry, not a complete national standard map or certified border depiction. All 34 requested region identities are present, but South China Sea islands/inset and maritime line layers are absent; Macau is extremely coarse. Source metadata describes disputed areas; this learning roster is not evidence about actual administration or boundary adjudication. No authoritative capital points retained; place/capital/hydro capabilities disabled.",
+        "reviewStatus": "development-only; no named-human or statutory public-release approval"
+      }
+    }
+  ],
+  "quantization": null,
+  "retrievedAt": "2026-08-31",
+  "reviewIdentifier": null,
+  "sha256": "9bac4b3763a0dd441ac9eda9d1a5b00164d7669575c5a8332a34faff5af19444",
+  "simplification": null,
+  "url": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/CHN/ADM1/geoBoundaries-CHN-ADM1_simplified.geojson"
+}

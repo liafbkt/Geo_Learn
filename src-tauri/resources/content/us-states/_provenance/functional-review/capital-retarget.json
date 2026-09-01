@@ -1,0 +1,82 @@
+[
+  {
+    "id": "us-ca-capital",
+    "screen": {
+      "x": 254.74898042539155,
+      "y": 354.37373587255837
+    },
+    "clearance": 3.0453426594611837,
+    "selected": "us-ca-capital",
+    "passed": true
+  },
+  {
+    "id": "us-co-capital",
+    "screen": {
+      "x": 307.8318711751067,
+      "y": 351.33317277047956
+    },
+    "clearance": 2.8851719681862242,
+    "selected": "us-co-capital",
+    "passed": true
+  },
+  {
+    "id": "us-ct-capital",
+    "screen": {
+      "x": 407.5875307068895,
+      "y": 345.16951059117855
+    },
+    "clearance": 0.7453446650896156,
+    "selected": "us-ri-capital",
+    "passed": false
+  },
+  {
+    "id": "us-de-capital",
+    "screen": {
+      "x": 402.53092713791057,
+      "y": 353.44808375349544
+    },
+    "clearance": 1.2565835097474558,
+    "selected": "us-de-capital",
+    "passed": true
+  },
+  {
+    "id": "us-ma-capital",
+    "screen": {
+      "x": 417.2552524964077,
+      "y": 336.8300678072223
+    },
+    "clearance": 1.015862412355367,
+    "selected": "us-ri-capital",
+    "passed": false
+  },
+  {
+    "id": "us-md-capital",
+    "screen": {
+      "x": 399.216813507834,
+      "y": 353.62775198350494
+    },
+    "clearance": 1.6699896223756383,
+    "selected": "us-md-capital",
+    "passed": true
+  },
+  {
+    "id": "us-nh-capital",
+    "screen": {
+      "x": 414.7305943355982,
+      "y": 333.0778598971381
+    },
+    "clearance": 1.9195588473793919,
+    "selected": "us-nh-capital",
+    "passed": true
+  },
+  {
+    "id": "us-nj-capital",
+    "screen": {
+      "x": 403.4459837935016,
+      "y": 347.48764563164247
+    },
+    "clearance": 3.370325220392301,
+    "selected": "us-nj-capital",
+    "passed": true
+  }
+]

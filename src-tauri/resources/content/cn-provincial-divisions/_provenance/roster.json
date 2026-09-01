@@ -1,0 +1,652 @@
+[
+  {
+    "id": "cn-110000",
+    "names": {
+      "zh": "北京市",
+      "en": "Beijing"
+    },
+    "sourceName": "Beijing Municipality",
+    "shapeID": "43563684B17418114845297",
+    "bbox": [
+      115.54020466000009,
+      39.57509420400004,
+      117.50647273100003,
+      41.07550586600007
+    ],
+    "aliases": [
+      "北京",
+      "Beijing Municipality"
+    ]
+  },
+  {
+    "id": "cn-120000",
+    "names": {
+      "zh": "天津市",
+      "en": "Tianjin"
+    },
+    "sourceName": "Tianjin Municipality",
+    "shapeID": "43563684B84701301190484",
+    "bbox": [
+      116.79262414000004,
+      38.677459283000076,
+      118.15694307100011,
+      40.30002925500003
+    ],
+    "aliases": [
+      "天津",
+      "Tianjin Municipality"
+    ]
+  },
+  {
+    "id": "cn-130000",
+    "names": {
+      "zh": "河北省",
+      "en": "Hebei"
+    },
+    "sourceName": "Hebei Province",
+    "shapeID": "43563684B58229551045164",
+    "bbox": [
+      113.59500164600001,
+      36.20226386400003,
+      119.97126983200008,
+      42.68079652900008
+    ],
+    "aliases": [
+      "河北",
+      "Hebei Province"
+    ]
+  },
+  {
+    "id": "cn-140000",
+    "names": {
+      "zh": "山西省",
+      "en": "Shanxi"
+    },
+    "sourceName": "Shanxi Province",
+    "shapeID": "43563684B34303967365755",
+    "bbox": [
+      110.37033354800008,
+      34.719451615000025,
+      114.622318489,
+      40.79157821800004
+    ],
+    "aliases": [
+      "山西",
+      "Shanxi Province"
+    ]
+  },
+  {
+    "id": "cn-150000",
+    "names": {
+      "zh": "内蒙古自治区",
+      "en": "Inner Mongolia"
+    },
+    "sourceName": "Inner Mongolia Autonomous Region",
+    "shapeID": "43563684B95381459098578",
+    "bbox": [
+      97.36665056300006,
+      37.52671813300003,
+      126.10750757000005,
+      53.40578626000007
+    ],
+    "aliases": [
+      "内蒙古",
+      "Inner Mongolia Autonomous Region"
+    ]
+  },
+  {
+    "id": "cn-210000",
+    "names": {
+      "zh": "辽宁省",
+      "en": "Liaoning"
+    },
+    "sourceName": "Liaoning Province",
+    "shapeID": "43563684B26929678147954",
+    "bbox": [
+      118.9562724110001,
+      38.76056710100005,
+      125.8422217320001,
+      43.53805233500003
+    ],
+    "aliases": [
+      "辽宁",
+      "Liaoning Province"
+    ]
+  },
+  {
+    "id": "cn-220000",
+    "names": {
+      "zh": "吉林省",
+      "en": "Jilin"
+    },
+    "sourceName": "Jilin Province",
+    "shapeID": "43563684B3982601277390",
+    "bbox": [
+      121.77456298200002,
+      40.86282897400008,
+      131.32245463700008,
+      46.34939295400005
+    ],
+    "aliases": [
+      "吉林",
+      "Jilin Province"
+    ]
+  },
+  {
+    "id": "cn-230000",
+    "names": {
+      "zh": "黑龙江省",
+      "en": "Heilongjiang"
+    },
+    "sourceName": "Heilongjiang Province",
+    "shapeID": "43563684B55920014778896",
+    "bbox": [
+      121.33680561800008,
+      43.428304843000035,
+      134.740415954,
+      53.57096340100003
+    ],
+    "aliases": [
+      "黑龙江",
+      "Heilongjiang Province"
+    ]
+  },
+  {
+    "id": "cn-310000",
+    "names": {
+      "zh": "上海市",
+      "en": "Shanghai"
+    },
+    "sourceName": "Shanghai Municipality",
+    "shapeID": "43563684B32591653033375",
+    "bbox": [
+      121.0018690170001,
+      30.710089537000044,
+      122.0441424600001,
+      31.836917734000053
+    ],
+    "aliases": [
+      "上海",
+      "Shanghai Municipality"
+    ]
+  },
+  {
+    "id": "cn-320000",
+    "names": {
+      "zh": "江苏省",
+      "en": "Jiangsu"
+    },
+    "sourceName": "Jiangsu Province",
+    "shapeID": "43563684B64367354813847",
+    "bbox": [
+      116.45645125200008,
+      30.87856105000003,
+      121.98260608400005,
+      35.199699183000064
+    ],
+    "aliases": [
+      "江苏",
+      "Jiangsu Province"
+    ]
+  },
+  {
+    "id": "cn-330000",
+    "names": {
+      "zh": "浙江省",
+      "en": "Zhejiang"
+    },
+    "sourceName": "Zhejiang Province",
+    "shapeID": "43563684B73528730180553",
+    "bbox": [
+      118.16848252900002,
+      27.28741374300006,
+      122.41145226800006,
+      31.22506099000003
+    ],
+    "aliases": [
+      "浙江",
+      "Zhejiang Province"
+    ]
+  },
+  {
+    "id": "cn-340000",
+    "names": {
+      "zh": "安徽省",
+      "en": "Anhui"
+    },
+    "sourceName": "Anhui Province",
+    "shapeID": "43563684B75549295130005",
+    "bbox": [
+      115.00037873100007,
+      29.48723452300004,
+      119.73999731800006,
+      34.73220183800004
+    ],
+    "aliases": [
+      "安徽",
+      "Anhui Province"
+    ]
+  },
+  {
+    "id": "cn-350000",
+    "names": {
+      "zh": "福建省",
+      "en": "Fujian"
+    },
+    "sourceName": "Fujian Province",
+    "shapeID": "43563684B30737817496648",
+    "bbox": [
+      115.90743926300001,
+      23.61636651200007,
+      120.54140008200011,
+      28.390088225000056
+    ],
+    "aliases": [
+      "福建",
+      "Fujian Province"
+    ]
+  },
+  {
+    "id": "cn-360000",
+    "names": {
+      "zh": "江西省",
+      "en": "Jiangxi"
+    },
+    "sourceName": "Jiangxi Province",
+    "shapeID": "43563684B87813050901813",
+    "bbox": [
+      113.67845004600008,
+      24.58754335900005,
+      118.59997933500006,
+      30.147835258000043
+    ],
+    "aliases": [
+      "江西",
+      "Jiangxi Province"
+    ]
+  },
+  {
+    "id": "cn-370000",
+    "names": {
+      "zh": "山东省",
+      "en": "Shandong"
+    },
+    "sourceName": "Shandong Province",
+    "shapeID": "43563684B58995436924100",
+    "bbox": [
+      114.94853007400002,
+      34.513995805000036,
+      122.65527878400007,
+      38.30339074800003
+    ],
+    "aliases": [
+      "山东",
+      "Shandong Province"
+    ]
+  },
+  {
+    "id": "cn-410000",
+    "names": {
+      "zh": "河南省",
+      "en": "Henan"
+    },
+    "sourceName": "Henan Province",
+    "shapeID": "43563684B96917371447908",
+    "bbox": [
+      110.43833766800009,
+      31.51406773700006,
+      116.73244143000011,
+      36.46220698500008
+    ],
+    "aliases": [
+      "河南",
+      "Henan Province"
+    ]
+  },
+  {
+    "id": "cn-420000",
+    "names": {
+      "zh": "湖北省",
+      "en": "Hubei"
+    },
+    "sourceName": "Hubei Province",
+    "shapeID": "43563684B41908353419915",
+    "bbox": [
+      108.53165476900006,
+      29.19659834600003,
+      116.2457002110001,
+      33.39701725200007
+    ],
+    "aliases": [
+      "湖北",
+      "Hubei Province"
+    ]
+  },
+  {
+    "id": "cn-430000",
+    "names": {
+      "zh": "湖南省",
+      "en": "Hunan"
+    },
+    "sourceName": "Hunan Province",
+    "shapeID": "43563684B64987462919315",
+    "bbox": [
+      108.91291055300007,
+      24.754874366000024,
+      114.3175584600001,
+      30.23649897300004
+    ],
+    "aliases": [
+      "湖南",
+      "Hunan Province"
+    ]
+  },
+  {
+    "id": "cn-440000",
+    "names": {
+      "zh": "广东省",
+      "en": "Guangdong"
+    },
+    "sourceName": "Guangzhou Province",
+    "shapeID": "43563684B38891657012300",
+    "bbox": [
+      109.68254305100004,
+      20.261775017000048,
+      117.22161590400003,
+      25.585525807000067
+    ],
+    "aliases": [
+      "广东",
+      "Guangdong Province"
+    ]
+  },
+  {
+    "id": "cn-450000",
+    "names": {
+      "zh": "广西壮族自治区",
+      "en": "Guangxi"
+    },
+    "sourceName": "Guangxi Zhuang Autonomous Region",
+    "shapeID": "43563684B59914390554750",
+    "bbox": [
+      104.54235583900004,
+      21.437599915000078,
+      112.076879082,
+      26.469079374000046
+    ],
+    "aliases": [
+      "广西",
+      "Guangxi Zhuang Autonomous Region"
+    ]
+  },
+  {
+    "id": "cn-460000",
+    "names": {
+      "zh": "海南省",
+      "en": "Hainan"
+    },
+    "sourceName": "Hainan Province",
+    "shapeID": "43563684B67556328368055",
+    "bbox": [
+      108.59849978800008,
+      18.17207570000005,
+      110.98406070400006,
+      20.15999338000006
+    ],
+    "aliases": [
+      "海南",
+      "Hainan Province"
+    ]
+  },
+  {
+    "id": "cn-500000",
+    "names": {
+      "zh": "重庆市",
+      "en": "Chongqing"
+    },
+    "sourceName": "Chongqing Municipality",
+    "shapeID": "43563684B97743196909507",
+    "bbox": [
+      105.37303897000004,
+      28.344423552000023,
+      110.25866772300009,
+      32.29969266300003
+    ],
+    "aliases": [
+      "重庆",
+      "Chongqing Municipality"
+    ]
+  },
+  {
+    "id": "cn-510000",
+    "names": {
+      "zh": "四川省",
+      "en": "Sichuan"
+    },
+    "sourceName": "Sichuan Province",
+    "shapeID": "43563684B14397599951889",
+    "bbox": [
+      97.43043593900006,
+      26.17161581000005,
+      108.75889331500008,
+      34.323977564000074
+    ],
+    "aliases": [
+      "四川",
+      "Sichuan Province"
+    ]
+  },
+  {
+    "id": "cn-520000",
+    "names": {
+      "zh": "贵州省",
+      "en": "Guizhou"
+    },
+    "sourceName": "Guizhou Province",
+    "shapeID": "43563684B78583622565599",
+    "bbox": [
+      103.69187770500008,
+      24.779055223000057,
+      109.59644410100009,
+      29.34883176200003
+    ],
+    "aliases": [
+      "贵州",
+      "Guizhou Province"
+    ]
+  },
+  {
+    "id": "cn-530000",
+    "names": {
+      "zh": "云南省",
+      "en": "Yunnan"
+    },
+    "sourceName": "Yunnan Province",
+    "shapeID": "43563684B84540832148656",
+    "bbox": [
+      97.58261748200005,
+      21.171143518000065,
+      106.20385541500008,
+      29.340099191000036
+    ],
+    "aliases": [
+      "云南",
+      "Yunnan Province"
+    ]
+  },
+  {
+    "id": "cn-540000",
+    "names": {
+      "zh": "西藏自治区",
+      "en": "Xizang"
+    },
+    "sourceName": "Tibet Autonomous Region",
+    "shapeID": "43563684B19802372559419",
+    "bbox": [
+      78.46692369700008,
+      26.888238949000026,
+      99.12145406400003,
+      36.54604898300005
+    ],
+    "aliases": [
+      "西藏",
+      "Tibet",
+      "Tibet Autonomous Region",
+      "Xizang Autonomous Region"
+    ]
+  },
+  {
+    "id": "cn-610000",
+    "names": {
+      "zh": "陕西省",
+      "en": "Shaanxi"
+    },
+    "sourceName": "Shaanxi Province",
+    "shapeID": "43563684B62959128536432",
+    "bbox": [
+      105.81978364100007,
+      31.90566657900007,
+      111.27180531600004,
+      39.64571575400004
+    ],
+    "aliases": [
+      "陕西",
+      "Shaanxi Province"
+    ]
+  },
+  {
+    "id": "cn-620000",
+    "names": {
+      "zh": "甘肃省",
+      "en": "Gansu"
+    },
+    "sourceName": "Gansu Province",
+    "shapeID": "43563684B11053367304830",
+    "bbox": [
+      92.61770735400006,
+      32.65425219600007,
+      108.78256399700007,
+      42.65992465800008
+    ],
+    "aliases": [
+      "甘肃",
+      "Gansu Province"
+    ]
+  },
+  {
+    "id": "cn-630000",
+    "names": {
+      "zh": "青海省",
+      "en": "Qinghai"
+    },
+    "sourceName": "Qinghai Province",
+    "shapeID": "43563684B46172434476792",
+    "bbox": [
+      89.46694667100007,
+      31.711214959000074,
+      103.07792964900005,
+      39.208353818000035
+    ],
+    "aliases": [
+      "青海",
+      "Qinghai Province"
+    ]
+  },
+  {
+    "id": "cn-640000",
+    "names": {
+      "zh": "宁夏回族自治区",
+      "en": "Ningxia"
+    },
+    "sourceName": "Ningxia Ningxia Hui Autonomous Region",
+    "shapeID": "43563684B64666899633249",
+    "bbox": [
+      104.54273383900005,
+      35.42025567400003,
+      107.58140655100004,
+      39.432229076000056
+    ],
+    "aliases": [
+      "宁夏",
+      "Ningxia Hui Autonomous Region"
+    ]
+  },
+  {
+    "id": "cn-650000",
+    "names": {
+      "zh": "新疆维吾尔自治区",
+      "en": "Xinjiang"
+    },
+    "sourceName": "Xinjiang Uyghur Autonomous Region",
+    "shapeID": "43563684B50492231896073",
+    "bbox": [
+      73.60608328100005,
+      34.35575348300006,
+      96.40396180600004,
+      49.15072211000006
+    ],
+    "aliases": [
+      "新疆",
+      "Xinjiang Uyghur Autonomous Region"
+    ]
+  },
+  {
+    "id": "cn-710000",
+    "names": {
+      "zh": "台湾省",
+      "en": "Taiwan"
+    },
+    "sourceName": "Taiwan Province",
+    "shapeID": "43563684B32372453033755",
+    "bbox": [
+      120.02700091500003,
+      21.90161520500004,
+      121.94793223300007,
+      25.281383638000023
+    ],
+    "aliases": [
+      "台湾",
+      "Taiwan Province"
+    ]
+  },
+  {
+    "id": "cn-810000",
+    "names": {
+      "zh": "香港特别行政区",
+      "en": "Hong Kong"
+    },
+    "sourceName": "Hong Kong Special Administrative Region",
+    "shapeID": "43563684B69230098435171",
+    "bbox": [
+      113.8413328690001,
+      22.193000012000027,
+      114.41427295200003,
+      22.60404713300005
+    ],
+    "aliases": [
+      "香港",
+      "Hong Kong Special Administrative Region"
+    ]
+  },
+  {
+    "id": "cn-820000",
+    "names": {
+      "zh": "澳门特别行政区",
+      "en": "Macao"
+    },
+    "sourceName": "Macau Special Administrative Region",
+    "shapeID": "43563684B97104103456250",
+    "bbox": [
+      113.49713262300008,
+      22.091324835000023,
+      113.62211382400005,
+      22.227362490000075
+    ],
+    "aliases": [
+      "澳门",
+      "Macau",
+      "Macao Special Administrative Region",
+      "Macau Special Administrative Region"
+    ]
+  }
+]

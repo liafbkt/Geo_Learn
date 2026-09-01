@@ -1,0 +1,26 @@
+{
+  "capabilities": [
+    "locate_region",
+    "identify_region"
+  ],
+  "contentVersion": "1.0.0-dev.1",
+  "defaultViewport": {
+    "center": [
+      104,
+      35
+    ],
+    "scale": 800
+  },
+  "distributionStatus": "development-only",
+  "expectedEntityCounts": {
+    "place": 0,
+    "region": 34
+  },
+  "packId": "cn-provincial-divisions",
+  "primaryAnswerLanguage": "zh",
+  "schemaVersion": 1,
+  "title": {
+    "en": "China Provincial Divisions",
+    "zh": "中国省级行政区"
+  }
+}

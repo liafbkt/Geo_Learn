@@ -5,8 +5,16 @@ dist/
 coverage/
 playwright-report/
 test-results/
+release-artifacts/
 .pnpm-store/
 .tauri-template-spatial-memory-coach/
 src-tauri/target/
 *.log
 *.tsbuildinfo
+
+# Signing secrets must never be repository artifacts. Public keys remain trackable.
+.env
+.env.*
+*.key
+*.p12
+*.pfx

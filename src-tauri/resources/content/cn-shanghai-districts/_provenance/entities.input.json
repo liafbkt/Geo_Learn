@@ -1,0 +1,261 @@
+[
+  {
+    "aliases": [
+      "黄浦",
+      "Huangpu"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310101",
+    "kind": "region",
+    "names": {
+      "en": "Huangpu District",
+      "zh": "黄浦区"
+    }
+  },
+  {
+    "aliases": [
+      "徐汇",
+      "Xuhui"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310104",
+    "kind": "region",
+    "names": {
+      "en": "Xuhui District",
+      "zh": "徐汇区"
+    }
+  },
+  {
+    "aliases": [
+      "长宁",
+      "Changning"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310105",
+    "kind": "region",
+    "names": {
+      "en": "Changning District",
+      "zh": "长宁区"
+    }
+  },
+  {
+    "aliases": [
+      "静安",
+      "Jing'an",
+      "Jing’an",
+      "Jing’an District"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310106",
+    "kind": "region",
+    "names": {
+      "en": "Jing'an District",
+      "zh": "静安区"
+    }
+  },
+  {
+    "aliases": [
+      "普陀",
+      "Putuo"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310107",
+    "kind": "region",
+    "names": {
+      "en": "Putuo District",
+      "zh": "普陀区"
+    }
+  },
+  {
+    "aliases": [
+      "虹口",
+      "Hongkou"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310109",
+    "kind": "region",
+    "names": {
+      "en": "Hongkou District",
+      "zh": "虹口区"
+    }
+  },
+  {
+    "aliases": [
+      "杨浦",
+      "Yangpu"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310110",
+    "kind": "region",
+    "names": {
+      "en": "Yangpu District",
+      "zh": "杨浦区"
+    }
+  },
+  {
+    "aliases": [
+      "闵行",
+      "Minhang"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310112",
+    "kind": "region",
+    "names": {
+      "en": "Minhang District",
+      "zh": "闵行区"
+    }
+  },
+  {
+    "aliases": [
+      "宝山",
+      "Baoshan"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310113",
+    "kind": "region",
+    "names": {
+      "en": "Baoshan District",
+      "zh": "宝山区"
+    }
+  },
+  {
+    "aliases": [
+      "嘉定",
+      "Jiading"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310114",
+    "kind": "region",
+    "names": {
+      "en": "Jiading District",
+      "zh": "嘉定区"
+    }
+  },
+  {
+    "aliases": [
+      "浦东",
+      "Pudong",
+      "Pudong New District"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310115",
+    "kind": "region",
+    "names": {
+      "en": "Pudong New Area",
+      "zh": "浦东新区"
+    }
+  },
+  {
+    "aliases": [
+      "金山",
+      "Jinshan"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310116",
+    "kind": "region",
+    "names": {
+      "en": "Jinshan District",
+      "zh": "金山区"
+    }
+  },
+  {
+    "aliases": [
+      "松江",
+      "Songjiang"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310117",
+    "kind": "region",
+    "names": {
+      "en": "Songjiang District",
+      "zh": "松江区"
+    }
+  },
+  {
+    "aliases": [
+      "青浦",
+      "Qingpu"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310118",
+    "kind": "region",
+    "names": {
+      "en": "Qingpu District",
+      "zh": "青浦区"
+    }
+  },
+  {
+    "aliases": [
+      "奉贤",
+      "Fengxian"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310120",
+    "kind": "region",
+    "names": {
+      "en": "Fengxian District",
+      "zh": "奉贤区"
+    }
+  },
+  {
+    "aliases": [
+      "崇明",
+      "Chongming"
+    ],
+    "capabilities": [
+      "locate_region",
+      "identify_region"
+    ],
+    "id": "cn-310151",
+    "kind": "region",
+    "names": {
+      "en": "Chongming District",
+      "zh": "崇明区"
+    }
+  }
+]

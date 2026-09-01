@@ -4,7 +4,7 @@ import {
   type AppSettings,
 } from '../app/settings';
 import type { AttemptEvent, MasteryRecord } from '../learning/types';
-import type { PracticeSession } from '../practice/session';
+import type { PracticeSession, RetryDebt } from '../practice/session';
 import type { ProgressRepository } from './ProgressRepository';
 
 const DAY_MS = 86_400_000;
@@ -98,7 +98,7 @@ function compareAscii(left: string, right: string): number {
 
 export class InMemoryProgressRepository implements ProgressRepository {
   readonly #mastery = new Map<string, MasteryRecord>();
-  readonly #attemptIds = new Set<string>();
+  readonly #attempts = new Map<string, AttemptEvent>();
   readonly #sessions = new Map<string, PracticeSession>();
   #settings: AppSettings = clone(DEFAULT_APP_SETTINGS);
 
@@ -109,6 +109,26 @@ export class InMemoryProgressRepository implements ProgressRepository {
       .filter((record) => record.learnerId === learnerId && record.packId === packId)
       .sort(compareMastery)
       .map(clone);
+  }
+
+  async loadAttemptHistory(learnerId: string, packId: string): Promise<readonly AttemptEvent[]> {
+    validateId(learnerId, 'Learner');
+    validateId(packId, 'Pack');
+    return [...this.#attempts.values()]
+      .filter((event) => event.learnerId === learnerId && event.packId === packId)
+      .sort((left, right) => left.completedAt.localeCompare(right.completedAt) ||
+        compareAscii(left.attemptId, right.attemptId))
+      .map(clone);
+  }
+
+  async loadRetryDebts(learnerId: string, packId: string): Promise<readonly RetryDebt[]> {
+    validateId(learnerId, 'Learner');
+    validateId(packId, 'Pack');
+    const latest = [...this.#sessions.values()]
+      .filter((session) => session.learnerId === learnerId && session.request.packId === packId)
+      .sort((left, right) => right.startedAt.localeCompare(left.startedAt) ||
+        right.sessionId.localeCompare(left.sessionId))[0];
+    return latest === undefined ? [] : clone(latest.carryoverRetryDebts);
   }
 
   async saveAttempt(
@@ -133,13 +153,13 @@ export class InMemoryProgressRepository implements ProgressRepository {
     ) {
       throw new Error('Attempt, mastery, and session scopes do not match');
     }
-    if (this.#attemptIds.has(event.attemptId)) {
+    if (this.#attempts.has(event.attemptId)) {
       return;
     }
 
     const clonedMastery = clone(mastery);
     const clonedSession = clone(session);
-    this.#attemptIds.add(event.attemptId);
+    this.#attempts.set(event.attemptId, clone(event));
     this.#mastery.set(masteryKey(clonedMastery), clonedMastery);
     this.#sessions.set(clonedSession.sessionId, clonedSession);
   }

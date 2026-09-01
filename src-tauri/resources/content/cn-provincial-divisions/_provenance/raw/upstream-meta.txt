@@ -1,0 +1,12 @@
+Boundary Representative of Year: 2019
+ISO-3166-1 (Alpha-3): CHN
+Boundary Type: ADM1
+Canonical Boundary Type Name: People’s Republic of China
+Source 1: geoBoundaries
+Source 2: Wikimedia Commons
+Release Type: gbOpen
+License: Public Domain
+License Notes:
+License Source: https://commons.wikimedia.org/wiki/File:China_blank_province_map.svg
+Link to Source Data: https://commons.wikimedia.org/wiki/File:China_blank_province_map.svg
+Other Notes: The disputed areas are in a small part of southwestern Xinjiang Uyghur Autonomous Region, western and southern Tibet Autonomous Region, and Taiwan Province

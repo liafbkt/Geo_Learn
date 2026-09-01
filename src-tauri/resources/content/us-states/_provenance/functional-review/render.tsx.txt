@@ -1,0 +1,47 @@
+import React, { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { loadAvailablePacks } from '../../src/content/loadPacks';
+import { projectMap } from '../../src/map/project';
+import { MapViewport } from '../../src/map/MapViewport';
+import type { MapMode, MapSelection } from '../../src/map/types';
+import '../../src/ui/tokens.css';
+import '../../src/ui/global.css';
+
+const requested = new URLSearchParams(location.search).get('pack') ?? 'us-states';
+if (!['us-states', 'cn-provincial-divisions', 'cn-shanghai-districts'].includes(requested)) throw new Error('Unknown pack');
+const source = {
+  readPackIds: async () => [requested],
+  readJson: async (packId: string, filename: string) => {
+    const response = await fetch(`/src-tauri/resources/content/${packId}/${filename}`);
+    if (!response.ok) throw new Error(`${filename}: ${response.status}`);
+    return response.json();
+  },
+};
+const loaded = await loadAvailablePacks(source);
+const pack = loaded.available[0];
+if (!pack) throw new Error(JSON.stringify(loaded.rejected));
+const topology = await source.readJson(requested, 'map.topojson');
+const projected = projectMap(pack, topology, { width: 1200, height: 800 });
+if (!projected.ok) throw new Error(projected.error.message);
+const map = projected.map;
+function Review() {
+  const [mode, setMode] = useState<MapMode>('quiz');
+  const [selection, setSelection] = useState<MapSelection | null>(null);
+  const [selectableKind, setSelectableKind] = useState<'region' | 'place'>('region');
+  return <main style={{ maxWidth: 1200, margin: '16px auto' }}>
+    <h1>{pack!.manifest.title.zh} — 实际成图核对</h1>
+    <p>使用现有 projectMap 与 MapViewport，1200 × 800。此页不代表人工/法定审核通过。</p>
+    <button onClick={() => setMode('quiz')}>无标签图</button>{' '}
+    <button onClick={() => setMode('explore')}>探索标签图</button>{' '}
+    <button onClick={() => setMode('reveal')}>仅揭示选中项</button>
+    <p><button onClick={() => { setSelectableKind('region'); setSelection(null); }}>测试州区域</button>{' '}
+    <button onClick={() => { setSelectableKind('place'); setSelection(null); }}>测试州府点位</button>{' '}
+    当前选择：<output data-testid="selected-id">{selection?.entityId ?? 'none'}</output></p>
+    <MapViewport pack={pack!} map={map} mode={mode} selection={selection}
+      selectableKind={selectableKind}
+      answerEntityId={selection?.entityId} reducedMotion
+      onRegionSelect={entityId => setSelection({ kind: 'region', entityId })}
+      onPlaceSelect={entityId => setSelection({ kind: 'place', entityId })} />
+  </main>;
+}
+createRoot(document.getElementById('root')!).render(<Review />);

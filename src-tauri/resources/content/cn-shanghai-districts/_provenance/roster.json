@@ -1,0 +1,309 @@
+[
+  {
+    "id": "cn-310101",
+    "names": {
+      "zh": "黄浦区",
+      "en": "Huangpu District"
+    },
+    "sourceName": "Huangpu District",
+    "shapeID": "62558664B15620574866891",
+    "bbox": [
+      121.4522039003898,
+      31.19019819978712,
+      121.50583310001764,
+      31.24653419959367
+    ],
+    "aliases": [
+      "黄浦",
+      "Huangpu"
+    ]
+  },
+  {
+    "id": "cn-310104",
+    "names": {
+      "zh": "徐汇区",
+      "en": "Xuhui District"
+    },
+    "sourceName": "Xuhui District",
+    "shapeID": "62558664B58068800824486",
+    "bbox": [
+      121.38776859994096,
+      31.102764399957152,
+      121.47121950027974,
+      31.222124699895062
+    ],
+    "aliases": [
+      "徐汇",
+      "Xuhui"
+    ]
+  },
+  {
+    "id": "cn-310105",
+    "names": {
+      "zh": "长宁区",
+      "en": "Changning District"
+    },
+    "sourceName": "Changning District",
+    "shapeID": "62558664B73657719469436",
+    "bbox": [
+      121.32733019962905,
+      31.180080399590793,
+      121.43479859957574,
+      31.246130500222478
+    ],
+    "aliases": [
+      "长宁",
+      "Changning"
+    ]
+  },
+  {
+    "id": "cn-310106",
+    "names": {
+      "zh": "静安区",
+      "en": "Jing'an District"
+    },
+    "sourceName": "Jing'an District",
+    "shapeID": "62558664B60000117234666",
+    "bbox": [
+      121.4139666002784,
+      31.216275399590074,
+      121.47847140033491,
+      31.32320880004613
+    ],
+    "aliases": [
+      "静安",
+      "Jing'an",
+      "Jing’an",
+      "Jing’an District"
+    ]
+  },
+  {
+    "id": "cn-310107",
+    "names": {
+      "zh": "普陀区",
+      "en": "Putuo District"
+    },
+    "sourceName": "Putuo District",
+    "shapeID": "62558664B37655815188257",
+    "bbox": [
+      121.3216657999368,
+      31.220111500045732,
+      121.44692599963525,
+      31.304747099798874
+    ],
+    "aliases": [
+      "普陀",
+      "Putuo"
+    ]
+  },
+  {
+    "id": "cn-310109",
+    "names": {
+      "zh": "虹口区",
+      "en": "Hongkou District"
+    },
+    "sourceName": "Hongkou District",
+    "shapeID": "62558664B69815106766578",
+    "bbox": [
+      121.45547390010051,
+      31.243929500346212,
+      121.51317999995706,
+      31.31784310027888
+    ],
+    "aliases": [
+      "虹口",
+      "Hongkou"
+    ]
+  },
+  {
+    "id": "cn-310110",
+    "names": {
+      "zh": "杨浦区",
+      "en": "Yangpu District"
+    },
+    "sourceName": "Yangpu District",
+    "shapeID": "62558664B19255580098954",
+    "bbox": [
+      121.4808983998413,
+      31.24931260019639,
+      121.56496210002092,
+      31.349095800430916
+    ],
+    "aliases": [
+      "杨浦",
+      "Yangpu"
+    ]
+  },
+  {
+    "id": "cn-310112",
+    "names": {
+      "zh": "闵行区",
+      "en": "Minhang District"
+    },
+    "sourceName": "Minhang District",
+    "shapeID": "62558664B76759395272944",
+    "bbox": [
+      121.23635619967888,
+      30.978338000398423,
+      121.5718178001514,
+      31.261562799983267
+    ],
+    "aliases": [
+      "闵行",
+      "Minhang"
+    ]
+  },
+  {
+    "id": "cn-310113",
+    "names": {
+      "zh": "宝山区",
+      "en": "Baoshan District"
+    },
+    "sourceName": "Baoshan District",
+    "shapeID": "62558664B30058220699094",
+    "bbox": [
+      121.2955779998249,
+      31.267082899856007,
+      121.52105060030499,
+      31.510634521965642
+    ],
+    "aliases": [
+      "宝山",
+      "Baoshan"
+    ]
+  },
+  {
+    "id": "cn-310114",
+    "names": {
+      "zh": "嘉定区",
+      "en": "Jiading District"
+    },
+    "sourceName": "Jiading District",
+    "shapeID": "62558664B43292361433828",
+    "bbox": [
+      121.10235759972352,
+      31.22930810038855,
+      121.37629709973146,
+      31.49877240032606
+    ],
+    "aliases": [
+      "嘉定",
+      "Jiading"
+    ]
+  },
+  {
+    "id": "cn-310115",
+    "names": {
+      "zh": "浦东新区",
+      "en": "Pudong New Area"
+    },
+    "sourceName": "Pudong New District",
+    "shapeID": "62558664B78645465192316",
+    "bbox": [
+      121.45252279998726,
+      30.845150800269266,
+      122.00715979958511,
+      31.39306813658527
+    ],
+    "aliases": [
+      "浦东",
+      "Pudong",
+      "Pudong New District"
+    ]
+  },
+  {
+    "id": "cn-310116",
+    "names": {
+      "zh": "金山区",
+      "en": "Jinshan District"
+    },
+    "sourceName": "Jinshan District",
+    "shapeID": "62558664B68011662992689",
+    "bbox": [
+      120.98427780038026,
+      30.690569620791393,
+      121.45853671309885,
+      30.95487539958009
+    ],
+    "aliases": [
+      "金山",
+      "Jinshan"
+    ]
+  },
+  {
+    "id": "cn-310117",
+    "names": {
+      "zh": "松江区",
+      "en": "Songjiang District"
+    },
+    "sourceName": "Songjiang District",
+    "shapeID": "62558664B53892596451413",
+    "bbox": [
+      121.0194912002587,
+      30.896916399572206,
+      121.36824059962407,
+      31.162228699594834
+    ],
+    "aliases": [
+      "松江",
+      "Songjiang"
+    ]
+  },
+  {
+    "id": "cn-310118",
+    "names": {
+      "zh": "青浦区",
+      "en": "Qingpu District"
+    },
+    "sourceName": "Qingpu District",
+    "shapeID": "62558664B37530369632792",
+    "bbox": [
+      120.85201709980936,
+      30.94195620041836,
+      121.31963739974628,
+      31.291891200318673
+    ],
+    "aliases": [
+      "青浦",
+      "Qingpu"
+    ]
+  },
+  {
+    "id": "cn-310120",
+    "names": {
+      "zh": "奉贤区",
+      "en": "Fengxian District"
+    },
+    "sourceName": "Fengxian District",
+    "shapeID": "62558664B92208349849242",
+    "bbox": [
+      121.3467333003016,
+      30.781413490640148,
+      121.77683639988004,
+      31.018230300388097
+    ],
+    "aliases": [
+      "奉贤",
+      "Fengxian"
+    ]
+  },
+  {
+    "id": "cn-310151",
+    "names": {
+      "zh": "崇明区",
+      "en": "Chongming District"
+    },
+    "sourceName": "Chongming District",
+    "shapeID": "62558664B47664669283193",
+    "bbox": [
+      121.1622998998206,
+      31.294784599929415,
+      121.97686510044412,
+      31.866060099693925
+    ],
+    "aliases": [
+      "崇明",
+      "Chongming"
+    ]
+  }
+]

@@ -454,6 +454,8 @@ describe('commitCurrentAttempt', () => {
     let shouldFail = true;
     const repository: ProgressRepository = {
       loadSnapshot: (...args) => stored.loadSnapshot(...args),
+      loadAttemptHistory: (...args) => stored.loadAttemptHistory(...args),
+      loadRetryDebts: (...args) => stored.loadRetryDebts(...args),
       saveAttempt: async (input) => {
         observedAttemptIds.push(input.event.attemptId);
         if (shouldFail) {

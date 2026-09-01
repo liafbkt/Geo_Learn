@@ -1,0 +1,52 @@
+[
+  {
+    "coordinateReferenceSystem": "WGS84 KML longitude/latitude (EPSG:4326)",
+    "file": "cb_2025_us_state_20m.zip",
+    "license": "Census archive ISO metadata: free to use in products/publications with Census acknowledgement; visual display at 1:20,000,000 or smaller scales only, not precise geographic analysis/geocoding.",
+    "licenseUrl": "https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_state_20m.zip#cb_2025_us_state_20m.kml.iso.xml",
+    "organization": "U.S. Census Bureau",
+    "retrievedAt": "2026-08-30",
+    "sha256": "efddd884f1442ef233b1ba9c12dddbd66b6fdf94da6a373e1556aefe3dbc5751",
+    "url": "https://www2.census.gov/geo/tiger/GENZ2025/kml/cb_2025_us_state_20m.zip"
+  },
+  {
+    "coordinateReferenceSystem": "NAD83 (EPSG:4269)",
+    "file": "2025_Gaz_place_national.zip",
+    "license": "U.S. federal government work; public domain in the United States (17 USC 105)",
+    "licenseUrl": "https://www.govinfo.gov/about",
+    "organization": "U.S. Census Bureau",
+    "retrievedAt": "2026-08-30",
+    "sha256": "49644173a453469d9bd77fb7a493b027f87567e209edaf2078aac7543ac2ee29",
+    "url": "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2025_Gazetteer/2025_Gaz_place_national.zip"
+  },
+  {
+    "coordinateReferenceSystem": "not applicable",
+    "file": "gpo-states-capitals.pdf",
+    "license": "U.S. federal government work; public domain in the United States (17 USC 105)",
+    "licenseUrl": "https://www.govinfo.gov/about",
+    "organization": "U.S. Government Publishing Office",
+    "retrievedAt": "2026-08-30",
+    "sha256": "2f832de6bf5a2ebcb5ffd9f79939e0bb41da2f53d09a8f2fb99ffe2c605b1f9f",
+    "url": "https://www.govinfo.gov/content/pkg/GPO-STYLEMANUAL-2016/pdf/GPO-STYLEMANUAL-2016-20.pdf"
+  },
+  {
+    "coordinateReferenceSystem": "not applicable; documents NAD83 source data",
+    "file": "census-tiger2025-techdoc.pdf",
+    "license": "U.S. federal government work; public domain in the United States (17 USC 105)",
+    "licenseUrl": "https://www.govinfo.gov/about",
+    "organization": "U.S. Census Bureau",
+    "retrievedAt": "2026-08-30",
+    "sha256": "21476bdba82fe8072f8994ae59bda484260d1b932c13f31991f6414f8e04d551",
+    "url": "https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2025/TGRSHP2025_TechDoc.pdf"
+  },
+  {
+    "coordinateReferenceSystem": "not applicable",
+    "file": "govinfo-about.html",
+    "license": "U.S. federal government work; public domain in the United States (17 USC 105)",
+    "licenseUrl": "https://www.govinfo.gov/about",
+    "organization": "U.S. Government Publishing Office",
+    "retrievedAt": "2026-08-30",
+    "sha256": "6794de83f2aead8c0dfe8806ce82c630a1fb6a770c5924dab66c1ca6ac326a05",
+    "url": "https://www.govinfo.gov/about"
+  }
+]

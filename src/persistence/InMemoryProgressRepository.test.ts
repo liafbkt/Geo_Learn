@@ -285,6 +285,18 @@ describe('InMemoryProgressRepository', () => {
     ).toEqual(['A', 'a', 'a-1', 'a.1', 'a:1', 'a_1']);
   });
 
+  it('restores attempt history and the latest session retry debts for scheduling', async () => {
+    const repository = new InMemoryProgressRepository();
+    const savedSession = session();
+    const savedEvent = event();
+    await repository.saveAttempt({ event: savedEvent, session: savedSession, mastery: mastery() });
+
+    await expect(repository.loadAttemptHistory('learner-1', 'china-provinces')).resolves.toEqual([savedEvent]);
+    await expect(repository.loadRetryDebts('learner-1', 'china-provinces')).resolves.toEqual(
+      savedSession.carryoverRetryDebts,
+    );
+  });
+
   it('persists cloned settings and rejects unsupported or out-of-range audio values', async () => {
     const repository = new InMemoryProgressRepository();
     const settings: AppSettings = {

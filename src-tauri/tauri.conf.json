@@ -13,8 +13,10 @@
     "windows": [
       {
         "title": "空间记忆教练",
-        "width": 800,
-        "height": 600
+        "width": 1180,
+        "height": 760,
+        "minWidth": 1024,
+        "minHeight": 700
       }
     ],
     "security": {
@@ -23,8 +25,18 @@
   },
   "bundle": {
     "active": true,
-    "resources": ["resources/content/**/*"],
-    "targets": "all",
+    "resources": [
+      "resources/content/*/manifest.json",
+      "resources/content/*/entities.json",
+      "resources/content/*/map.topojson",
+      "resources/content/*/sources.json"
+    ],
+    "targets": ["nsis"],
+    "createUpdaterArtifacts": true,
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true },
+      "nsis": { "installMode": "currentUser" }
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -32,5 +44,12 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDU1MUFBNDVCMkVDQjQ2NEEKUldSS1Jzc3VXNlFhVlRKeTd5WGFJSnZieUlGdlBHTS9iZFJSV0lqTnNFK1ZET3NZMDJZNUowRWIK",
+      "endpoints": ["https://github.com/liafbkt/Geo_Learn/releases/latest/download/latest.json"],
+      "windows": { "installMode": "passive" }
+    }
   }
 }

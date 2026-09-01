@@ -1,0 +1,30 @@
+[
+  {
+    "id": "us-ct-capital",
+    "zoom": 4.29981696,
+    "pan": [
+      -900,
+      -1400
+    ],
+    "screen": {
+      "x": 688.0435599588831,
+      "y": 441.31127109342367
+    },
+    "selected": "us-ct-capital",
+    "passed": true
+  },
+  {
+    "id": "us-ma-capital",
+    "zoom": 4.29981696,
+    "pan": [
+      -900,
+      -1400
+    ],
+    "screen": {
+      "x": 729.6129940740154,
+      "y": 405.45319357401866
+    },
+    "selected": "us-ma-capital",
+    "passed": true
+  }
+]

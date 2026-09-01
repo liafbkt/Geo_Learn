@@ -1,0 +1,104 @@
+[
+  {
+    "id": "us-ct",
+    "start": "us-ak",
+    "keys": [
+      "ArrowLeft",
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowDown"
+    ],
+    "selected": "us-ct",
+    "passed": true
+  },
+  {
+    "id": "us-de",
+    "start": "us-ct",
+    "keys": [
+      "ArrowDown",
+      "ArrowDown"
+    ],
+    "selected": "us-de",
+    "passed": true
+  },
+  {
+    "id": "us-ma",
+    "start": "us-de",
+    "keys": [
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowUp"
+    ],
+    "selected": "us-ma",
+    "passed": true
+  },
+  {
+    "id": "us-nh",
+    "start": "us-ma",
+    "keys": [
+      "ArrowUp"
+    ],
+    "selected": "us-nh",
+    "passed": true
+  },
+  {
+    "id": "us-nj",
+    "start": "us-nh",
+    "keys": [
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowDown"
+    ],
+    "selected": "us-nj",
+    "passed": true
+  },
+  {
+    "id": "us-ri",
+    "start": "us-nj",
+    "keys": [
+      "ArrowUp",
+      "ArrowUp"
+    ],
+    "selected": "us-ri",
+    "passed": true
+  },
+  {
+    "id": "us-sc",
+    "start": "us-ri",
+    "keys": [
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowDown"
+    ],
+    "selected": "us-sc",
+    "passed": true
+  },
+  {
+    "id": "us-vt",
+    "start": "us-sc",
+    "keys": [
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowRight",
+      "ArrowLeft",
+      "ArrowUp",
+      "ArrowUp"
+    ],
+    "selected": "us-vt",
+    "passed": true
+  }
+]

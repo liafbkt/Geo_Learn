@@ -1,0 +1,852 @@
+[
+  {
+    "GEOID": "0236400",
+    "WGS84": [
+      -134.178445,
+      58.37291
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Juneau city and borough",
+    "gpoCapital": "Juneau",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -134.178445,
+      58.37291
+    ],
+    "state": "AK"
+  },
+  {
+    "GEOID": "0151000",
+    "WGS84": [
+      -86.267307,
+      32.348503
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Montgomery city",
+    "gpoCapital": "Montgomery",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -86.267307,
+      32.348503
+    ],
+    "state": "AL"
+  },
+  {
+    "GEOID": "0541000",
+    "WGS84": [
+      -92.358556,
+      34.725393
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Little Rock city",
+    "gpoCapital": "Little Rock",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -92.358556,
+      34.725393
+    ],
+    "state": "AR"
+  },
+  {
+    "GEOID": "0455000",
+    "WGS84": [
+      -112.090132,
+      33.572154
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Phoenix city",
+    "gpoCapital": "Phoenix",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -112.090132,
+      33.572154
+    ],
+    "state": "AZ"
+  },
+  {
+    "GEOID": "0664000",
+    "WGS84": [
+      -121.468161,
+      38.567694
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Sacramento city",
+    "gpoCapital": "Sacramento",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -121.468161,
+      38.567694
+    ],
+    "state": "CA"
+  },
+  {
+    "GEOID": "0820000",
+    "WGS84": [
+      -104.881105,
+      39.76185
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Denver city",
+    "gpoCapital": "Denver",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -104.881105,
+      39.76185
+    ],
+    "state": "CO"
+  },
+  {
+    "GEOID": "0937000",
+    "WGS84": [
+      -72.681579,
+      41.765933
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Hartford city",
+    "gpoCapital": "Hartford",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -72.681579,
+      41.765933
+    ],
+    "state": "CT"
+  },
+  {
+    "GEOID": "1021200",
+    "WGS84": [
+      -75.521659,
+      39.160602
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Dover city",
+    "gpoCapital": "Dover",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -75.521659,
+      39.160602
+    ],
+    "state": "DE"
+  },
+  {
+    "GEOID": "1270600",
+    "WGS84": [
+      -84.252272,
+      30.453529
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Tallahassee city",
+    "gpoCapital": "Tallahassee",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -84.252272,
+      30.453529
+    ],
+    "state": "FL"
+  },
+  {
+    "GEOID": "1304000",
+    "WGS84": [
+      -84.422675,
+      33.762909
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Atlanta city",
+    "gpoCapital": "Atlanta",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -84.422675,
+      33.762909
+    ],
+    "state": "GA"
+  },
+  {
+    "GEOID": "1571550",
+    "WGS84": [
+      -157.847645293,
+      21.324342866
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=pipeline step proj=unitconvert xy_in=deg xy_out=rad step proj=push v_3 step proj=cart ellps=GRS80 step proj=helmert x=1 y=1 z=-1 step inv proj=cart ellps=WGS84 step proj=pop v_3 step proj=unitconvert xy_in=rad xy_out=deg",
+    "gazetteerName": "Urban Honolulu CDP",
+    "gpoCapital": "Honolulu",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (3) + axis order change (2D)",
+    "rawNAD83": [
+      -157.84764,
+      21.324347
+    ],
+    "state": "HI"
+  },
+  {
+    "GEOID": "1921000",
+    "WGS84": [
+      -93.610243,
+      41.57259
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Des Moines city",
+    "gpoCapital": "Des Moines",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -93.610243,
+      41.57259
+    ],
+    "state": "IA"
+  },
+  {
+    "GEOID": "1608830",
+    "WGS84": [
+      -116.231596,
+      43.59805
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Boise City city",
+    "gpoCapital": "Boise",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -116.231596,
+      43.59805
+    ],
+    "state": "ID"
+  },
+  {
+    "GEOID": "1772000",
+    "WGS84": [
+      -89.644572,
+      39.791063
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Springfield city",
+    "gpoCapital": "Springfield",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -89.644572,
+      39.791063
+    ],
+    "state": "IL"
+  },
+  {
+    "GEOID": "1836003",
+    "WGS84": [
+      -86.145935,
+      39.776664
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Indianapolis city (balance)",
+    "gpoCapital": "Indianapolis",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -86.145935,
+      39.776664
+    ],
+    "state": "IN"
+  },
+  {
+    "GEOID": "2071000",
+    "WGS84": [
+      -95.696191,
+      39.034673
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Topeka city",
+    "gpoCapital": "Topeka",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -95.696191,
+      39.034673
+    ],
+    "state": "KS"
+  },
+  {
+    "GEOID": "2128900",
+    "WGS84": [
+      -84.865877,
+      38.194966
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Frankfort city",
+    "gpoCapital": "Frankfort",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -84.865877,
+      38.194966
+    ],
+    "state": "KY"
+  },
+  {
+    "GEOID": "2205000",
+    "WGS84": [
+      -91.130894,
+      30.442174
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Baton Rouge city",
+    "gpoCapital": "Baton Rouge",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -91.130894,
+      30.442174
+    ],
+    "state": "LA"
+  },
+  {
+    "GEOID": "2507000",
+    "WGS84": [
+      -71.018253,
+      42.338551
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Boston city",
+    "gpoCapital": "Boston",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -71.018253,
+      42.338551
+    ],
+    "state": "MA"
+  },
+  {
+    "GEOID": "2401600",
+    "WGS84": [
+      -76.505332,
+      38.972152
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Annapolis city",
+    "gpoCapital": "Annapolis",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -76.505332,
+      38.972152
+    ],
+    "state": "MD"
+  },
+  {
+    "GEOID": "2302100",
+    "WGS84": [
+      -69.734199,
+      44.334904
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Augusta city",
+    "gpoCapital": "Augusta",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -69.734199,
+      44.334904
+    ],
+    "state": "ME"
+  },
+  {
+    "GEOID": "2646000",
+    "WGS84": [
+      -84.560889,
+      42.714341
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Lansing city",
+    "gpoCapital": "Lansing",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -84.560889,
+      42.714341
+    ],
+    "state": "MI"
+  },
+  {
+    "GEOID": "2758000",
+    "WGS84": [
+      -93.104063,
+      44.948901
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "St. Paul city",
+    "gpoCapital": "St. Paul",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -93.104063,
+      44.948901
+    ],
+    "state": "MN"
+  },
+  {
+    "GEOID": "2937000",
+    "WGS84": [
+      -92.175254,
+      38.567461
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Jefferson City city",
+    "gpoCapital": "Jefferson City",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -92.175254,
+      38.567461
+    ],
+    "state": "MO"
+  },
+  {
+    "GEOID": "2836000",
+    "WGS84": [
+      -90.21285,
+      32.315834
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Jackson city",
+    "gpoCapital": "Jackson",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -90.21285,
+      32.315834
+    ],
+    "state": "MS"
+  },
+  {
+    "GEOID": "3035600",
+    "WGS84": [
+      -112.018746,
+      46.595465
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Helena city",
+    "gpoCapital": "Helena",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -112.018746,
+      46.595465
+    ],
+    "state": "MT"
+  },
+  {
+    "GEOID": "3755000",
+    "WGS84": [
+      -78.641042,
+      35.831868
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Raleigh city",
+    "gpoCapital": "Raleigh",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -78.641042,
+      35.831868
+    ],
+    "state": "NC"
+  },
+  {
+    "GEOID": "3807200",
+    "WGS84": [
+      -100.768568,
+      46.814572
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Bismarck city",
+    "gpoCapital": "Bismarck",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -100.768568,
+      46.814572
+    ],
+    "state": "ND"
+  },
+  {
+    "GEOID": "3128000",
+    "WGS84": [
+      -96.674856,
+      40.810284
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Lincoln city",
+    "gpoCapital": "Lincoln",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -96.674856,
+      40.810284
+    ],
+    "state": "NE"
+  },
+  {
+    "GEOID": "3314200",
+    "WGS84": [
+      -71.561252,
+      43.232493
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Concord city",
+    "gpoCapital": "Concord",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -71.561252,
+      43.232493
+    ],
+    "state": "NH"
+  },
+  {
+    "GEOID": "3474000",
+    "WGS84": [
+      -74.763624,
+      40.223841
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Trenton city",
+    "gpoCapital": "Trenton",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -74.763624,
+      40.223841
+    ],
+    "state": "NJ"
+  },
+  {
+    "GEOID": "3570500",
+    "WGS84": [
+      -105.981815,
+      35.661981
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Santa Fe city",
+    "gpoCapital": "Santa Fe",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -105.981815,
+      35.661981
+    ],
+    "state": "NM"
+  },
+  {
+    "GEOID": "3209700",
+    "WGS84": [
+      -119.747368,
+      39.15306
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Carson City",
+    "gpoCapital": "Carson City",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -119.747368,
+      39.15306
+    ],
+    "state": "NV"
+  },
+  {
+    "GEOID": "3601000",
+    "WGS84": [
+      -73.798353,
+      42.665745
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Albany city",
+    "gpoCapital": "Albany",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -73.798353,
+      42.665745
+    ],
+    "state": "NY"
+  },
+  {
+    "GEOID": "3918000",
+    "WGS84": [
+      -82.985594,
+      39.985531
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Columbus city",
+    "gpoCapital": "Columbus",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -82.985594,
+      39.985531
+    ],
+    "state": "OH"
+  },
+  {
+    "GEOID": "4055000",
+    "WGS84": [
+      -97.513657,
+      35.467079
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Oklahoma City city",
+    "gpoCapital": "Oklahoma City",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -97.513657,
+      35.467079
+    ],
+    "state": "OK"
+  },
+  {
+    "GEOID": "4164900",
+    "WGS84": [
+      -123.023007,
+      44.9239
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Salem city",
+    "gpoCapital": "Salem",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -123.023007,
+      44.9239
+    ],
+    "state": "OR"
+  },
+  {
+    "GEOID": "4232800",
+    "WGS84": [
+      -76.88502,
+      40.275891
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Harrisburg city",
+    "gpoCapital": "Harrisburg",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -76.88502,
+      40.275891
+    ],
+    "state": "PA"
+  },
+  {
+    "GEOID": "4459000",
+    "WGS84": [
+      -71.418784,
+      41.823056
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Providence city",
+    "gpoCapital": "Providence",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -71.418784,
+      41.823056
+    ],
+    "state": "RI"
+  },
+  {
+    "GEOID": "4516000",
+    "WGS84": [
+      -80.906099,
+      34.040519
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Columbia city",
+    "gpoCapital": "Columbia",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -80.906099,
+      34.040519
+    ],
+    "state": "SC"
+  },
+  {
+    "GEOID": "4649600",
+    "WGS84": [
+      -100.319996,
+      44.375163
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Pierre city",
+    "gpoCapital": "Pierre",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -100.319996,
+      44.375163
+    ],
+    "state": "SD"
+  },
+  {
+    "GEOID": "4752006",
+    "WGS84": [
+      -86.785002,
+      36.1718
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Nashville-Davidson metropolitan government (balance)",
+    "gpoCapital": "Nashville",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -86.785002,
+      36.1718
+    ],
+    "state": "TN"
+  },
+  {
+    "GEOID": "4805000",
+    "WGS84": [
+      -97.754134,
+      30.298622
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Austin city",
+    "gpoCapital": "Austin",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -97.754134,
+      30.298622
+    ],
+    "state": "TX"
+  },
+  {
+    "GEOID": "4967000",
+    "WGS84": [
+      -111.930991,
+      40.776928
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Salt Lake City city",
+    "gpoCapital": "Salt Lake City",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -111.930991,
+      40.776928
+    ],
+    "state": "UT"
+  },
+  {
+    "GEOID": "5167000",
+    "WGS84": [
+      -77.476009,
+      37.531399
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Richmond city",
+    "gpoCapital": "Richmond",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -77.476009,
+      37.531399
+    ],
+    "state": "VA"
+  },
+  {
+    "GEOID": "5046000",
+    "WGS84": [
+      -72.571524,
+      44.266448
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Montpelier city",
+    "gpoCapital": "Montpelier",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -72.571524,
+      44.266448
+    ],
+    "state": "VT"
+  },
+  {
+    "GEOID": "5351300",
+    "WGS84": [
+      -122.895,
+      47.040604
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Olympia city",
+    "gpoCapital": "Olympia",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -122.895,
+      47.040604
+    ],
+    "state": "WA"
+  },
+  {
+    "GEOID": "5548000",
+    "WGS84": [
+      -89.429856,
+      43.087815
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Madison city",
+    "gpoCapital": "Madison",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -89.429856,
+      43.087815
+    ],
+    "state": "WI"
+  },
+  {
+    "GEOID": "5414600",
+    "WGS84": [
+      -81.632324,
+      38.348692
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Charleston city",
+    "gpoCapital": "Charleston",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -81.632324,
+      38.348692
+    ],
+    "state": "WV"
+  },
+  {
+    "GEOID": "5613900",
+    "WGS84": [
+      -104.799155,
+      41.128275
+    ],
+    "accuracyMetres": 4.0,
+    "definition": "proj=noop ellps=GRS80",
+    "gazetteerName": "Cheyenne city",
+    "gpoCapital": "Cheyenne",
+    "operation": "axis order change (2D) + NAD83 to WGS 84 (1) + axis order change (2D)",
+    "rawNAD83": [
+      -104.799155,
+      41.128275
+    ],
+    "state": "WY"
+  }
+]
