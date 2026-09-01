@@ -55,7 +55,11 @@ export function OptionsPanel({ value, repository, unavailablePacks = [], onChang
     if (next.enabled && !unavailablePacks.includes(packId)) onPreview(packId, next.volume);
   };
   return (
-    <ModalDialog labelledBy="options-title" className="options-card">
+    <ModalDialog
+      labelledBy="options-title"
+      className="options-card"
+      onEscape={() => { if (!savingRef.current) onBack(); }}
+    >
       <button
         type="button"
         className="text-action"

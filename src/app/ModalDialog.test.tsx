@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import { ModalDialog } from './ModalDialog';
 
 it('moves focus into the modal, traps Tab, and restores prior focus', () => {
@@ -28,4 +29,18 @@ it('moves focus into the modal, traps Tab, and restores prior focus', () => {
   view.unmount();
   expect(launcher).toHaveFocus();
   launcher.remove();
+});
+
+it('routes the native Escape cancel event to the owning overlay stack', () => {
+  const onEscape = vi.fn();
+  render(
+    <ModalDialog labelledBy="escape-title" className="test-modal" onEscape={onEscape}>
+      <h2 id="escape-title">可退回模态框</h2>
+      <button type="button">操作</button>
+    </ModalDialog>,
+  );
+
+  const dialog = screen.getByRole('dialog', { name: '可退回模态框' });
+  expect(fireEvent(dialog, new Event('cancel', { bubbles: true, cancelable: true }))).toBe(false);
+  expect(onEscape).toHaveBeenCalledTimes(1);
 });

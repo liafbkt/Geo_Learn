@@ -5,11 +5,12 @@ type Props = Readonly<{
   labelledBy: string;
   className: string;
   children: ReactNode;
+  onEscape?: () => void;
 }>;
 
 const focusableSelector = 'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])';
 
-export function ModalDialog({ labelledBy, className, children }: Props) {
+export function ModalDialog({ labelledBy, className, children, onEscape }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -48,7 +49,10 @@ export function ModalDialog({ labelledBy, className, children }: Props) {
       ref={dialogRef}
       className="app-overlay"
       aria-labelledby={labelledBy}
-      onCancel={(event) => event.preventDefault()}
+      onCancel={(event) => {
+        event.preventDefault();
+        onEscape?.();
+      }}
       onKeyDown={trapFocus}
     >
       <section className={className}>{children}</section>

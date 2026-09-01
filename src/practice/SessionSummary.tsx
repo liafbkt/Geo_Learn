@@ -117,7 +117,7 @@ export function SessionSummary(props: SessionSummaryProps) {
     <main className="product-surface session-summary">
       <header className="session-summary__header">
         <p className="product-kicker">本次航程完成</p>
-        <h1>练习总结</h1>
+        <h1>本次总结</h1>
         <p>看看这次回忆留下了哪些变化。</p>
       </header>
 
