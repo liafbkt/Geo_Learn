@@ -1,5 +1,7 @@
 import { lstat, readFile, readdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
+import { readVersions, validateVersion } from './version-lib.mjs';
 
 export const repository = 'liafbkt/Geo_Learn';
 export const updaterEndpoint = `https://github.com/${repository}/releases/latest/download/latest.json`;
@@ -13,20 +15,24 @@ export async function readJson(path) {
   return JSON.parse(await readFile(path, 'utf8'));
 }
 
+export function parseReleaseTag(ref) {
+  const match = /^refs\/tags\/v(.+)$/.exec(ref ?? '');
+  if (!match) throw new Error('Release requires a vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-rc.N tag ref.');
+  const version = validateVersion(match[1]);
+  return { version, tag: `v${version}`, channel: version.includes('-rc.') ? 'candidate' : 'stable' };
+}
+
 export async function releaseIdentity(root, env) {
   if (env.GITHUB_REPOSITORY !== repository) throw new Error('Release repository is not allowed.');
-  const match = /^refs\/tags\/v((?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))$/.exec(env.GITHUB_REF ?? '');
-  if (!match) throw new Error('Release requires a stable vMAJOR.MINOR.PATCH tag ref.');
-  const version = match[1];
+  const identity = parseReleaseTag(env.GITHUB_REF);
+  const { version } = identity;
   const pkg = await readJson(join(root, 'package.json'));
   const config = await readJson(join(root, 'src-tauri/tauri.conf.json'));
-  const cargo = await readFile(join(root, 'src-tauri/Cargo.toml'), 'utf8');
-  const packageSection = cargo.match(/^\[package\]\s*\r?\n([\s\S]*?)(?=^\[|$(?![\s\S]))/m)?.[1];
-  const cargoVersion = packageSection?.match(/^version\s*=\s*"([^"]+)"\s*$/m)?.[1];
-  if ([pkg.version, config.version, cargoVersion].some((value) => value !== version)) {
-    throw new Error('Release tag, package.json, tauri.conf.json and Cargo.toml versions must match.');
+  const versions = await readVersions(root);
+  if (pkg.version !== version || config.version !== version || Object.values(versions).some((value) => value !== version)) {
+    throw new Error('Release tag and all four release version sources must match.');
   }
-  return { version, tag: `v${version}`, config };
+  return { ...identity, config };
 }
 
 function decodeBase64(value, label) {
@@ -99,7 +105,18 @@ export async function preflight(root, env, { secrets = false, identityOnly = fal
 
 export function artifactNames(version) {
   const installer = `GeoLearn_${version}_x64-setup.exe`;
-  return { installer, signature: `${installer}.sig`, manifest: 'latest.json' };
+  return { installer, signature: `${installer}.sig`, manifest: 'latest.json', checksums: 'SHA256SUMS.txt' };
+}
+
+export function checksumManifest(contents) {
+  return `${Object.entries(contents)
+    .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
+    .map(([name, bytes]) => `${createHash('sha256').update(bytes).digest('hex')}  ${name}`)
+    .join('\n')}\n`;
+}
+
+export function verifyChecksumManifest(source, contents) {
+  if (source !== checksumManifest(contents)) throw new Error('Invalid SHA256SUMS.txt contents.');
 }
 
 export function downloadUrl(tag, name) {

@@ -1,2 +1,3 @@
 /// <reference types="vite/client" />
-/// <reference path="./e2e/types.ts" />
+
+import './e2e/types';

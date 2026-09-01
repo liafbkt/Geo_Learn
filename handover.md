@@ -29,5 +29,9 @@
 - No branch push, candidate, stable Release, installer, or updater smoke has yet occurred.
 - 更新检查边界已改为首页/总结页由用户显式触发；完全断网时不会因启动检查产生错误，主动检查失败不影响本地学习。
 - Playwright 固定 fixture 已覆盖冷启动、反馈、切题和地图帧门槛；这些浏览器数据不得标记为原生 Tauri 性能实测。
+- RC/stable 版本边界已在本地工具层固定为 `vMAJOR.MINOR.PATCH-rc.N`（`N >= 1`）或 `vMAJOR.MINOR.PATCH`；四个版本源必须先一致，再通过带回滚的暂存替换同步。
+- 发布资产契约现为 NSIS `.exe`、`.exe.sig`、`latest.json`、`SHA256SUMS.txt` 恰好四项；校验文件覆盖另外三项并使用小写 SHA-256、ASCII 文件名排序。
+- 草稿晋级只能从当前 `GITHUB_REF` 派生身份，远端草稿的 tag、candidate/stable channel、四资产、签名、更新清单和校验和全部通过后才允许一次 PATCH；这些规则仅完成本地自动测试，尚未创建或晋级任何 GitHub Release。
+- E2E 全局类型声明改用模块导入以满足当前 ESLint 门禁，E2E-only 运行时边界未改变。
 - 本机缺少 MSVC `link.exe`：Rust clippy/test 的 exit-0 证据和真实 NSIS/updater 构建必须来自 GitHub Windows runner。
 - 自动化、资产、授权和当前用户实测的实时状态以 `docs/release/windows-v1-checklist.md` 与 `docs/release/windows-v1-smoke.md` 为准；尚未记录的结果不得宣称通过。
