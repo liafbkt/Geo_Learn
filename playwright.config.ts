@@ -15,7 +15,7 @@ export default defineConfig({
     serviceWorkers: 'block',
   },
   webServer: {
-    command: 'pnpm preview --host 127.0.0.1 --port 4173 --strictPort',
+    command: 'pnpm build:e2e && pnpm preview --host 127.0.0.1 --port 4173 --strictPort',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: false,
     timeout: 30_000,

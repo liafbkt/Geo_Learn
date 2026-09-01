@@ -96,11 +96,77 @@ function compareAscii(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
+export type InMemoryProgressState = Readonly<{
+  mastery: readonly MasteryRecord[];
+  attempts: readonly AttemptEvent[];
+  sessions: readonly PracticeSession[];
+  settings: AppSettings;
+}>;
+
+function assertStateShape(state: InMemoryProgressState): void {
+  if (
+    state === null ||
+    typeof state !== 'object' ||
+    !Array.isArray(state.mastery) ||
+    !Array.isArray(state.attempts) ||
+    !Array.isArray(state.sessions)
+  ) {
+    throw new Error('Progress state shape is invalid');
+  }
+}
+
 export class InMemoryProgressRepository implements ProgressRepository {
-  readonly #mastery = new Map<string, MasteryRecord>();
-  readonly #attempts = new Map<string, AttemptEvent>();
-  readonly #sessions = new Map<string, PracticeSession>();
+  #mastery = new Map<string, MasteryRecord>();
+  #attempts = new Map<string, AttemptEvent>();
+  #sessions = new Map<string, PracticeSession>();
   #settings: AppSettings = clone(DEFAULT_APP_SETTINGS);
+
+  constructor(initialState?: InMemoryProgressState) {
+    if (initialState !== undefined) this.#applyValidatedState(initialState);
+  }
+
+  exportState(): InMemoryProgressState {
+    return clone({
+      mastery: [...this.#mastery.values()],
+      attempts: [...this.#attempts.values()],
+      sessions: [...this.#sessions.values()],
+      settings: this.#settings,
+    });
+  }
+
+  async replaceState(state: InMemoryProgressState): Promise<void> {
+    const replacement = new InMemoryProgressRepository(state);
+    this.#mastery = replacement.#mastery;
+    this.#attempts = replacement.#attempts;
+    this.#sessions = replacement.#sessions;
+    this.#settings = replacement.#settings;
+  }
+
+  #applyValidatedState(state: InMemoryProgressState): void {
+    assertStateShape(state);
+    state.mastery.forEach(validateMastery);
+    state.attempts.forEach(validateEvent);
+    state.sessions.forEach(validateSession);
+    validateAppSettings(state.settings);
+
+    const mastery = new Map<string, MasteryRecord>();
+    const attempts = new Map<string, AttemptEvent>();
+    const sessions = new Map<string, PracticeSession>();
+    for (const record of state.mastery) mastery.set(masteryKey(record), clone(record));
+    for (const attempt of state.attempts) {
+      if (attempts.has(attempt.attemptId)) throw new Error('Duplicate attempt ID in progress state');
+      attempts.set(attempt.attemptId, clone(attempt));
+    }
+    for (const session of state.sessions) {
+      if (sessions.has(session.sessionId)) throw new Error('Duplicate session ID in progress state');
+      sessions.set(session.sessionId, clone(session));
+    }
+
+    this.#mastery = mastery;
+    this.#attempts = attempts;
+    this.#sessions = sessions;
+    this.#settings = clone(state.settings);
+  }
 
   async loadSnapshot(learnerId: string, packId: string): Promise<readonly MasteryRecord[]> {
     validateId(learnerId, 'Learner');

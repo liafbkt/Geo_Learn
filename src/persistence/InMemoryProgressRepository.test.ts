@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import type { AppSettings } from '../app/settings';
 import type { AttemptEvent, MasteryRecord } from '../learning/types';
 import type { PracticeSession } from '../practice/session';
-import { InMemoryProgressRepository } from './InMemoryProgressRepository';
+import {
+  InMemoryProgressRepository,
+  type InMemoryProgressState,
+} from './InMemoryProgressRepository';
 
 const startedAt = '2026-08-26T12:00:00.000Z';
 
@@ -331,5 +334,58 @@ describe('InMemoryProgressRepository', () => {
     await expect(
       repository.saveSession(session({ sessionId: '', startedAt: 'local noon' })),
     ).rejects.toThrow();
+  });
+
+  it('exports a deep clone that cannot mutate repository state', async () => {
+    const repository = new InMemoryProgressRepository();
+    await repository.saveSession(session());
+    await repository.saveSettings({ audio: { enabled: true, packId: 'soft', volume: 0.25 } });
+
+    const exported = repository.exportState() as unknown as {
+      sessions: Array<{ questions: Array<{ entityId: string }> }>;
+      settings: { audio: { volume: number } };
+    };
+    exported.sessions[0]!.questions[0]!.entityId = 'mutated';
+    exported.settings.audio.volume = 0.9;
+
+    await expect(
+      repository.loadResumableSession(
+        'learner-1',
+        'china-provinces',
+        '2026-08-27T12:00:00.000Z',
+      ),
+    ).resolves.toMatchObject({
+      questions: [
+        { kind: 'locate_region', presentation: 'map', entityId: 'anhui' },
+        { kind: 'locate_region', presentation: 'map', entityId: 'beijing' },
+      ],
+    });
+    await expect(repository.loadSettings()).resolves.toEqual({
+      audio: { enabled: true, packId: 'soft', volume: 0.25 },
+    });
+  });
+
+  it('validates an entire replacement before changing existing state', async () => {
+    const repository = new InMemoryProgressRepository();
+    await repository.saveSession(session({ sessionId: 'keep-me' }));
+    const invalid: InMemoryProgressState = {
+      mastery: [],
+      attempts: [],
+      sessions: [session({ sessionId: 'invalid', questionCursor: 99 })],
+      settings: { audio: { enabled: true, packId: 'soft', volume: 0.5 } },
+    };
+
+    await expect(repository.replaceState(invalid)).rejects.toThrow(/cursor/i);
+
+    await expect(
+      repository.loadResumableSession(
+        'learner-1',
+        'china-provinces',
+        '2026-08-27T12:00:00.000Z',
+      ),
+    ).resolves.toMatchObject({ sessionId: 'keep-me' });
+    await expect(repository.loadSettings()).resolves.toEqual({
+      audio: { enabled: true, packId: 'crisp', volume: 0.7 },
+    });
   });
 });

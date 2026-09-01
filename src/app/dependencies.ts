@@ -47,7 +47,7 @@ export function createTauriDependencies(): AppDependencies {
   });
 }
 
-const browserResources: InMemoryContentResources = {
+export const browserResources: InMemoryContentResources = {
   'cn-provincial-divisions': {
     'manifest.json': cnManifest,
     'entities.json': cnEntities,
