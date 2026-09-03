@@ -6,6 +6,7 @@ coverage/
 playwright-report/
 test-results/
 release-artifacts/
+release-evidence/
 .pnpm-store/
 .tauri-template-spatial-memory-coach/
 src-tauri/target/

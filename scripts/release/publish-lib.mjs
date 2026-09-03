@@ -5,7 +5,7 @@ import { artifactNames, collectInstaller, downloadUrl, nonemptyFile, outputDirec
 
 const expectedFiles = (names) => [names.installer, names.signature, names.manifest, names.checksums];
 
-async function validatePreparedDirectory(root, version, tag) {
+export async function verifyPreparedArtifacts(root, version, tag) {
   const directory = join(root, outputDirectory);
   const names = artifactNames(version);
   const files = expectedFiles(names);
@@ -27,7 +27,7 @@ async function validatePreparedDirectory(root, version, tag) {
 
 export async function publishDraft(root, env, run = (args) => spawnSync('gh', args, { cwd: root, env, encoding: 'utf8', shell: false, windowsHide: true })) {
   const { version, tag, channel } = await preflight(root, env);
-  const { directory, files, names, signature } = await validatePreparedDirectory(root, version, tag);
+  const { directory, files, names, signature } = await verifyPreparedArtifacts(root, version, tag);
   const source = await collectInstaller(root);
   const [preparedInstaller, verifiedInstaller] = await Promise.all([
     readFile(join(directory, names.installer)), readFile(source.installer),

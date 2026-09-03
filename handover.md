@@ -35,5 +35,7 @@
 - E2E 全局类型声明改用模块导入以满足当前 ESLint 门禁，E2E-only 运行时边界未改变。
 - `THIRD_PARTY_NOTICES.md` 已从锁定的生产依赖元数据生成并通过逐字 `--check`：12 个 Node 包、494 个 Rust 包，另含 bundled SQLite、三套原创音频和三内容包的使用/许可边界；不包含本机路径，也不把 development-only 地图声明为合规获批。
 - Windows CI 证据格式固定为九个 `QG-01..09` 命令全部 `passed` 后才能写出；记录 commit/tag/run URL、runner image 和 Node/pnpm/Rust 工具版本，拒绝缺项、改命令、非 tag、非 Windows、旧输出目录和个人路径。当前只通过合成环境测试，尚无真实 GitHub run 证据。
+- Release workflow 的 tag push 现在逐条执行九个原文门禁，上传 coverage、Playwright report/traces 和 `quality-gates.json`，再签名、验证并创建四资产草稿；`workflow_dispatch` 只允许在所选现有 tag 上复验远端草稿并晋级，不重建或覆盖资产。普通 quality workflow 的 Windows/macOS 矩阵使用同一九命令序列。
+- 固定命令 `pnpm test -- --run --coverage` 的 pnpm 分隔符由最小测试入口归一化；本地实跑确认 `Coverage enabled with v8`、43 文件/487 项通过并生成 `coverage/index.html`。原命令文本未改变。
 - 本机缺少 MSVC `link.exe`：Rust clippy/test 的 exit-0 证据和真实 NSIS/updater 构建必须来自 GitHub Windows runner。
 - 自动化、资产、授权和当前用户实测的实时状态以 `docs/release/windows-v1-checklist.md` 与 `docs/release/windows-v1-smoke.md` 为准；尚未记录的结果不得宣称通过。

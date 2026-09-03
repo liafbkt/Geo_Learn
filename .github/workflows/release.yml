@@ -1,10 +1,10 @@
-name: Windows x64 draft release
+name: Windows x64 release
 
 on:
   push:
     tags: ['v*']
-  # Select an existing vMAJOR.MINOR.PATCH tag in the Run workflow ref picker.
-  # Branch dispatches are rejected by preflight; no arbitrary URL/path inputs.
+  # Select an existing release tag in the Run workflow ref picker.
+  # Branch dispatches are rejected before any GitHub mutation.
   workflow_dispatch:
 
 permissions:
@@ -20,16 +20,18 @@ defaults:
 
 env:
   CI: 'true'
-  RUSTUP_TOOLCHAIN: '1.98.0'
   CARGO_TERM_COLOR: always
 
 jobs:
   tests:
-    name: Windows quality gates
+    name: Windows release quality gates
+    if: github.event_name == 'push'
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
+    env:
+      RUSTUP_TOOLCHAIN: '1.98.0-x86_64-pc-windows-msvc'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,23 +44,109 @@ jobs:
       - name: Install pinned package manager
         run: npm install --global pnpm@11.19.0 --ignore-scripts
       - run: pnpm install --frozen-lockfile
-      - name: Install pinned Rust toolchain using runner rustup
-        run: rustup toolchain install 1.98.0 --profile minimal --component rustfmt --component clippy --target x86_64-pc-windows-msvc
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm exec vitest run --coverage
-      - run: pnpm build
-      - run: pnpm exec playwright install chromium
-      - run: pnpm exec playwright test
-      - run: cargo +1.98.0 fmt --manifest-path src-tauri/Cargo.toml --all -- --check
-      - run: cargo +1.98.0 clippy --locked --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
-      - run: cargo +1.98.0 test --locked --manifest-path src-tauri/Cargo.toml --all-targets
+      - name: Install pinned Rust MSVC toolchain
+        run: rustup toolchain install 1.98.0-x86_64-pc-windows-msvc --profile minimal --component rustfmt --component clippy --target x86_64-pc-windows-msvc
+      - name: Install Chromium
+        run: pnpm exec playwright install chromium
+      - name: QG-01
+        run: pnpm lint
+      - name: QG-02
+        run: pnpm typecheck
+      - name: QG-03
+        run: pnpm test -- --run --coverage
+      - name: QG-04
+        run: pnpm exec playwright test
+      - name: QG-05
+        run: pnpm build
+      - name: QG-06
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+      - name: QG-07
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+      - name: QG-08
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+      - name: QG-09
+        run: pnpm content:validate -- --all
+      - name: Write passed gate evidence
+        run: node scripts/release/write-gate-evidence.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-v1-coverage
+          path: coverage/
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-v1-playwright
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-v1-evidence
+          path: release-evidence/quality-gates.json
+          if-no-files-found: error
+          retention-days: 90
 
   release:
-    name: Sign and upload draft (human publication required)
+    name: Sign and upload immutable draft
+    if: github.event_name == 'push'
     needs: [tests]
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      RUSTUP_TOOLCHAIN: '1.98.0-x86_64-pc-windows-msvc'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Require release identity, content, public key, and signing secrets
+        run: node scripts/release/preflight.mjs --secrets
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - name: Install pinned package manager
+        run: npm install --global pnpm@11.19.0 --ignore-scripts
+      - run: pnpm install --frozen-lockfile
+      - name: Install pinned Rust MSVC toolchain
+        run: rustup toolchain install 1.98.0-x86_64-pc-windows-msvc --profile minimal --component rustfmt --component clippy --target x86_64-pc-windows-msvc
+      - name: Fetch locked Rust metadata
+        run: cargo fetch --locked --manifest-path src-tauri/Cargo.toml
+      - name: Check generated third-party notices
+        run: pnpm release:notices -- --check
+      - name: Build and sign NSIS updater artifacts
+        run: pnpm tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci -- --locked
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - name: Verify installer signature against the committed updater public key
+        run: cargo run --locked --manifest-path src-tauri/Cargo.toml --example verify_update_artifact
+      - name: Prepare exactly four release assets
+        run: node scripts/release/prepare-artifacts.mjs
+      - name: Verify updater metadata and SHA256SUMS
+        run: node scripts/release/verify-artifacts.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-release
+          path: release-artifacts/*
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload four assets to a new immutable GitHub draft
+        run: node scripts/release/publish-draft.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  promote:
+    name: Promote validated existing draft
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    timeout-minutes: 15
     permissions:
       contents: write
     steps:
@@ -68,34 +156,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.18.0'
-      - name: Require real content packs, configured public key, and signing secrets
-        run: node scripts/release/preflight.mjs --secrets
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-      - name: Install pinned package manager
-        run: npm install --global pnpm@11.19.0 --ignore-scripts
-      - run: pnpm install --frozen-lockfile
-      - name: Validate complete packaged content
-        run: pnpm content:validate -- --all
-      - name: Install pinned Rust toolchain using runner rustup
-        run: rustup toolchain install 1.98.0 --profile minimal --component rustfmt --component clippy --target x86_64-pc-windows-msvc
-      - name: Build and sign NSIS updater artifacts
-        run: pnpm tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci -- --locked
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-      - name: Verify installer signature against the committed updater public key
-        run: cargo +1.98.0 run --locked --manifest-path src-tauri/Cargo.toml --example verify_update_artifact
-      - name: Prepare installer, signature, and latest.json
-        run: node scripts/release/prepare-artifacts.mjs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows-x64-release
-          path: release-artifacts/*
-          if-no-files-found: error
-          retention-days: 14
-      - name: Upload three assets to a new GitHub draft release
-        run: node scripts/release/publish-draft.mjs
+      - name: Re-inspect remote assets and promote once
+        run: node scripts/release/promote-release.mjs
         env:
           GH_TOKEN: ${{ github.token }}

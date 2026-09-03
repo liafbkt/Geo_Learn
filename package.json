@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "release:notices": "node scripts/release/generate-notices.mjs",
     "tauri": "tauri",
-    "test": "vitest run",
+    "test": "node scripts/run-tests.mjs",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.content.json --noEmit",
     "content:validate": "tsx scripts/content/validate.ts"
   },
