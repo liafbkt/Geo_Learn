@@ -55,6 +55,7 @@ This read-only audit is not authorization for a push, tag, Release, promotion, o
 | 2026-09-07 21:16 CST | Windows `QG-07` for `v0.1.0-rc.1` | 1 | Real MSVC runner found seven Rust compile/clippy errors in `progress.rs` and `backup.rs`; no QG-08/QG-09, signing, or draft asset steps ran. Repair `8138063`; successor must be a new immutable RC. |
 | 2026-09-07 21:29 CST | Windows `QG-07` for `v0.1.0-rc.2` | 1 | Real MSVC runner cleared the seven prior errors but found the sole `E0308` at `progress.rs:563`: a `MutexGuard<Connection>` was passed through `?` where `Connection` was expected. No QG-08/QG-09, signing, or draft asset steps ran. Repair `2138e7a`; successor must be a new immutable RC. |
 | 2026-09-07 21:47 CST | Windows `QG-07` for `v0.1.0-rc.3` | 1 | Real MSVC runner compiled `progress.rs` successfully, then rejected the unused `backup.rs:1130` `mastery_key` under `-D dead-code`. No QG-08/QG-09, signing, or draft asset steps ran. Repair `7caaf22`; successor must be a new immutable RC. |
+| 2026-09-07 22:03 CST | Windows `QG-08` for `v0.1.0-rc.4` | 1 | QG-01..07 passed. The duplicate ZIP test fixture unwrapped a `zip` writer error before reaching `inspect_archive_bytes`; Windows rejected the duplicate name during fixture construction. Repair `cd04860` constructs duplicate central/local ZIP names after creation; successor must be a new immutable RC. |
 
 ## 授权台账
 
