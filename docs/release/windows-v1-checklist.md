@@ -54,6 +54,7 @@ This read-only audit is not authorization for a push, tag, Release, promotion, o
 | 2026-09-07 20:30 CST | `pnpm build` | 1 | Sandbox again denied esbuild access while loading `vite.config.ts`; identical sandbox-exempt rerun exit 0 with 305 modules. |
 | 2026-09-07 21:16 CST | Windows `QG-07` for `v0.1.0-rc.1` | 1 | Real MSVC runner found seven Rust compile/clippy errors in `progress.rs` and `backup.rs`; no QG-08/QG-09, signing, or draft asset steps ran. Repair `8138063`; successor must be a new immutable RC. |
 | 2026-09-07 21:29 CST | Windows `QG-07` for `v0.1.0-rc.2` | 1 | Real MSVC runner cleared the seven prior errors but found the sole `E0308` at `progress.rs:563`: a `MutexGuard<Connection>` was passed through `?` where `Connection` was expected. No QG-08/QG-09, signing, or draft asset steps ran. Repair `2138e7a`; successor must be a new immutable RC. |
+| 2026-09-07 21:47 CST | Windows `QG-07` for `v0.1.0-rc.3` | 1 | Real MSVC runner compiled `progress.rs` successfully, then rejected the unused `backup.rs:1130` `mastery_key` under `-D dead-code`. No QG-08/QG-09, signing, or draft asset steps ran. Repair `7caaf22`; successor must be a new immutable RC. |
 
 ## 授权台账
 
@@ -71,7 +72,7 @@ This read-only audit is not authorization for a push, tag, Release, promotion, o
 
 | Field | Status | Evidence |
 | --- | --- | --- |
-| Selected immutable tag | `v0.1.0-rc.1` and `v0.1.0-rc.2` failed; `v0.1.0-rc.3` pending | [rc.1](https://github.com/liafbkt/Geo_Learn/actions/runs/34126066871), [rc.2](https://github.com/liafbkt/Geo_Learn/actions/runs/34127404393) |
+| Selected immutable tag | `v0.1.0-rc.1`, `v0.1.0-rc.2`, and `v0.1.0-rc.3` failed; `v0.1.0-rc.4` pending | [rc.1](https://github.com/liafbkt/Geo_Learn/actions/runs/34126066871), [rc.2](https://github.com/liafbkt/Geo_Learn/actions/runs/34127404393), [rc.3](https://github.com/liafbkt/Geo_Learn/actions/runs/34128882514) |
 | Version sources synchronized | passed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | commits `69ed53c`, `9b4addf` |
 | Tag release workflow exit 0 | failed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | QG-07 failures; successor required |
 | Draft asset inspection | pending | — |
@@ -113,6 +114,7 @@ Detailed observations belong in `windows-v1-smoke.md`.
 | --- | --- | --- | --- | --- |
 | `v0.1.0-rc.1` | QG-07, [Windows run 34126066871](https://github.com/liafbkt/Geo_Learn/actions/runs/34126066871) | Rust lifetime/type inference errors and two denied clippy warnings; no draft assets created | `8138063` | Full local recheck passed where executable locally; prepare `v0.1.0-rc.2` and re-run all Windows gates |
 | `v0.1.0-rc.2` | QG-07, [Windows run 34127404393](https://github.com/liafbkt/Geo_Learn/actions/runs/34127404393) | Sole Rust `E0308` from passing `MutexGuard<Connection>` through `?`; no draft assets created | `2138e7a` | Full local recheck passed where executable locally; prepare `v0.1.0-rc.3` and re-run all Windows gates |
+| `v0.1.0-rc.3` | QG-07, [Windows run 34128882514](https://github.com/liafbkt/Geo_Learn/actions/runs/34128882514) | Unused `mastery_key` denied by `-D dead-code`; no draft assets created | `7caaf22` | Full local recheck passed where executable locally; prepare `v0.1.0-rc.4` and re-run all Windows gates |
 
 ## Unverified boundaries
 
