@@ -1127,15 +1127,6 @@ fn canonical_json<T: Serialize>(value: &T) -> Result<String, BackupError> {
     serde_json::to_string(value).map_err(|_| BackupError::invalid_data())
 }
 
-fn mastery_key(record: &MasteryRecord) -> (&str, &str, &str, &str) {
-    (
-        &record.learner_id,
-        &record.pack_id,
-        &record.entity_id,
-        &record.skill,
-    )
-}
-
 fn independent_count(
     attempts: &[AttemptRecord],
     learner: &str,
