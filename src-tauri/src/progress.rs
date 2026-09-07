@@ -560,7 +560,8 @@ pub fn save_attempt_transaction(
     database: State<'_, Database>,
     input: SaveAttemptInput,
 ) -> Result<(), ProgressError> {
-    save_attempt_transaction_on(&mut lock_database(&database)?, &input)
+    let mut connection = lock_database(&database)?;
+    save_attempt_transaction_on(&mut connection, &input)
 }
 
 #[tauri::command]
