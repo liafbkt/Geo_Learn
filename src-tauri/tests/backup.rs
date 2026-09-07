@@ -119,6 +119,34 @@ fn archive(entries: Vec<(String, Vec<u8>, Option<u32>)>) -> Vec<u8> {
     output.into_inner()
 }
 
+fn archive_with_duplicate_progress_entry(documents: &BTreeMap<String, Vec<u8>>) -> Vec<u8> {
+    let mut bytes = archive(vec![
+        ("manifest.json".to_owned(), manifest(documents, 1), None),
+        (
+            "progress.json".to_owned(),
+            documents["progress.json"].clone(),
+            None,
+        ),
+        ("progressxjson".to_owned(), b"{}".to_vec(), None),
+        (
+            "sessions.json".to_owned(),
+            documents["sessions.json"].clone(),
+            None,
+        ),
+    ]);
+    let placeholder = b"progressxjson";
+    let duplicate = b"progress.json";
+    let mut replacements = 0;
+    for offset in 0..=bytes.len() - placeholder.len() {
+        if bytes[offset..offset + placeholder.len()] == placeholder[..] {
+            bytes[offset..offset + placeholder.len()].copy_from_slice(duplicate);
+            replacements += 1;
+        }
+    }
+    assert_eq!(replacements, 2);
+    bytes
+}
+
 fn valid_archive() -> Vec<u8> {
     let documents = valid_documents();
     let mut entries = vec![("manifest.json".to_owned(), manifest(&documents, 1), None)];
@@ -246,11 +274,8 @@ fn rejects_missing_extra_duplicate_traversal_and_symlink_entries() {
         "invalid_archive",
     );
 
-    let mut duplicate_entries = base.clone();
-    duplicate_entries.extend(documents.clone().into_iter().map(|(n, b)| (n, b, None)));
-    duplicate_entries.push(("progress.json".to_owned(), b"{}".to_vec(), None));
     assert_code(
-        inspect_archive_bytes(&archive(duplicate_entries)),
+        inspect_archive_bytes(&archive_with_duplicate_progress_entry(&documents)),
         "invalid_archive",
     );
 
