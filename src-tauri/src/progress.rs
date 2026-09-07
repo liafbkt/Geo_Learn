@@ -513,9 +513,9 @@ pub(crate) fn save_attempt_transaction_on(
     Ok(())
 }
 
-fn lock_database(
-    database: &State<'_, Database>,
-) -> Result<std::sync::MutexGuard<'_, Connection>, ProgressError> {
+fn lock_database<'a>(
+    database: &'a State<'a, Database>,
+) -> Result<std::sync::MutexGuard<'a, Connection>, ProgressError> {
     database.0.lock().map_err(|_| ProgressError::persistence())
 }
 
@@ -738,7 +738,7 @@ pub fn load_retry_debts(
     validate_id(&learner_id, "Learner")?;
     validate_id(&pack_id, "Pack")?;
     let connection = lock_database(&database)?;
-    let value = connection
+    let value: Option<String> = connection
         .query_row(
             "SELECT retry_debts_json FROM practice_session
              WHERE learner_id = ?1 AND pack_id = ?2
@@ -767,7 +767,7 @@ fn default_settings() -> AppSettingsDto {
 #[tauri::command]
 pub fn load_settings(database: State<'_, Database>) -> Result<AppSettingsDto, ProgressError> {
     let connection = lock_database(&database)?;
-    let value = connection
+    let value: Option<String> = connection
         .query_row(
             "SELECT value_json FROM app_setting WHERE setting_key = 'app'",
             [],

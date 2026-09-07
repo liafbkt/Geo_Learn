@@ -1041,7 +1041,6 @@ pub fn write_selected_backup(
         return Ok(None);
     };
     let target = target_path(selected)?;
-    let directory = target.parent().ok_or_else(BackupError::export_failed)?;
     let name = target
         .file_name()
         .and_then(|value| value.to_str())
@@ -1593,7 +1592,7 @@ fn read_selected_backup(path: &Path) -> Result<InspectedBackup, BackupError> {
             "The selected backup is too large.",
         ));
     }
-    let mut file = File::open(path).map_err(|_| BackupError::invalid_archive())?;
+    let file = File::open(path).map_err(|_| BackupError::invalid_archive())?;
     let mut bytes = Vec::with_capacity(metadata.len() as usize);
     file.take(MAX_ARCHIVE_BYTES as u64 + 1)
         .read_to_end(&mut bytes)
