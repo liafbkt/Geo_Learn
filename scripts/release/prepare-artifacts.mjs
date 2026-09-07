@@ -15,7 +15,7 @@ await cli(async () => {
   await copyFile(source.signaturePath, join(output, names.signature));
   await writeFile(join(output, names.manifest), `${JSON.stringify({
     version,
-    notes: 'Personal-use Windows x64 update; verified on the current user environment only.',
+    notes: 'Personal-use Windows x64 update. Publication and current-user observations are recorded separately in the release checklist.',
     pub_date: new Date().toISOString(),
     platforms: { 'windows-x86_64': { signature: source.signature, url: downloadUrl(tag, names.installer) } },
   }, null, 2)}\n`, { flag: 'wx' });

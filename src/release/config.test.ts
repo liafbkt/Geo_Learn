@@ -40,12 +40,13 @@ describe('Windows release configuration contract', () => {
     ].sort());
   });
 
-  it('bundles only runtime content files, embedded frontend and statically bundled SQLite', () => {
+  it('bundles runtime content, third-party notices, embedded frontend and statically bundled SQLite', () => {
     expect(config.bundle.resources).toEqual([
       'resources/content/*/manifest.json',
       'resources/content/*/entities.json',
       'resources/content/*/map.topojson',
       'resources/content/*/sources.json',
+      '../THIRD_PARTY_NOTICES.md',
     ]);
     expect(config.build.frontendDist).toBe('../dist');
     expect(read('src-tauri/Cargo.toml')).toMatch(/rusqlite\s*=\s*\{[^\n]*features\s*=\s*\["bundled"\]/);

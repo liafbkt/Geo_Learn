@@ -29,7 +29,8 @@
       "resources/content/*/manifest.json",
       "resources/content/*/entities.json",
       "resources/content/*/map.topojson",
-      "resources/content/*/sources.json"
+      "resources/content/*/sources.json",
+      "../THIRD_PARTY_NOTICES.md"
     ],
     "targets": ["nsis"],
     "createUpdaterArtifacts": true,

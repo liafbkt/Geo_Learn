@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 const compareAscii = (left, right) => left < right ? -1 : left > right ? 1 : 0;
 
 export function parseNoticesArgs(rawArgs) {
@@ -13,6 +15,11 @@ function requiredText(value, label) {
 
 function markdown(value) {
   return value.replaceAll('|', '\\|').replaceAll('\r', ' ').replaceAll('\n', ' ');
+}
+
+function normalizeLicenseText(value) {
+  return value.replaceAll('\r\n', '\n').replaceAll('\t', '    ')
+    .split('\n').map((line) => line.trimEnd()).join('\n').trimEnd();
 }
 
 function nodeDependencies(pnpmLicenses) {
@@ -39,14 +46,33 @@ function nodeDependencies(pnpmLicenses) {
   return [...packages.values()].sort((left, right) => compareAscii(`${left.name}@${left.version}`, `${right.name}@${right.version}`));
 }
 
-function rustDependencies(metadata) {
-  if (!metadata || !Array.isArray(metadata.packages) || typeof metadata.resolve?.root !== 'string') {
+export function rustDependencyPackages(metadata) {
+  if (!metadata || !Array.isArray(metadata.packages) || typeof metadata.resolve?.root !== 'string' || !Array.isArray(metadata.resolve.nodes)) {
     throw new Error('Invalid Cargo metadata.');
   }
-  const root = metadata.packages.find((pkg) => pkg?.id === metadata.resolve.root);
-  if (!root || !Array.isArray(root.dependencies)) throw new Error('Invalid Cargo root package metadata.');
+  const packagesById = new Map(metadata.packages.map((pkg) => [pkg?.id, pkg]));
+  const nodesById = new Map(metadata.resolve.nodes.map((node) => [node?.id, node]));
+  if (!packagesById.has(metadata.resolve.root) || !nodesById.has(metadata.resolve.root)) throw new Error('Invalid Cargo root package metadata.');
+  const reachable = new Set();
+  const queue = [metadata.resolve.root];
+  while (queue.length) {
+    const node = nodesById.get(queue.shift());
+    if (!node || !Array.isArray(node.deps)) throw new Error('Invalid Cargo dependency graph.');
+    for (const dependency of node.deps) {
+      if (!Array.isArray(dependency?.dep_kinds) || !dependency.dep_kinds.some((kind) => kind?.kind == null || kind?.kind === 'build')) continue;
+      if (!packagesById.has(dependency.pkg) || !nodesById.has(dependency.pkg)) throw new Error('Invalid Cargo dependency graph.');
+      if (!reachable.has(dependency.pkg)) {
+        reachable.add(dependency.pkg);
+        queue.push(dependency.pkg);
+      }
+    }
+  }
+  return [...reachable].map((id) => packagesById.get(id));
+}
+
+function rustDependencies(metadata) {
   const packages = new Map();
-  for (const entry of metadata.packages.filter((pkg) => pkg?.id !== metadata.resolve.root)) {
+  for (const entry of rustDependencyPackages(metadata)) {
     const name = requiredText(entry?.name, 'name');
     const version = requiredText(entry?.version, 'version');
     const license = requiredText(entry?.license, 'license expression');
@@ -55,14 +81,7 @@ function rustDependencies(metadata) {
     if (existing && existing.license !== license) throw new Error(`Conflicting license expressions for ${name}@${version}.`);
     packages.set(key, { name, version, license });
   }
-  const values = [...packages.values()].sort((left, right) => compareAscii(`${left.name}@${left.version}`, `${right.name}@${right.version}`));
-  const available = new Set(values.map((entry) => entry.name));
-  const missing = root.dependencies
-    .filter((dependency) => dependency?.kind == null)
-    .map((dependency) => requiredText(dependency.name, 'name'))
-    .filter((name) => !available.has(name));
-  if (missing.length) throw new Error(`Missing direct Rust production dependencies: ${missing.sort(compareAscii).join(', ')}.`);
-  return values;
+  return [...packages.values()].sort((left, right) => compareAscii(`${left.name}@${left.version}`, `${right.name}@${right.version}`));
 }
 
 function table(packages) {
@@ -70,7 +89,22 @@ function table(packages) {
     `| ${markdown(entry.name)} | ${markdown(entry.version)} | ${markdown(entry.license)} |`)].join('\n');
 }
 
-export function generateNotices(pnpmLicenses, cargoMetadata, directNodeDependencies) {
+function licenseAppendix(documents) {
+  if (!Array.isArray(documents) || documents.length === 0) throw new Error('Missing dependency license text.');
+  return documents.map((document, index) => {
+    if (!Array.isArray(document?.packages) || !document.packages.length || !Array.isArray(document.filenames) || !document.filenames.length) {
+      throw new Error('Invalid dependency license document metadata.');
+    }
+    const text = normalizeLicenseText(requiredText(document.text, 'license text'));
+    const digest = createHash('sha256').update(text).digest('hex');
+    const indented = text.split('\n').map((line) => line ? `    ${line}` : '').join('\n');
+    const packages = [...new Set(document.packages.map((value) => requiredText(value, 'license package')))].sort(compareAscii);
+    const filenames = [...new Set(document.filenames.map((value) => requiredText(value, 'license filename')))].sort(compareAscii);
+    return `### Document ${index + 1} — SHA-256 ${digest}\n\nApplies to: ${packages.map((value) => `\`${value}\``).join(', ')}\n\nSource filenames: ${filenames.map((value) => `\`${value}\``).join(', ')}\n\n${indented}`;
+  }).join('\n\n');
+}
+
+export function generateNotices(pnpmLicenses, cargoMetadata, directNodeDependencies, licenseDocuments) {
   const node = nodeDependencies(pnpmLicenses);
   const direct = Array.isArray(directNodeDependencies) ? directNodeDependencies.map((name) => requiredText(name, 'name')) : [];
   const nodeNames = new Set(node.map((entry) => entry.name));
@@ -79,7 +113,7 @@ export function generateNotices(pnpmLicenses, cargoMetadata, directNodeDependenc
   const rust = rustDependencies(cargoMetadata);
   const output = `# Third-Party Notices
 
-This file is generated from the locked production dependency metadata. Package license expressions are reproduced as reported by their manifests.
+This file is generated from the locked Node production and Windows Rust production/build dependency metadata. Package license expressions are reproduced as reported by their manifests.
 
 ## Node production dependencies
 
@@ -88,6 +122,14 @@ ${table(node)}
 ## Rust dependencies
 
 ${table(rust)}
+
+This table is the locked Windows production and build dependency graph; development-only packages are excluded.
+
+## Dependency license and notice texts
+
+The following package-supplied license and NOTICE texts are bundled with line endings, trailing whitespace, and tabs normalized, deduplicated by content, and mapped to the packages that supplied them.
+
+${licenseAppendix(licenseDocuments)}
 
 ## Bundled SQLite
 

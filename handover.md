@@ -37,5 +37,15 @@
 - Windows CI 证据格式固定为九个 `QG-01..09` 命令全部 `passed` 后才能写出；记录 commit/tag/run URL、runner image 和 Node/pnpm/Rust 工具版本，拒绝缺项、改命令、非 tag、非 Windows、旧输出目录和个人路径。当前只通过合成环境测试，尚无真实 GitHub run 证据。
 - Release workflow 的 tag push 现在逐条执行九个原文门禁，上传 coverage、Playwright report/traces 和 `quality-gates.json`，再签名、验证并创建四资产草稿；`workflow_dispatch` 只允许在所选现有 tag 上复验远端草稿并晋级，不重建或覆盖资产。普通 quality workflow 的 Windows/macOS 矩阵使用同一九命令序列。
 - 固定命令 `pnpm test -- --run --coverage` 的 pnpm 分隔符由最小测试入口归一化；本地实跑确认 `Coverage enabled with v8`、43 文件/487 项通过并生成 `coverage/index.html`。原命令文本未改变。
+- Windows v1 qualification 本地实现提交链：`c17a56d`（RC/stable 与四资产）、`d2d1009`（notices/证据）、`e0546d7`（精确 Windows CI）。这些提交当前位于隔离 worktree 的 detached 线，Task 9 资格提交后需以 fast-forward 落回 `codex/user-test-mvp`；尚未推送。
+- 2026-09-03 本地九门禁：QG-01/02/03/04/05/06/09 最终 exit 0；QG-03 为 43 文件/487 项，QG-04 为 19 项，QG-09 三包 34/16/50。QG-07/08 实际 exit 1，唯一 Rust 根因是本机缺少 MSVC `link.exe`，必须由 GitHub Windows runner 补齐。
+- 本地失败保留：QG-05 首次因沙箱拒绝 esbuild 读取 Vite 配置 exit 1，QG-09 首次因沙箱内 `uv_os_get_passwd` ENOMEM 在校验器启动前 exit 1；两者完全相同命令在允许读取本地环境的执行面重跑 exit 0。一次 RC 聚焦测试误用 Vitest `--grep` 未启动，改用 `-t` 后通过。Task 9 收尾时 notices 检查也曾因沙箱无法收集依赖元数据 exit 1，同命令在允许读取依赖的执行面重跑 exit 0。
+- 2026-09-03 安全干跑：notices freshness、离线扫描、stable identity preflight、合成 RC identity preflight、tracked secret/sensitive-file scan、ignore/upload boundary 与 `git diff --check` 均 exit 0。无 Release 资产、CI URL 或原生安装/更新烟测可报告。
+- GitHub promotion PATCH 的 `draft`/`prerelease` 使用 `gh api -F` 发送 JSON boolean；stable 的 `make_latest=true` 保持 API 要求的字符串字段。该边界按 GitHub CLI 官方类型语义修正并有单测，尚未对远端执行。
+- Task 9 独立审查发现并已修复发布晋级阻断：远端单资产限 256 MiB 且 `gh` 同步读取缓冲相应放宽，2 MiB 回归样本已覆盖；四资产从 GitHub 重下并通过 SHA-256 后，还必须由 Rust/minisign 使用仓库提交的 updater 公钥验签，才允许唯一一次 PATCH。真实远端和真实签名仍待授权后的候选版证明。
+- `latest.json` 和 Release 草稿说明不再提前声称当前用户已验证；草稿明确个人用途、Windows 11/全新系统/真实缺失 WebView2 边界，以及 updater minisign 不等同 Authenticode 发布者签名。
+- 四版本源更新在全部替换后才进入提交点；提交后的 `.bak` 清理失败不再触发回滚。staging、八个 rename 位置、rollback 和部分 backup cleanup 均有故障注入覆盖；失败回滚不先删除当前版本源。
+- `THIRD_PARTY_NOTICES.md` 改为 Windows production/build Rust 可达图，排除仅开发依赖，附带并去重映射依赖自带的 license/NOTICE 正文；配置要求它随 NSIS 资源分发。当前只是配置与生成验证，安装后的实际落盘位置仍需候选版烟测确认。
 - 本机缺少 MSVC `link.exe`：Rust clippy/test 的 exit-0 证据和真实 NSIS/updater 构建必须来自 GitHub Windows runner。
 - 自动化、资产、授权和当前用户实测的实时状态以 `docs/release/windows-v1-checklist.md` 与 `docs/release/windows-v1-smoke.md` 为准；尚未记录的结果不得宣称通过。
+- 2026-09-07 下载就绪复核：本地 release-focused Vitest 8 文件/121 项、lint、typecheck、rustfmt、notices freshness 与 `git diff --check` 均 fresh exit 0；`pnpm build` 在已知 esbuild 沙箱读权限失败后以完全相同命令在允许读取本机环境的执行面复跑 exit 0（305 modules）。GitHub 公共 API 返回 0 个 Release、0 次 Actions run，远端未找到 `codex/user-test-mvp`，且当前 `gh` 登录 token 无效。因此初版安装测试尚不能开始，必须先经明确授权重新登录、推送并由 Windows runner 生成真实资产。

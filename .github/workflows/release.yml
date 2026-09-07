@@ -149,6 +149,8 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: write
+    env:
+      RUSTUP_TOOLCHAIN: '1.98.0-x86_64-pc-windows-msvc'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -156,6 +158,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.18.0'
+      - name: Install pinned Rust MSVC toolchain
+        run: rustup toolchain install 1.98.0-x86_64-pc-windows-msvc --profile minimal --target x86_64-pc-windows-msvc
       - name: Re-inspect remote assets and promote once
         run: node scripts/release/promote-release.mjs
         env:

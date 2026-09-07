@@ -56,7 +56,10 @@ describe('release workflow security boundary', () => {
     expect(jobs.release.permissions).toEqual({ contents: 'write' });
     expect(jobs.promote.if).toBe("github.event_name == 'workflow_dispatch'");
     expect(jobs.promote.permissions).toEqual({ contents: 'write' });
-    expect(jobs.promote.steps.filter((step) => step.run).map((step) => step.run)).toContain('node scripts/release/promote-release.mjs');
+    expect(jobs.promote.env.RUSTUP_TOOLCHAIN).toBe('1.98.0-x86_64-pc-windows-msvc');
+    const promoteRuns = jobs.promote.steps.filter((step) => step.run).map((step) => step.run);
+    expect(promoteRuns).toContain('node scripts/release/promote-release.mjs');
+    expect(promoteRuns.findIndex((run) => run.startsWith('rustup toolchain install'))).toBeLessThan(promoteRuns.indexOf('node scripts/release/promote-release.mjs'));
     expect(jobs.promote.steps.some((step) => step.run?.includes('tauri build') || step.run?.includes('publish-draft'))).toBe(false);
   });
 

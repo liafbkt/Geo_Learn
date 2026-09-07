@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -10,7 +11,7 @@ const roots = [];
 const script = (name) => resolve('scripts/release', name);
 const packs = ['cn-provincial-divisions', 'cn-shanghai-districts', 'us-states'];
 const resources = ['manifest.json', 'entities.json', 'map.topojson', 'sources.json']
-  .map((file) => `resources/content/*/${file}`);
+  .map((file) => `resources/content/*/${file}`).concat('../THIRD_PARTY_NOTICES.md');
 const endpoint = 'https://github.com/liafbkt/Geo_Learn/releases/latest/download/latest.json';
 // Deliberately synthetic format-only fixtures; never usable for signing a release.
 const packet = (length) => Buffer.concat([Buffer.from('Ed'), Buffer.alloc(length - 2, 7)]).toString('base64');
@@ -26,6 +27,7 @@ async function fixture(version = '0.1.0') {
   await writeFile(join(root, 'src-tauri/Cargo.toml'), `[package]\nname = "spatial-memory-coach"\nversion = "${version}"\n`);
   await writeFile(join(root, 'src-tauri/Cargo.lock'), `version = 4\n\n[[package]]\nname = "spatial-memory-coach"\nversion = "${version}"\n`);
   await writeFile(join(root, 'src-tauri/tauri.conf.json'), JSON.stringify({ version, bundle: { targets: ['nsis'], createUpdaterArtifacts: true, resources }, plugins: { updater: { pubkey: publicKey, endpoints: [endpoint] } } }));
+  await writeFile(join(root, 'THIRD_PARTY_NOTICES.md'), '# Third-Party Notices\n');
   for (const pack of packs) {
     await mkdir(join(root, 'src-tauri/resources/content', pack), { recursive: true });
     for (const file of ['manifest.json', 'entities.json', 'sources.json', 'map.topojson']) await writeFile(join(root, 'src-tauri/resources/content', pack, file), '{}');
@@ -118,7 +120,8 @@ describe('release artifact preparation CLI', () => {
     const manifest = JSON.parse(await readFile(join(root, 'release-artifacts/latest.json'), 'utf8'));
     expect(manifest.version).toBe('0.1.0');
     expect(manifest.notes).toContain('Personal-use');
-    expect(manifest.notes).toContain('current user');
+    expect(manifest.notes).toContain('current-user observations are recorded separately');
+    expect(manifest.notes).not.toContain('verified on the current user environment');
     expect(manifest.notes).not.toContain('human content/map review');
     expect(manifest.platforms).toEqual({ 'windows-x86_64': { signature, url: 'https://github.com/liafbkt/Geo_Learn/releases/download/v0.1.0/GeoLearn_0.1.0_x64-setup.exe' } });
     expect(await readFile(join(root, 'release-artifacts/GeoLearn_0.1.0_x64-setup.exe.sig'), 'utf8')).toBe(signature);
@@ -174,7 +177,12 @@ describe('draft release publishing', () => {
       return { status: 0, stdout: '' };
     });
     expect(calls[0]).toEqual(['api', 'repos/liafbkt/Geo_Learn/releases', '--paginate', '--slurp']);
-    expect(calls[1]).toEqual(['release', 'create', 'v0.1.0', ...['GeoLearn_0.1.0_x64-setup.exe', 'GeoLearn_0.1.0_x64-setup.exe.sig', 'latest.json', 'SHA256SUMS.txt'].map((name) => join(root, 'release-artifacts', name)), '--repo', 'liafbkt/Geo_Learn', '--draft', '--verify-tag', '--title', 'Geo Learn v0.1.0', '--notes', 'Draft only. Personal-use Windows x64 release; current-user smoke and release checklist approval are required before publication.']);
+    expect(calls[1]).toEqual(['release', 'create', 'v0.1.0', ...['GeoLearn_0.1.0_x64-setup.exe', 'GeoLearn_0.1.0_x64-setup.exe.sig', 'latest.json', 'SHA256SUMS.txt'].map((name) => join(root, 'release-artifacts', name)), '--repo', 'liafbkt/Geo_Learn', '--draft', '--verify-tag', '--title', 'Geo Learn v0.1.0', '--notes', expect.stringContaining('not an Authenticode publisher signature')]);
+  });
+  it('blocks an installer configuration that omits the generated notices', async () => {
+    const root = await fixture();
+    await editConfig(root, (config) => { config.bundle.resources = config.bundle.resources.filter((entry) => entry !== '../THIRD_PARTY_NOTICES.md'); });
+    expect(run('preflight.mjs', root).status).not.toBe(0);
   });
   it('marks a candidate draft as a prerelease', async () => {
     const publish = await publisher();
@@ -274,16 +282,26 @@ describe('immutable release promotion', () => {
     };
   }
 
+  function trustedVerifier(calls) {
+    return async (_root, installerBytes, signatureText) => {
+      calls.push({ installerBytes, signatureText });
+    };
+  }
+
   it.each([
-    ['0.1.0-rc.1', ['-f', 'draft=false', '-f', 'prerelease=true']],
-    ['0.1.0', ['-f', 'draft=false', '-f', 'prerelease=false', '-f', 'make_latest=true']],
+    ['0.1.0-rc.1', ['-F', 'draft=false', '-F', 'prerelease=true']],
+    ['0.1.0', ['-F', 'draft=false', '-F', 'prerelease=false', '-f', 'make_latest=true']],
   ])('promotes %s only after validating all remote assets', async (version, fields) => {
     const promote = await promoter();
     const state = await remoteDraft(version);
     const calls = [];
+    const verifications = [];
 
-    await promote(state.root, envFor(version), remoteRunner(state, calls));
+    await promote(state.root, envFor(version), remoteRunner(state, calls), trustedVerifier(verifications));
 
+    expect(verifications).toHaveLength(1);
+    expect(verifications[0].installerBytes).toEqual(state.contents[`GeoLearn_${version}_x64-setup.exe`]);
+    expect(verifications[0].signatureText).toBe(state.contents[`GeoLearn_${version}_x64-setup.exe.sig`].toString('utf8').trim());
     expect(calls.at(-1)).toEqual(['api', 'repos/liafbkt/Geo_Learn/releases/17', '-X', 'PATCH', ...fields]);
     expect(calls.filter((args) => args.includes('PATCH'))).toHaveLength(1);
   });
@@ -318,9 +336,94 @@ describe('immutable release promotion', () => {
     expect(calls.some((args) => args.includes('PATCH'))).toBe(false);
   });
 
+  it('refuses internally consistent remote assets when public-key verification fails', async () => {
+    const promote = await promoter();
+    const state = await remoteDraft('0.1.0-rc.1');
+    const installerName = `GeoLearn_${state.version}_x64-setup.exe`;
+    const signatureName = `${installerName}.sig`;
+    state.contents[installerName] = Buffer.from('MZconsistently-replaced-installer');
+    const manifest = JSON.parse(state.contents['latest.json'].toString('utf8'));
+    manifest.platforms['windows-x86_64'].signature = state.contents[signatureName].toString('utf8').trim();
+    state.contents['latest.json'] = Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`);
+    const checksummed = [installerName, signatureName, 'latest.json'].sort();
+    state.contents['SHA256SUMS.txt'] = Buffer.from(`${checksummed.map((name) => `${createHash('sha256').update(state.contents[name]).digest('hex')}  ${name}`).join('\n')}\n`);
+    for (const asset of state.metadata.assets) asset.size = state.contents[asset.name].length;
+    const calls = [];
+
+    await expect(promote(state.root, envFor(state.version), remoteRunner(state, calls), async () => {
+      throw new Error('Updater signature does not match the committed public key.');
+    })).rejects.toThrow('public key');
+
+    expect(calls.some((args) => args.includes('PATCH'))).toBe(false);
+  });
+
+  it('rejects an oversized remote asset before attempting its download', async () => {
+    const promote = await promoter();
+    const state = await remoteDraft('0.1.0-rc.1');
+    state.metadata.assets[0].size = 256 * 1024 * 1024 + 1;
+    const calls = [];
+
+    await expect(promote(state.root, envFor(state.version), remoteRunner(state, calls), trustedVerifier([]))).rejects.toThrow('size');
+
+    expect(calls).toHaveLength(1);
+    expect(calls.some((args) => args.includes('PATCH'))).toBe(false);
+  });
+
+  it('validates an installer larger than Node default child-process output buffering', async () => {
+    const promote = await promoter();
+    const state = await remoteDraft('0.1.0-rc.1');
+    const installerName = `GeoLearn_${state.version}_x64-setup.exe`;
+    const largeInstaller = Buffer.alloc(2 * 1024 * 1024, 7);
+    largeInstaller.set(Buffer.from('MZ'));
+    state.contents[installerName] = largeInstaller;
+    const checksummed = [installerName, `${installerName}.sig`, 'latest.json'].sort();
+    state.contents['SHA256SUMS.txt'] = Buffer.from(`${checksummed.map((name) => `${createHash('sha256').update(state.contents[name]).digest('hex')}  ${name}`).join('\n')}\n`);
+    for (const asset of state.metadata.assets) asset.size = state.contents[asset.name].length;
+    const calls = [];
+    const verifications = [];
+
+    await promote(state.root, envFor(state.version), remoteRunner(state, calls), trustedVerifier(verifications));
+
+    expect(verifications[0].installerBytes).toHaveLength(2 * 1024 * 1024);
+    expect(calls.filter((args) => args.includes('PATCH'))).toHaveLength(1);
+  });
+
   it('rejects free-form promotion arguments before any GitHub call', async () => {
     const result = run('promote-release.mjs', await fixture(), {}, ['v0.1.0']);
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('no arguments');
+  });
+});
+
+describe('downloaded updater signature verification', () => {
+  it('passes an isolated installer pair to the pinned Rust verifier', async () => {
+    const module = await import('./publish-lib.mjs').catch(() => ({}));
+    expect(module.verifyDownloadedUpdater).toBeTypeOf('function');
+    const root = await fixture();
+    const calls = [];
+
+    await module.verifyDownloadedUpdater(root, Buffer.from('MZdownloaded-installer'), signature, env, (args, options) => {
+      calls.push(args);
+      const directory = args.at(-1);
+      expect(readFileSync(join(directory, 'GeoLearn-update.exe'))).toEqual(Buffer.from('MZdownloaded-installer'));
+      expect(readFileSync(join(directory, 'GeoLearn-update.exe.sig'), 'utf8')).toBe(signature);
+      expect(options.cwd).toBe(root);
+      expect(options.env.GH_TOKEN).toBeUndefined();
+      expect(options.env.TAURI_SIGNING_PRIVATE_KEY).toBeUndefined();
+      expect(options.env.GITHUB_REF).toBe(env.GITHUB_REF);
+      return { status: 0, stdout: 'verified', stderr: '' };
+    });
+
+    expect(calls).toEqual([[
+      'run', '--locked', '--manifest-path', 'src-tauri/Cargo.toml', '--example', 'verify_update_artifact', '--', expect.any(String),
+    ]]);
+  });
+
+  it('fails closed when the committed-public-key verifier rejects the pair', async () => {
+    const module = await import('./publish-lib.mjs').catch(() => ({}));
+    expect(module.verifyDownloadedUpdater).toBeTypeOf('function');
+
+    await expect(module.verifyDownloadedUpdater(await fixture(), Buffer.from('MZdownloaded-installer'), signature, env, () => ({ status: 1 })))
+      .rejects.toThrow('committed public key');
   });
 });

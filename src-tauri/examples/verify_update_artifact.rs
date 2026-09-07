@@ -45,8 +45,13 @@ fn run() -> Result<(), Box<dyn Error>> {
         .as_str()
         .filter(|value| !value.is_empty())
         .ok_or("Missing updater public key")?;
-    let installer =
-        find_installer(&root.join("target/x86_64-pc-windows-msvc/release/bundle/nsis"))?;
+    let mut arguments = std::env::args_os().skip(1);
+    let directory = match arguments.next() {
+        Some(path) if arguments.next().is_none() => PathBuf::from(path),
+        None => root.join("target/x86_64-pc-windows-msvc/release/bundle/nsis"),
+        Some(_) => return Err("Expected at most one updater artifact directory".into()),
+    };
+    let installer = find_installer(&directory)?;
     let bytes = std::fs::read(&installer)?;
     let signature = std::fs::read_to_string(installer.with_extension("exe.sig"))?;
     verify(&bytes, &signature, key)?;

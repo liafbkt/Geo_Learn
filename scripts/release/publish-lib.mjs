@@ -1,9 +1,43 @@
-import { readFile, readdir } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { artifactNames, collectInstaller, downloadUrl, nonemptyFile, outputDirectory, preflight, readJson, repository, validateSignature, verifyChecksumManifest } from './lib.mjs';
 
 const expectedFiles = (names) => [names.installer, names.signature, names.manifest, names.checksums];
+const githubAssetMaxBytes = 256 * 1024 * 1024;
+const githubOutputMaxBytes = githubAssetMaxBytes + 1024 * 1024;
+
+function releaseNotes(channel, tag) {
+  return [
+    `Personal-use Windows x64 ${channel === 'candidate' ? 'release candidate' : 'release'}.`,
+    `Manual witness scope: the current account on an existing Windows 10 Home 22H2 x64 installation. Results are recorded in https://github.com/${repository}/blob/${tag}/docs/release/windows-v1-checklist.md; this draft text does not claim those observations have occurred.`,
+    'Windows 11, a fresh OS, and a genuinely missing WebView2 runtime remain manually unverified.',
+    'The updater artifact uses Tauri minisign update signing; this is not an Authenticode publisher signature.',
+    'Named-human China-map review and statutory public-distribution approval are out of scope for this personal application and are not claimed.',
+  ].join('\n\n');
+}
+
+export async function verifyDownloadedUpdater(root, installerBytes, signature, environment, run = (args, options) => spawnSync('cargo', args, {
+  ...options, encoding: 'utf8', shell: false, windowsHide: true, maxBuffer: 1024 * 1024,
+})) {
+  const directory = await mkdtemp(join(tmpdir(), 'geo-learn-updater-'));
+  try {
+    await writeFile(join(directory, 'GeoLearn-update.exe'), installerBytes, { flag: 'wx' });
+    await writeFile(join(directory, 'GeoLearn-update.exe.sig'), signature, { flag: 'wx' });
+    const result = run([
+      'run', '--locked', '--manifest-path', 'src-tauri/Cargo.toml', '--example', 'verify_update_artifact', '--', directory,
+    ], {
+      cwd: root,
+      env: Object.fromEntries(Object.entries(environment).filter(([name]) => ![
+        'GH_TOKEN', 'GITHUB_TOKEN', 'TAURI_SIGNING_PRIVATE_KEY', 'TAURI_SIGNING_PRIVATE_KEY_PASSWORD',
+      ].includes(name))),
+    });
+    if (result.status !== 0) throw new Error('Downloaded updater signature does not match the committed public key.');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+}
 
 export async function verifyPreparedArtifacts(root, version, tag) {
   const directory = join(root, outputDirectory);
@@ -47,14 +81,14 @@ export async function publishDraft(root, env, run = (args) => spawnSync('gh', ar
   const created = run([
     'release', 'create', tag, ...files.map((name) => join(directory, name)),
     '--repo', repository, '--draft', ...(channel === 'candidate' ? ['--prerelease'] : []), '--verify-tag', '--title', `Geo Learn ${tag}`,
-    '--notes', 'Draft only. Personal-use Windows x64 release; current-user smoke and release checklist approval are required before publication.',
+    '--notes', releaseNotes(channel, tag),
   ]);
   if (created.status !== 0) throw new Error('GitHub draft creation/upload failed; inspect the draft before retrying.');
 }
 
 export async function promoteRelease(root, env, run = (args, { binary = false } = {}) => spawnSync('gh', args, {
-  cwd: root, env, encoding: binary ? null : 'utf8', shell: false, windowsHide: true,
-})) {
+  cwd: root, env, encoding: binary ? null : 'utf8', shell: false, windowsHide: true, maxBuffer: githubOutputMaxBytes,
+}), verifyUpdater = verifyDownloadedUpdater) {
   const { version, tag, channel } = await preflight(root, env);
   const inspected = run(['api', `repos/${repository}/releases/tags/${tag}`]);
   if (inspected.status !== 0) throw new Error('Cannot inspect the GitHub draft; no changes made.');
@@ -72,11 +106,16 @@ export async function promoteRelease(root, env, run = (args, { binary = false } 
   if (release.assets.length !== files.length || JSON.stringify(release.assets.map((asset) => asset?.name).sort()) !== JSON.stringify([...files].sort())) {
     throw new Error('GitHub draft does not contain exactly the four expected assets.');
   }
-  const contents = {};
   for (const asset of release.assets) {
-    if (!Number.isInteger(asset.id) || asset.id < 1 || !Number.isInteger(asset.size) || asset.size < 1 || asset.url !== `https://api.github.com/repos/${repository}/releases/assets/${asset.id}`) {
+    if (!Number.isInteger(asset.size) || asset.size < 1 || asset.size > githubAssetMaxBytes) {
+      throw new Error('GitHub draft asset size is invalid or exceeds the 256 MiB promotion limit.');
+    }
+    if (!Number.isInteger(asset.id) || asset.id < 1 || asset.url !== `https://api.github.com/repos/${repository}/releases/assets/${asset.id}`) {
       throw new Error('Cannot inspect malformed GitHub draft asset metadata.');
     }
+  }
+  const contents = {};
+  for (const asset of release.assets) {
     const downloaded = run(['api', asset.url, '-H', 'Accept: application/octet-stream'], { binary: true });
     if (downloaded.status !== 0) throw new Error('Cannot download GitHub draft assets for verification.');
     const bytes = Buffer.isBuffer(downloaded.stdout) ? downloaded.stdout : Buffer.from(downloaded.stdout ?? '');
@@ -94,7 +133,8 @@ export async function promoteRelease(root, env, run = (args, { binary = false } 
   verifyChecksumManifest(contents[names.checksums].toString('utf8'), Object.fromEntries([
     names.installer, names.signature, names.manifest,
   ].map((name) => [name, contents[name]])));
-  const fields = ['-f', 'draft=false', '-f', `prerelease=${expectedPrerelease}`];
+  await verifyUpdater(root, contents[names.installer], signature, env);
+  const fields = ['-F', 'draft=false', '-F', `prerelease=${expectedPrerelease}`];
   if (channel === 'stable') fields.push('-f', 'make_latest=true');
   const promoted = run(['api', `repos/${repository}/releases/${release.id}`, '-X', 'PATCH', ...fields]);
   if (promoted.status !== 0) throw new Error('GitHub Release promotion failed after validation.');

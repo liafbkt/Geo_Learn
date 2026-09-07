@@ -6,15 +6,52 @@
 
 | ID | Command | Local | Windows CI | Evidence URL |
 | --- | --- | --- | --- | --- |
-| QG-01 | `pnpm lint` | pending | pending | — |
-| QG-02 | `pnpm typecheck` | pending | pending | — |
-| QG-03 | `pnpm test -- --run --coverage` | pending | pending | — |
-| QG-04 | `pnpm exec playwright test` | pending | pending | — |
-| QG-05 | `pnpm build` | pending | pending | — |
-| QG-06 | `cargo fmt --manifest-path src-tauri/Cargo.toml -- --check` | pending | pending | — |
-| QG-07 | `cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings` | blocked: local MSVC absent | pending | — |
-| QG-08 | `cargo test --manifest-path src-tauri/Cargo.toml` | blocked: local MSVC absent | pending | — |
-| QG-09 | `pnpm content:validate -- --all` | pending | pending | — |
+| QG-01 | `pnpm lint` | passed — 2026-09-03 21:30 CST; exit 0 | pending | Operator-recorded local observation (no retained transcript); Windows run URL pending |
+| QG-02 | `pnpm typecheck` | passed — 2026-09-03 21:30 CST; exit 0 | pending | Operator-recorded local observation (no retained transcript); Windows run URL pending |
+| QG-03 | `pnpm test -- --run --coverage` | passed — 2026-09-03 21:30 CST; exit 0; 43 files/487 tests; 81.36/75.56/84.63/84.84% | pending | V8 report `coverage/index.html` (ignored local artifact); Windows run URL pending |
+| QG-04 | `pnpm exec playwright test` | passed — 2026-09-03 21:31 CST; exit 0; 19 tests | pending | Operator-recorded local observation (no retained transcript); Windows run URL pending |
+| QG-05 | `pnpm build` | passed on identical sandbox-exempt rerun — 2026-09-03 21:32 CST; exit 0; 305 modules | pending | Initial sandbox EACCES retained below; Windows run URL pending |
+| QG-06 | `cargo fmt --manifest-path src-tauri/Cargo.toml -- --check` | passed — 2026-09-03 21:32 CST; exit 0 | pending | Operator-recorded local observation (no retained transcript); Windows run URL pending |
+| QG-07 | `cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings` | blocked — 2026-09-03 21:32 CST; exit 1; MSVC `link.exe` absent | pending | Must pass on GitHub Windows runner |
+| QG-08 | `cargo test --manifest-path src-tauri/Cargo.toml` | blocked — 2026-09-03 21:32 CST; exit 1; MSVC `link.exe` absent | pending | Must pass on GitHub Windows runner |
+| QG-09 | `pnpm content:validate -- --all` | passed on identical sandbox-exempt rerun — 2026-09-03 21:33 CST; exit 0; 34/16/50 packs | pending | Initial Node environment failure retained below; Windows run URL pending |
+
+## Local security and dry checks
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `pnpm release:notices -- --check` | passed — 2026-09-03 21:33 CST; exit 0 | `THIRD_PARTY_NOTICES.md is current.` |
+| `pwsh -File scripts/check-offline.ps1` | passed — 2026-09-03 21:33 CST; exit 0 | `Offline scan passed.` |
+| Stable identity preflight | passed — 2026-09-03 21:34 CST; exit 0 | `GITHUB_REF=refs/tags/v0.1.0`; `Release preflight passed.` |
+| Synthetic RC identity preflight | passed — 2026-09-03 21:33 CST; exit 0 | Focused test for `refs/tags/v0.1.0-rc.1`; 1 passed/44 skipped |
+| Tracked secret-pattern and sensitive-file scan | passed — 2026-09-03 21:33 CST; exit 0 | No private-key marker or tracked `.env`/`.key`/`.p12`/`.pfx` |
+| Ignore/upload boundary | passed — 2026-09-03 21:33 CST; exit 0 | release artifacts/evidence, coverage, Playwright output, `.env`, and key containers matched `.gitignore`; workflows deliberately upload only named CI evidence |
+| `git diff --check` | passed — 2026-09-03 21:33 CST; exit 0 | Operator-recorded local observation (no retained transcript) |
+
+## 2026-09-07 readiness recheck
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Release-focused Vitest | passed — 2026-09-07 20:28 CST; exit 0; 8 files/121 tests | `pnpm exec vitest run scripts/release scripts/run-tests.test.mjs src/release/config.test.ts` |
+| Lint/typecheck/rustfmt/diff | passed — 2026-09-07 20:28 CST; each exit 0 | Fresh local command results; Windows native link gates remain unchanged |
+| Production build | passed on identical sandbox-exempt rerun — 2026-09-07 20:31 CST; exit 0; 305 modules | Initial sandbox EACCES retained below |
+| Notices freshness | passed — 2026-09-07 20:29 CST; exit 0 | `THIRD_PARTY_NOTICES.md is current.` |
+| Public GitHub release audit | not ready — 2026-09-07 20:27 CST | GitHub public API returned 0 Releases and 0 Actions runs; remote `codex/user-test-mvp` was not found |
+| GitHub CLI authentication | blocked — 2026-09-07 20:26 CST | Stored `liafbkt` token is invalid; re-authentication is required before any authorized push or release action |
+
+This read-only audit is not authorization for a push, tag, Release, promotion, or installer execution. The installation test cannot start until a Windows workflow passes and publishes the required assets.
+
+## Local qualification incidents
+
+| Timestamp | Command | Exit | Cause and disposition |
+| --- | --- | --- | --- |
+| 2026-09-03 21:31 CST | `pnpm build` | 1 | Sandbox denied esbuild access to `vite.config.ts`; identical sandbox-exempt rerun exit 0. No source fix or waiver. |
+| 2026-09-03 21:32 CST | `cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings` | 1 | MSVC `link.exe` absent; remains blocked pending GitHub Windows runner. |
+| 2026-09-03 21:32 CST | `cargo test --manifest-path src-tauri/Cargo.toml` | 1 | MSVC `link.exe` absent; remains blocked pending GitHub Windows runner. |
+| 2026-09-03 21:33 CST | `pnpm content:validate -- --all` | 1 | Sandbox Node startup failed at `uv_os_get_passwd` with ENOMEM before validation; identical sandbox-exempt rerun exit 0. |
+| 2026-09-03 21:33 CST | RC-focused Vitest invocation with unsupported `--grep` | 1 | Test did not start; corrected to supported `-t`, then 1 focused test passed. Not a product or release-candidate failure. |
+| 2026-09-03 21:38 CST | `pnpm release:notices -- --check` | 1 | Sandbox could not collect installed dependency metadata; identical sandbox-exempt rerun exit 0 and confirmed the committed notices are current. |
+| 2026-09-07 20:30 CST | `pnpm build` | 1 | Sandbox again denied esbuild access while loading `vite.config.ts`; identical sandbox-exempt rerun exit 0 with 305 modules. |
 
 ## 授权台账
 

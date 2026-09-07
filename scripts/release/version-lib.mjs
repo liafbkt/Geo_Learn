@@ -101,7 +101,7 @@ function renderSources(sources, version) {
   };
 }
 
-export async function setVersion(root, requestedVersion) {
+export async function setVersion(root, requestedVersion, operations = { writeFile, rename, rm }) {
   const version = validateVersion(requestedVersion);
   const sources = await readSources(root);
   const current = Object.values(versionsFromSources(sources));
@@ -118,24 +118,46 @@ export async function setVersion(root, requestedVersion) {
   }));
   const committed = [];
   try {
-    await Promise.all(staged.map((entry) => writeFile(entry.temporary, entry.contents, { flag: 'wx' })));
+    const writes = await Promise.allSettled(staged.map((entry) => operations.writeFile(entry.temporary, entry.contents, { flag: 'wx' })));
+    const failedWrite = writes.find((result) => result.status === 'rejected');
+    if (failedWrite) throw failedWrite.reason;
     for (const entry of staged) {
-      await rename(entry.target, entry.backup);
+      await operations.rename(entry.target, entry.backup);
       try {
-        await rename(entry.temporary, entry.target);
+        await operations.rename(entry.temporary, entry.target);
       } catch (error) {
-        await rename(entry.backup, entry.target);
+        try {
+          await operations.rename(entry.backup, entry.target);
+        } catch (restoreError) {
+          try { await operations.rename(entry.temporary, entry.target); } catch { /* preserve both recoverable files when possible */ }
+          throw restoreError;
+        }
         throw error;
       }
       committed.push(entry);
     }
-    await Promise.all(committed.map((entry) => rm(entry.backup)));
   } catch (error) {
+    let rollbackFailed = false;
     for (const entry of committed.reverse()) {
-      await rm(entry.target, { force: true });
-      await rename(entry.backup, entry.target);
+      const replacement = `${entry.temporary}.replacement`;
+      try {
+        await operations.rename(entry.target, replacement);
+        try {
+          await operations.rename(entry.backup, entry.target);
+        } catch (rollbackError) {
+          await operations.rename(replacement, entry.target);
+          throw rollbackError;
+        }
+        await operations.rm(replacement, { force: true }).catch(() => {});
+      } catch {
+        rollbackFailed = true;
+      }
     }
-    await Promise.all(staged.flatMap((entry) => [entry.temporary, entry.backup]).map((path) => rm(path, { force: true })));
+    await Promise.allSettled(staged.map((entry) => operations.rm(entry.temporary, { force: true })));
+    if (!rollbackFailed) await Promise.allSettled(staged.map((entry) => operations.rm(entry.backup, { force: true })));
     throw error;
   }
+  // All target replacements are now committed. Cleanup cannot roll the transaction back.
+  await Promise.allSettled(staged.flatMap((entry) => [entry.temporary, entry.backup])
+    .map((path) => operations.rm(path, { force: true })));
 }

@@ -9,7 +9,8 @@ export const installerDirectory = 'src-tauri/target/x86_64-pc-windows-msvc/relea
 export const outputDirectory = 'release-artifacts';
 const requiredPacks = ['cn-provincial-divisions', 'cn-shanghai-districts', 'us-states'];
 const requiredFiles = ['manifest.json', 'entities.json', 'sources.json', 'map.topojson'];
-const requiredResourceGlobs = requiredFiles.map((file) => `resources/content/*/${file}`);
+const noticesResource = '../THIRD_PARTY_NOTICES.md';
+const requiredResourceGlobs = requiredFiles.map((file) => `resources/content/*/${file}`).concat(noticesResource);
 
 export async function readJson(path) {
   return JSON.parse(await readFile(path, 'utf8'));
@@ -100,6 +101,7 @@ export async function preflight(root, env, { secrets = false, identityOnly = fal
       try { await readJson(join(directory, file)); } catch { throw new Error(`Invalid JSON content resource: ${pack}/${file}.`); }
     }
   }
+  await nonemptyFile(join(root, 'THIRD_PARTY_NOTICES.md'), 'THIRD_PARTY_NOTICES.md');
   return identity;
 }
 

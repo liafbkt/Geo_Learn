@@ -27,8 +27,21 @@ const cargoMetadata = {
     { id: 'serde-1', name: 'serde', version: '1.0.0', license: 'MIT OR Apache-2.0', dependencies: [] },
     { id: 'serde-1-copy', name: 'serde', version: '1.0.0', license: 'MIT OR Apache-2.0', dependencies: [] },
     { id: 'alpha-1', name: 'alpha-crate', version: '0.2.0', license: 'Apache-2.0 WITH LLVM-exception', dependencies: [] },
+    { id: 'dev-1', name: 'dev-only', version: '9.9.9', license: 'MIT', dependencies: [] },
   ],
-  resolve: { root: 'root' },
+  resolve: {
+    root: 'root',
+    nodes: [
+      { id: 'root', deps: [
+        { name: 'serde', pkg: 'serde-1', dep_kinds: [{ kind: null, target: null }] },
+        { name: 'alpha_crate', pkg: 'alpha-1', dep_kinds: [{ kind: 'build', target: null }] },
+        { name: 'dev_only', pkg: 'dev-1', dep_kinds: [{ kind: 'dev', target: null }] },
+      ] },
+      { id: 'serde-1', deps: [] },
+      { id: 'alpha-1', deps: [] },
+      { id: 'dev-1', deps: [] },
+    ],
+  },
 };
 
 async function generator() {
@@ -48,7 +61,11 @@ describe('third-party notices generation', () => {
   it('sorts deterministically, preserves license expressions, collapses duplicates, and redacts paths', async () => {
     const generateNotices = await generator();
 
-    const output = generateNotices(pnpmLicenses, cargoMetadata, ['zeta', '@scope/alpha', 'middle']);
+    const output = generateNotices(pnpmLicenses, cargoMetadata, ['zeta', '@scope/alpha', 'middle'], [{
+      packages: ['serde@1.0.0', 'zeta@2.0.0'],
+      filenames: ['LICENSE', 'NOTICE'],
+      text: 'Permission is hereby granted for this synthetic fixture.',
+    }]);
 
     expect(output.indexOf('@scope/alpha')).toBeLessThan(output.indexOf('middle'));
     expect(output.indexOf('middle')).toBeLessThan(output.indexOf('zeta'));
@@ -56,6 +73,10 @@ describe('third-party notices generation', () => {
     expect(output).toContain('Apache-2.0 WITH LLVM-exception');
     expect(output.match(/serde \| 1\.0\.0/g)).toHaveLength(1);
     expect(output.match(/zeta \| 2\.0\.0/g)).toHaveLength(1);
+    expect(output).not.toContain('dev-only');
+    expect(output).toContain('## Dependency license and notice texts');
+    expect(output).toContain('Applies to: `serde@1.0.0`, `zeta@2.0.0`');
+    expect(output).toContain('Permission is hereby granted for this synthetic fixture.');
     expect(output).not.toMatch(/C:\\Users|\/Users\/|\/home\//);
   });
 
@@ -64,11 +85,11 @@ describe('third-party notices generation', () => {
     expect(() => generateNotices(pnpmLicenses, cargoMetadata, ['zeta', 'missing-direct'])).toThrow('direct Node');
   });
 
-  it('requires every direct Rust production dependency', async () => {
+  it('requires every reachable Rust production dependency to exist in metadata', async () => {
     const generateNotices = await generator();
     const missing = structuredClone(cargoMetadata);
     missing.packages = missing.packages.filter((pkg) => pkg.name !== 'serde');
-    expect(() => generateNotices(pnpmLicenses, missing, ['zeta'])).toThrow('direct Rust');
+    expect(() => generateNotices(pnpmLicenses, missing, ['zeta'], [{ packages: ['zeta@2.0.0'], filenames: ['LICENSE'], text: 'fixture' }])).toThrow('dependency graph');
   });
 
   it.each(['node', 'rust'])('rejects a %s dependency without a license expression', async (kind) => {
@@ -80,9 +101,14 @@ describe('third-party notices generation', () => {
     expect(() => generateNotices(node, cargo, ['zeta'])).toThrow('license');
   });
 
+  it('requires at least one package-supplied dependency license text', async () => {
+    const generateNotices = await generator();
+    expect(() => generateNotices(pnpmLicenses, cargoMetadata, ['zeta'], [])).toThrow('license text');
+  });
+
   it('includes fixed SQLite, original audio, and all three content-pack notices without claiming legal approval', async () => {
     const generateNotices = await generator();
-    const output = generateNotices(pnpmLicenses, cargoMetadata, ['zeta']);
+    const output = generateNotices(pnpmLicenses, cargoMetadata, ['zeta'], [{ packages: ['zeta@2.0.0'], filenames: ['LICENSE'], text: 'fixture' }]);
     expect(output).toContain('## Bundled SQLite');
     expect(output).toContain('## Original audio');
     expect(output).toContain('cn-provincial-divisions');
