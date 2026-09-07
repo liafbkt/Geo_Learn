@@ -49,3 +49,4 @@
 - 本机缺少 MSVC `link.exe`：Rust clippy/test 的 exit-0 证据和真实 NSIS/updater 构建必须来自 GitHub Windows runner。
 - 自动化、资产、授权和当前用户实测的实时状态以 `docs/release/windows-v1-checklist.md` 与 `docs/release/windows-v1-smoke.md` 为准；尚未记录的结果不得宣称通过。
 - 2026-09-07 下载就绪复核：本地 release-focused Vitest 8 文件/121 项、lint、typecheck、rustfmt、notices freshness 与 `git diff --check` 均 fresh exit 0；`pnpm build` 在已知 esbuild 沙箱读权限失败后以完全相同命令在允许读取本机环境的执行面复跑 exit 0（305 modules）。GitHub 公共 API 返回 0 个 Release、0 次 Actions run，远端未找到 `codex/user-test-mvp`，且当前 `gh` 登录 token 无效。因此初版安装测试尚不能开始，必须先经明确授权重新登录、推送并由 Windows runner 生成真实资产。
+- 2026-09-07 第一阶段已获当前用户明确授权：GitHub 登录恢复，审核分支与不可变 `v0.1.0-rc.1` 已推送。真实 Windows run `34126066871` 的 QG-01..06 通过，但 QG-07 在 `progress.rs` 生命周期/SQLite 类型推断与 `backup.rs` 两个 clippy warning 失败；QG-08/09、签名、草稿资产均未运行。修复提交 `8138063` 只纠正这七项；`rc.1` 保留为失败候选，必须用新的 `v0.1.0-rc.2` 重跑，绝不覆盖 tag。
