@@ -74,7 +74,7 @@ This read-only audit is not authorization for a push, tag, Release, promotion, o
 
 | Field | Status | Evidence |
 | --- | --- | --- |
-| Selected immutable tag | `v0.1.0-rc.1` through `v0.1.0-rc.6` failed; successor is pending Windows notices diagnosis | [rc.6](https://github.com/liafbkt/Geo_Learn/actions/runs/34177876989) |
+| Selected immutable tag | `v0.1.0-rc.1` through `v0.1.0-rc.7` failed; next candidate is blocked until the LF checkout repair is independently verified | [rc.7](https://github.com/liafbkt/Geo_Learn/actions/runs/34222866127) |
 | Version sources synchronized | passed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | commits `69ed53c`, `9b4addf` |
 | Tag release workflow exit 0 | failed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | QG-07 failures; successor required |
 | Draft asset inspection | pending | — |
@@ -120,6 +120,7 @@ Detailed observations belong in `windows-v1-smoke.md`.
 | `v0.1.0-rc.4` | QG-08, [Windows run 34129905190](https://github.com/liafbkt/Geo_Learn/actions/runs/34129905190) | Duplicate ZIP fixture failed during construction before the production parser; no draft assets created | `cd04860` | Use a post-write duplicate-name fixture and prepare a new immutable candidate |
 | `v0.1.0-rc.5` | Gate-evidence write, [Windows run 34136508178](https://github.com/liafbkt/Geo_Learn/actions/runs/34136508178) | QG-01..09 passed; Windows `pnpm.cmd` version lookup failed before signing | `7937cc2` | Windows PowerShell version lookup repaired; prepare a new immutable candidate |
 | `v0.1.0-rc.6` | Notices freshness, [Windows run 34177876989](https://github.com/liafbkt/Geo_Learn/actions/runs/34177876989) | QG-01..09, gate evidence, signing-secret and `contents: write` preflight passed; committed notices differ from Windows generation, so build/sign/upload were skipped | pending Windows diagnostic artifact | New candidate will upload the generated notice only on this failure; then commit its exact contents and retry |
+| `v0.1.0-rc.7` | Notices freshness, [Windows run 34222866127](https://github.com/liafbkt/Geo_Learn/actions/runs/34222866127) | QG-01..09, gate evidence and signing preflight passed. Diagnostic notice content equals the repository blob; CI checkout converted the unpinned Markdown file to CRLF while the generator emits LF | `.gitattributes` LF rule plus regression test, pending independent Windows validation | Do not create the next candidate until the line-ending repair is verified |
 
 ## Unverified boundaries
 

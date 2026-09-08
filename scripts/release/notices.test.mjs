@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
+import { readFile } from 'node:fs/promises';
 
 const pnpmLicenses = {
   'MIT OR Apache-2.0': [
@@ -51,6 +52,11 @@ async function generator() {
 }
 
 describe('third-party notices generation', () => {
+  it('keeps the committed notices LF-stable on Windows checkouts', async () => {
+    const attributes = await readFile('.gitattributes', 'utf8');
+    expect(attributes).toMatch(/^THIRD_PARTY_NOTICES\.md text eol=lf$/m);
+  });
+
   it('accepts pnpm\'s separator before --check and rejects other arguments', async () => {
     const module = await import('./notices-lib.mjs');
     expect(module.parseNoticesArgs(['--', '--check'])).toEqual({ check: true });
