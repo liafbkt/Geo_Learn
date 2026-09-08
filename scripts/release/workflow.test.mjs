@@ -100,6 +100,15 @@ describe('release workflow security boundary', () => {
     expect(artifact.with['if-no-files-found']).toBe('error');
   });
 
+  it('uploads a short-lived Windows notice diagnostic only when freshness fails', async () => {
+    const { release } = (await workflow()).jobs;
+    const generate = release.steps.find((step) => step.name === 'Generate Windows third-party notices after freshness failure');
+    const diagnostic = upload(release, 'windows-third-party-notices-diagnostic');
+    expect(generate).toMatchObject({ if: 'failure()', run: 'pnpm release:notices' });
+    expect(diagnostic.if).toBe('failure()');
+    expect(diagnostic.with).toMatchObject({ path: 'THIRD_PARTY_NOTICES.md', 'if-no-files-found': 'error', 'retention-days': 7 });
+  });
+
   it('uses only reviewed actions and never persists checkout credentials', async () => {
     const doc = await workflow();
     for (const job of Object.values(doc.jobs)) {

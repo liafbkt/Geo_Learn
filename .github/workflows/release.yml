@@ -120,6 +120,17 @@ jobs:
         run: cargo fetch --locked --manifest-path src-tauri/Cargo.toml
       - name: Check generated third-party notices
         run: pnpm release:notices -- --check
+      - name: Generate Windows third-party notices after freshness failure
+        if: failure()
+        run: pnpm release:notices
+      - name: Upload Windows third-party notices diagnostic
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-third-party-notices-diagnostic
+          path: THIRD_PARTY_NOTICES.md
+          if-no-files-found: error
+          retention-days: 7
       - name: Build and sign NSIS updater artifacts
         run: pnpm tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci -- --locked
         env:

@@ -74,7 +74,7 @@ This read-only audit is not authorization for a push, tag, Release, promotion, o
 
 | Field | Status | Evidence |
 | --- | --- | --- |
-| Selected immutable tag | `v0.1.0-rc.1`, `v0.1.0-rc.2`, and `v0.1.0-rc.3` failed; `v0.1.0-rc.4` pending | [rc.1](https://github.com/liafbkt/Geo_Learn/actions/runs/34126066871), [rc.2](https://github.com/liafbkt/Geo_Learn/actions/runs/34127404393), [rc.3](https://github.com/liafbkt/Geo_Learn/actions/runs/34128882514) |
+| Selected immutable tag | `v0.1.0-rc.1` through `v0.1.0-rc.6` failed; successor is pending Windows notices diagnosis | [rc.6](https://github.com/liafbkt/Geo_Learn/actions/runs/34177876989) |
 | Version sources synchronized | passed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | commits `69ed53c`, `9b4addf` |
 | Tag release workflow exit 0 | failed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | QG-07 failures; successor required |
 | Draft asset inspection | pending | — |
@@ -117,6 +117,9 @@ Detailed observations belong in `windows-v1-smoke.md`.
 | `v0.1.0-rc.1` | QG-07, [Windows run 34126066871](https://github.com/liafbkt/Geo_Learn/actions/runs/34126066871) | Rust lifetime/type inference errors and two denied clippy warnings; no draft assets created | `8138063` | Full local recheck passed where executable locally; prepare `v0.1.0-rc.2` and re-run all Windows gates |
 | `v0.1.0-rc.2` | QG-07, [Windows run 34127404393](https://github.com/liafbkt/Geo_Learn/actions/runs/34127404393) | Sole Rust `E0308` from passing `MutexGuard<Connection>` through `?`; no draft assets created | `2138e7a` | Full local recheck passed where executable locally; prepare `v0.1.0-rc.3` and re-run all Windows gates |
 | `v0.1.0-rc.3` | QG-07, [Windows run 34128882514](https://github.com/liafbkt/Geo_Learn/actions/runs/34128882514) | Unused `mastery_key` denied by `-D dead-code`; no draft assets created | `7caaf22` | Full local recheck passed where executable locally; prepare `v0.1.0-rc.4` and re-run all Windows gates |
+| `v0.1.0-rc.4` | QG-08, [Windows run 34129905190](https://github.com/liafbkt/Geo_Learn/actions/runs/34129905190) | Duplicate ZIP fixture failed during construction before the production parser; no draft assets created | `cd04860` | Use a post-write duplicate-name fixture and prepare a new immutable candidate |
+| `v0.1.0-rc.5` | Gate-evidence write, [Windows run 34136508178](https://github.com/liafbkt/Geo_Learn/actions/runs/34136508178) | QG-01..09 passed; Windows `pnpm.cmd` version lookup failed before signing | `7937cc2` | Windows PowerShell version lookup repaired; prepare a new immutable candidate |
+| `v0.1.0-rc.6` | Notices freshness, [Windows run 34177876989](https://github.com/liafbkt/Geo_Learn/actions/runs/34177876989) | QG-01..09, gate evidence, signing-secret and `contents: write` preflight passed; committed notices differ from Windows generation, so build/sign/upload were skipped | pending Windows diagnostic artifact | New candidate will upload the generated notice only on this failure; then commit its exact contents and retry |
 
 ## Unverified boundaries
 
