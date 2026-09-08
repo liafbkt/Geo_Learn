@@ -1,6 +1,7 @@
 import { lstat, readFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
+import { parse } from 'yaml';
 import { readVersions, validateVersion } from './version-lib.mjs';
 
 export const repository = 'liafbkt/Geo_Learn';
@@ -71,6 +72,21 @@ export async function nonemptyFile(path, label) {
   if (!stat.isFile() || stat.isSymbolicLink() || stat.size === 0) throw new Error(`Invalid ${label}: requires a nonempty regular file.`);
 }
 
+function majorMinor(version) {
+  const match = /^(\d+\.\d+)\.\d+$/.exec(version ?? '');
+  return match?.[1];
+}
+
+export async function validateTauriUpdaterVersions(root) {
+  const pnpmLock = parse(await readFile(join(root, 'pnpm-lock.yaml'), 'utf8'));
+  const javascript = pnpmLock?.importers?.['.']?.dependencies?.['@tauri-apps/plugin-updater']?.version;
+  const cargoLock = await readFile(join(root, 'src-tauri/Cargo.lock'), 'utf8');
+  const rust = /\[\[package\]\]\r?\nname = "tauri-plugin-updater"\r?\nversion = "(\d+\.\d+\.\d+)"/.exec(cargoLock)?.[1];
+  if (!majorMinor(javascript) || !majorMinor(rust) || majorMinor(javascript) !== majorMinor(rust)) {
+    throw new Error('Tauri updater JavaScript and Rust packages must share a major.minor version.');
+  }
+}
+
 export async function preflight(root, env, { secrets = false, identityOnly = false } = {}) {
   if (secrets) {
     const missing = ['TAURI_SIGNING_PRIVATE_KEY', 'TAURI_SIGNING_PRIVATE_KEY_PASSWORD'].filter((name) => !env[name]?.trim());
@@ -78,6 +94,7 @@ export async function preflight(root, env, { secrets = false, identityOnly = fal
   }
   const identity = await releaseIdentity(root, env);
   if (identityOnly) return identity;
+  await validateTauriUpdaterVersions(root);
   const { config } = identity;
   validatePublicKey(config.plugins?.updater?.pubkey);
   const updater = config.plugins.updater;

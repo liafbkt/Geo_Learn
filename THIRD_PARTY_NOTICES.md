@@ -8,7 +8,7 @@ This file is generated from the locked Node production and Windows Rust producti
 | --- | --- | --- |
 | @tauri-apps/api | 2.11.1 | Apache-2.0 OR MIT |
 | @tauri-apps/plugin-opener | 2.5.4 | MIT OR Apache-2.0 |
-| @tauri-apps/plugin-updater | 2.10.1 | MIT OR Apache-2.0 |
+| @tauri-apps/plugin-updater | 2.11.0 | MIT OR Apache-2.0 |
 | commander | 2.20.3 | MIT |
 | d3-array | 3.2.4 | ISC |
 | d3-geo | 3.1.1 | ISC |
@@ -11973,7 +11973,7 @@ Source filenames: `LICENSE-ZLIB.md`
 
 ### Document 182 — SHA-256 eb8a6c84630461b352badcab1dbe5d0168c56d377358b2b8c86b51003272d5ef
 
-Applies to: `@tauri-apps/plugin-opener@2.5.4`, `@tauri-apps/plugin-updater@2.10.1`, `tauri-plugin-dialog@2.7.2`, `tauri-plugin-fs@2.5.1`, `tauri-plugin-updater@2.11.0`
+Applies to: `@tauri-apps/plugin-opener@2.5.4`, `@tauri-apps/plugin-updater@2.11.0`, `tauri-plugin-dialog@2.7.2`, `tauri-plugin-fs@2.5.1`, `tauri-plugin-updater@2.11.0`
 
 Source filenames: `LICENSE.spdx`
 

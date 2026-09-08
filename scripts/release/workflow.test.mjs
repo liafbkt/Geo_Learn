@@ -83,7 +83,7 @@ describe('release workflow security boundary', () => {
         expect(step.run ?? '').not.toContain('${{');
       }
     }
-    expect(secretRuns).toEqual(['node scripts/release/preflight.mjs --secrets', 'pnpm exec tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci -- --locked']);
+    expect(secretRuns).toEqual(['node scripts/release/preflight.mjs --secrets', 'pnpm tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci']);
     expect(tokenRuns.sort()).toEqual(['node scripts/release/promote-release.mjs', 'node scripts/release/publish-draft.mjs'].sort());
   });
 
@@ -91,6 +91,8 @@ describe('release workflow security boundary', () => {
     const steps = (await workflow()).jobs.release.steps;
     const index = (part) => steps.findIndex((step) => step.run?.includes(part));
     expect(index('release:notices')).toBeGreaterThan(index('pnpm install'));
+    expect(index('git diff --exit-code -- src-tauri/Cargo.lock')).toBeGreaterThan(index('pnpm tauri build'));
+    expect(index('verify_update_artifact')).toBeGreaterThan(index('git diff --exit-code -- src-tauri/Cargo.lock'));
     expect(index('verify_update_artifact')).toBeGreaterThan(index('pnpm tauri build'));
     expect(index('prepare-artifacts.mjs')).toBeGreaterThan(index('verify_update_artifact'));
     expect(index('verify-artifacts.mjs')).toBeGreaterThan(index('prepare-artifacts.mjs'));

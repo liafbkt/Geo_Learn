@@ -23,9 +23,10 @@ async function fixture(version = '0.1.0') {
   const root = await mkdtemp(join(tmpdir(), 'geo-release-test-'));
   roots.push(root);
   await mkdir(join(root, 'src-tauri'), { recursive: true });
-  await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'spatial-memory-coach', version }));
+  await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'spatial-memory-coach', version, dependencies: { '@tauri-apps/plugin-updater': '^2.11.0' } }));
   await writeFile(join(root, 'src-tauri/Cargo.toml'), `[package]\nname = "spatial-memory-coach"\nversion = "${version}"\n`);
-  await writeFile(join(root, 'src-tauri/Cargo.lock'), `version = 4\n\n[[package]]\nname = "spatial-memory-coach"\nversion = "${version}"\n`);
+  await writeFile(join(root, 'src-tauri/Cargo.lock'), `version = 4\n\n[[package]]\nname = "spatial-memory-coach"\nversion = "${version}"\n\n[[package]]\nname = "tauri-plugin-updater"\nversion = "2.11.0"\n`);
+  await writeFile(join(root, 'pnpm-lock.yaml'), `lockfileVersion: '9.0'\n\nimporters:\n  .:\n    dependencies:\n      '@tauri-apps/plugin-updater':\n        specifier: ^2.11.0\n        version: 2.11.0\n`);
   await writeFile(join(root, 'src-tauri/tauri.conf.json'), JSON.stringify({ version, bundle: { targets: ['nsis'], createUpdaterArtifacts: true, resources }, plugins: { updater: { pubkey: publicKey, endpoints: [endpoint] } } }));
   await writeFile(join(root, 'THIRD_PARTY_NOTICES.md'), '# Third-Party Notices\n');
   for (const pack of packs) {
@@ -183,6 +184,13 @@ describe('draft release publishing', () => {
     const root = await fixture();
     await editConfig(root, (config) => { config.bundle.resources = config.bundle.resources.filter((entry) => entry !== '../THIRD_PARTY_NOTICES.md'); });
     expect(run('preflight.mjs', root).status).not.toBe(0);
+  });
+  it('blocks mismatched Tauri updater JavaScript and Rust minor versions', async () => {
+    const root = await fixture();
+    await writeFile(join(root, 'pnpm-lock.yaml'), `lockfileVersion: '9.0'\n\nimporters:\n  .:\n    dependencies:\n      '@tauri-apps/plugin-updater':\n        specifier: ^2.10.1\n        version: 2.10.1\n`);
+    const result = run('preflight.mjs', root);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('Tauri updater JavaScript and Rust packages must share a major.minor version.');
   });
   it('marks a candidate draft as a prerelease', async () => {
     const publish = await publisher();

@@ -132,10 +132,12 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Build and sign NSIS updater artifacts
-        run: pnpm exec tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci -- --locked
+        run: pnpm tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - name: Verify build preserved the locked Rust dependency graph
+        run: git diff --exit-code -- src-tauri/Cargo.lock
       - name: Verify installer signature against the committed updater public key
         run: cargo run --locked --manifest-path src-tauri/Cargo.toml --example verify_update_artifact
       - name: Prepare exactly four release assets

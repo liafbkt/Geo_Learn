@@ -41,6 +41,17 @@
 
 This read-only audit is not authorization for a push, tag, Release, promotion, or installer execution. The installation test cannot start until a Windows workflow passes and publishes the required assets.
 
+## 2026-09-08 rc.9 repair local recheck
+
+| Check | Result | Evidence / boundary |
+| --- | --- | --- |
+| Release workflow and preflight regressions | passed — exit 0; 62 tests | `node node_modules/vitest/vitest.mjs run scripts/release/release.test.mjs scripts/release/workflow.test.mjs`; rejects updater 2.10/2.11 major.minor drift and requires a post-build Cargo.lock diff check |
+| Full Vitest + V8 coverage | passed — exit 0; 43 files / 508 tests | `node node_modules/vitest/vitest.mjs run --coverage`; Statements 81.77%, Branches 75.69%, Functions 84.91%, Lines 85.17% |
+| Lint / typecheck / build / rustfmt | passed — each exit 0 | `pnpm lint`; `pnpm typecheck`; `pnpm build` (305 modules); `cargo fmt --manifest-path src-tauri/Cargo.toml -- --check` |
+| Playwright | passed — exit 0; 19 tests | `pnpm exec playwright test`; the runner emitted existing `NO_COLOR` environment warnings only |
+| Content / notices | passed — each exit 0 | `pnpm content:validate -- --all` validated the 34/16/50 packs; `pnpm release:notices -- --check` is current after updater 2.11.0 regeneration |
+| Tauri no-bundle probe | expected local boundary — exit 1 only at MSVC linker | Direct CLI crossed the former `--locked` and 2.10/2.11 errors, built the frontend, then stopped at missing local `link.exe`; no bundle, signing, upload, tag, or Release was produced |
+
 ## Local qualification incidents
 
 | Timestamp | Command | Exit | Cause and disposition |
@@ -74,7 +85,7 @@ This read-only audit is not authorization for a push, tag, Release, promotion, o
 
 | Field | Status | Evidence |
 | --- | --- | --- |
-| Selected immutable tag | `v0.1.0-rc.1` through `v0.1.0-rc.8` failed; next candidate is blocked until the corrected Cargo argument forwarding is independently verified | [rc.8](https://github.com/liafbkt/Geo_Learn/actions/runs/34225148188) |
+| Selected immutable tag | `v0.1.0-rc.1` through `v0.1.0-rc.9` failed; the rc.9 repair has completed local verification, so the next immutable candidate may be prepared after its review commit is pushed | [rc.9](https://github.com/liafbkt/Geo_Learn/actions/runs/34232561369) |
 | Version sources synchronized | passed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | commits `69ed53c`, `9b4addf` |
 | Tag release workflow exit 0 | failed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | QG-07 failures; successor required |
 | Draft asset inspection | pending | — |
@@ -121,7 +132,8 @@ Detailed observations belong in `windows-v1-smoke.md`.
 | `v0.1.0-rc.5` | Gate-evidence write, [Windows run 34136508178](https://github.com/liafbkt/Geo_Learn/actions/runs/34136508178) | QG-01..09 passed; Windows `pnpm.cmd` version lookup failed before signing | `7937cc2` | Windows PowerShell version lookup repaired; prepare a new immutable candidate |
 | `v0.1.0-rc.6` | Notices freshness, [Windows run 34177876989](https://github.com/liafbkt/Geo_Learn/actions/runs/34177876989) | QG-01..09, gate evidence, signing-secret and `contents: write` preflight passed; committed notices differ from Windows generation, so build/sign/upload were skipped | pending Windows diagnostic artifact | New candidate will upload the generated notice only on this failure; then commit its exact contents and retry |
 | `v0.1.0-rc.7` | Notices freshness, [Windows run 34222866127](https://github.com/liafbkt/Geo_Learn/actions/runs/34222866127) | QG-01..09, gate evidence and signing preflight passed. Diagnostic notice content equals the repository blob; CI checkout converted the unpinned Markdown file to CRLF while the generator emits LF | `.gitattributes` LF rule plus regression test, pending independent Windows validation | Do not create the next candidate until the line-ending repair is verified |
-| `v0.1.0-rc.8` | NSIS build command, [Windows run 34225148188](https://github.com/liafbkt/Geo_Learn/actions/runs/34225148188) | QG-01..09, signing preflight and notices freshness passed. pnpm removed the delimiter before Cargo's `--locked`, so Tauri rejected it before build/sign/upload | `pnpm exec tauri build … --ci -- --locked` plus workflow regression test, pending independent Windows validation | Do not create the next candidate until the forwarding repair is verified |
+| `v0.1.0-rc.8` | NSIS build command, [Windows run 34225148188](https://github.com/liafbkt/Geo_Learn/actions/runs/34225148188) | QG-01..09, signing preflight and notices freshness passed. pnpm removed the delimiter before Cargo's `--locked`, so Tauri rejected it before build/sign/upload | Initial forwarding repair was insufficient | Preserve the immutable tag; investigate the pnpm/Tauri/Cargo argument boundary before a successor |
+| `v0.1.0-rc.9` | NSIS build command, [Windows run 34232561369](https://github.com/liafbkt/Geo_Learn/actions/runs/34232561369) | QG-01..09, evidence, notices and signing preflight passed. `pnpm exec` still consumed the first `--`, so Tauri rejected `--locked` before build/sign/upload | Remove fragile Cargo-argument forwarding; after build, require `git diff --exit-code -- src-tauri/Cargo.lock`; add Tauri updater major.minor preflight | Release workflow and full local regressions recorded above; only GitHub MSVC build remains for the successor |
 
 ## Unverified boundaries
 
