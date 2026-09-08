@@ -85,7 +85,7 @@ This read-only audit is not authorization for a push, tag, Release, promotion, o
 
 | Field | Status | Evidence |
 | --- | --- | --- |
-| Selected immutable tag | `v0.1.0-rc.1` through `v0.1.0-rc.9` failed; the rc.9 repair has completed local verification, so the next immutable candidate may be prepared after its review commit is pushed | [rc.9](https://github.com/liafbkt/Geo_Learn/actions/runs/34232561369) |
+| Selected immutable tag | `v0.1.0-rc.1` through `v0.1.0-rc.10` failed; the rc.10 identity-preflight repair has release regressions, but needs a fresh immutable candidate | [rc.10](https://github.com/liafbkt/Geo_Learn/actions/runs/34236471577) |
 | Version sources synchronized | passed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | commits `69ed53c`, `9b4addf` |
 | Tag release workflow exit 0 | failed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | QG-07 failures; successor required |
 | Draft asset inspection | pending | — |
@@ -134,6 +134,7 @@ Detailed observations belong in `windows-v1-smoke.md`.
 | `v0.1.0-rc.7` | Notices freshness, [Windows run 34222866127](https://github.com/liafbkt/Geo_Learn/actions/runs/34222866127) | QG-01..09, gate evidence and signing preflight passed. Diagnostic notice content equals the repository blob; CI checkout converted the unpinned Markdown file to CRLF while the generator emits LF | `.gitattributes` LF rule plus regression test, pending independent Windows validation | Do not create the next candidate until the line-ending repair is verified |
 | `v0.1.0-rc.8` | NSIS build command, [Windows run 34225148188](https://github.com/liafbkt/Geo_Learn/actions/runs/34225148188) | QG-01..09, signing preflight and notices freshness passed. pnpm removed the delimiter before Cargo's `--locked`, so Tauri rejected it before build/sign/upload | Initial forwarding repair was insufficient | Preserve the immutable tag; investigate the pnpm/Tauri/Cargo argument boundary before a successor |
 | `v0.1.0-rc.9` | NSIS build command, [Windows run 34232561369](https://github.com/liafbkt/Geo_Learn/actions/runs/34232561369) | QG-01..09, evidence, notices and signing preflight passed. `pnpm exec` still consumed the first `--`, so Tauri rejected `--locked` before build/sign/upload | Remove fragile Cargo-argument forwarding; after build, require `git diff --exit-code -- src-tauri/Cargo.lock`; add Tauri updater major.minor preflight | Release workflow and full local regressions recorded above; only GitHub MSVC build remains for the successor |
+| `v0.1.0-rc.10` | Identity preflight, [Windows run 34236471577](https://github.com/liafbkt/Geo_Learn/actions/runs/34236471577) | `lib.mjs` imported `yaml` before the workflow installed dependencies, so no QG, signing, or draft asset step ran | Remove runtime YAML dependency; regression copies the preflight into a dependency-free directory | Preserve the immutable tag; use a new candidate only after the regression suite passes |
 
 ## Unverified boundaries
 

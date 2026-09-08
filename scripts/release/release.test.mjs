@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -38,6 +38,12 @@ async function fixture(version = '0.1.0') {
 function run(name, root, overrides = {}, args = []) {
   return spawnSync(process.execPath, [script(name), ...args], { cwd: root, env: { ...env, ...overrides }, encoding: 'utf8' });
 }
+async function runIsolatedIdentityPreflight(root) {
+  const isolated = join(root, 'isolated-release');
+  await mkdir(isolated);
+  await Promise.all(['preflight.mjs', 'lib.mjs', 'version-lib.mjs'].map((file) => copyFile(script(file), join(isolated, file))));
+  return spawnSync(process.execPath, [join(isolated, 'preflight.mjs'), '--identity-only'], { cwd: root, env, encoding: 'utf8' });
+}
 async function editConfig(root, mutate) {
   const path = join(root, 'src-tauri/tauri.conf.json');
   const config = JSON.parse(await readFile(path, 'utf8'));
@@ -61,6 +67,11 @@ describe('release preflight CLI', () => {
   });
   it('accepts an immutable release candidate identity', async () => {
     const result = run('preflight.mjs', await fixture('0.1.0-rc.1'), envFor('0.1.0-rc.1'));
+    expect(result.stderr).toBe('');
+    expect(result.status).toBe(0);
+  });
+  it('validates release identity before dependencies are installed', async () => {
+    const result = await runIsolatedIdentityPreflight(await fixture());
     expect(result.stderr).toBe('');
     expect(result.status).toBe(0);
   });

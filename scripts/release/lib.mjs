@@ -1,7 +1,6 @@
 import { lstat, readFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
-import { parse } from 'yaml';
 import { readVersions, validateVersion } from './version-lib.mjs';
 
 export const repository = 'liafbkt/Geo_Learn';
@@ -78,8 +77,8 @@ function majorMinor(version) {
 }
 
 export async function validateTauriUpdaterVersions(root) {
-  const pnpmLock = parse(await readFile(join(root, 'pnpm-lock.yaml'), 'utf8'));
-  const javascript = pnpmLock?.importers?.['.']?.dependencies?.['@tauri-apps/plugin-updater']?.version;
+  const pnpmLock = await readFile(join(root, 'pnpm-lock.yaml'), 'utf8');
+  const javascript = /^ {6}'@tauri-apps\/plugin-updater':\r?\n(?: {8}specifier: .*\r?\n)? {8}version: (\d+\.\d+\.\d+)\r?$/m.exec(pnpmLock)?.[1];
   const cargoLock = await readFile(join(root, 'src-tauri/Cargo.lock'), 'utf8');
   const rust = /\[\[package\]\]\r?\nname = "tauri-plugin-updater"\r?\nversion = "(\d+\.\d+\.\d+)"/.exec(cargoLock)?.[1];
   if (!majorMinor(javascript) || !majorMinor(rust) || majorMinor(javascript) !== majorMinor(rust)) {
