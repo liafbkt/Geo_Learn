@@ -12,7 +12,9 @@ await cli(async () => {
   if (process.argv.length !== 2) throw new Error('Gate evidence writer accepts no arguments.');
   const pnpm = process.env.npm_execpath
     ? version(process.execPath, [process.env.npm_execpath, '--version'])
-    : version(process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm');
+    : process.platform === 'win32'
+      ? version('pwsh', ['-NoProfile', '-Command', 'pnpm --version'])
+      : version('pnpm');
   const gates = qualityGateCommands.map((command, index) => ({
     id: `QG-${String(index + 1).padStart(2, '0')}`,
     command,
