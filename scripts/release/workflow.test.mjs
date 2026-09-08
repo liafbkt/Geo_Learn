@@ -83,7 +83,7 @@ describe('release workflow security boundary', () => {
         expect(step.run ?? '').not.toContain('${{');
       }
     }
-    expect(secretRuns).toEqual(['node scripts/release/preflight.mjs --secrets', 'pnpm tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci -- --locked']);
+    expect(secretRuns).toEqual(['node scripts/release/preflight.mjs --secrets', 'pnpm exec tauri build --target x86_64-pc-windows-msvc --bundles nsis --ci -- --locked']);
     expect(tokenRuns.sort()).toEqual(['node scripts/release/promote-release.mjs', 'node scripts/release/publish-draft.mjs'].sort());
   });
 

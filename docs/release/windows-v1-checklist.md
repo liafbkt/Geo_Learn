@@ -74,7 +74,7 @@ This read-only audit is not authorization for a push, tag, Release, promotion, o
 
 | Field | Status | Evidence |
 | --- | --- | --- |
-| Selected immutable tag | `v0.1.0-rc.1` through `v0.1.0-rc.7` failed; next candidate is blocked until the LF checkout repair is independently verified | [rc.7](https://github.com/liafbkt/Geo_Learn/actions/runs/34222866127) |
+| Selected immutable tag | `v0.1.0-rc.1` through `v0.1.0-rc.8` failed; next candidate is blocked until the corrected Cargo argument forwarding is independently verified | [rc.8](https://github.com/liafbkt/Geo_Learn/actions/runs/34225148188) |
 | Version sources synchronized | passed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | commits `69ed53c`, `9b4addf` |
 | Tag release workflow exit 0 | failed for immutable `v0.1.0-rc.1` and `v0.1.0-rc.2` | QG-07 failures; successor required |
 | Draft asset inspection | pending | — |
@@ -121,6 +121,7 @@ Detailed observations belong in `windows-v1-smoke.md`.
 | `v0.1.0-rc.5` | Gate-evidence write, [Windows run 34136508178](https://github.com/liafbkt/Geo_Learn/actions/runs/34136508178) | QG-01..09 passed; Windows `pnpm.cmd` version lookup failed before signing | `7937cc2` | Windows PowerShell version lookup repaired; prepare a new immutable candidate |
 | `v0.1.0-rc.6` | Notices freshness, [Windows run 34177876989](https://github.com/liafbkt/Geo_Learn/actions/runs/34177876989) | QG-01..09, gate evidence, signing-secret and `contents: write` preflight passed; committed notices differ from Windows generation, so build/sign/upload were skipped | pending Windows diagnostic artifact | New candidate will upload the generated notice only on this failure; then commit its exact contents and retry |
 | `v0.1.0-rc.7` | Notices freshness, [Windows run 34222866127](https://github.com/liafbkt/Geo_Learn/actions/runs/34222866127) | QG-01..09, gate evidence and signing preflight passed. Diagnostic notice content equals the repository blob; CI checkout converted the unpinned Markdown file to CRLF while the generator emits LF | `.gitattributes` LF rule plus regression test, pending independent Windows validation | Do not create the next candidate until the line-ending repair is verified |
+| `v0.1.0-rc.8` | NSIS build command, [Windows run 34225148188](https://github.com/liafbkt/Geo_Learn/actions/runs/34225148188) | QG-01..09, signing preflight and notices freshness passed. pnpm removed the delimiter before Cargo's `--locked`, so Tauri rejected it before build/sign/upload | `pnpm exec tauri build … --ci -- --locked` plus workflow regression test, pending independent Windows validation | Do not create the next candidate until the forwarding repair is verified |
 
 ## Unverified boundaries
 
