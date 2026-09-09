@@ -107,8 +107,9 @@ function parseRequest(value: unknown): SessionRequest {
   const mode = oneOf(source.mode, PRACTICE_MODES, 'Session request mode');
   const packId = requireId(source.packId, 'Pack');
   if (mode !== 'custom') {
-    if (source.questionCount !== undefined || source.entityIds !== undefined ||
-        source.skills !== undefined || source.statuses !== undefined) {
+    // Rust serializes absent Option fields as null; both forms mean no filter.
+    if (source.questionCount != null || source.entityIds != null ||
+        source.skills != null || source.statuses != null) {
       throw new Error(`${mode} session request cannot contain custom filters`);
     }
     return { mode, packId };

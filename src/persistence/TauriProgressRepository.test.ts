@@ -68,6 +68,23 @@ function session(): PracticeSession {
 }
 
 describe('TauriProgressRepository', () => {
+  it.each(['smart', 'placement'] as const)('loads native %s sessions with null custom-only fields', async (mode) => {
+    const saved = session();
+    invokeMock.mockResolvedValue({
+      ...saved,
+      request: { mode, packId: 'china-provinces', questionCount: null, entityIds: null, skills: null, statuses: null },
+    });
+    const result = await new TauriProgressRepository().loadResumableSession('learner-1', 'china-provinces', '2026-08-26T12:05:00.000Z');
+    expect(result?.request).toEqual({ mode, packId: 'china-provinces' });
+    expect(result?.questionCursor).toBe(saved.questionCursor);
+    expect(result?.questions).toEqual(saved.questions);
+  });
+
+  it.each(['questionCount', 'entityIds', 'skills', 'statuses'])('still rejects a non-null %s filter on a smart session', async (field) => {
+    invokeMock.mockResolvedValue({ ...session(), request: { ...session().request, [field]: field === 'questionCount' ? 1 : [] } });
+    await expect(new TauriProgressRepository().loadResumableSession('learner-1', 'china-provinces', '2026-08-26T12:05:00.000Z')).rejects.toThrow('cannot contain custom filters');
+  });
+
   beforeEach(() => invokeMock.mockReset());
 
   it('uses the progress commands with explicit camelCase payloads and restores learning history', async () => {
