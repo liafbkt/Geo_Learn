@@ -11,10 +11,10 @@
   height: auto;
   touch-action: none;
   background: color-mix(in srgb, var(--color-panel-marine-mist) 72%, white);
-  cursor: grab;
+  cursor: default;
 }
 
-.map-viewport svg:active {
+.map-viewport svg[data-panning='true'] {
   cursor: grabbing;
 }
 
@@ -71,6 +71,10 @@
   stroke-linejoin: round;
   text-anchor: middle;
   vector-effect: non-scaling-stroke;
+}
+
+.map-labels--answer text {
+  font-size: 22px;
 }
 
 .map-sr-only {

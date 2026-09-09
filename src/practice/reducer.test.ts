@@ -389,7 +389,7 @@ describe('practiceReducer', () => {
 
     const next = practiceReducer(save(completed), { type: 'CONTINUED', now: CORRECT_AT });
     expect(next).toMatchObject({
-      phase: 'presenting',
+      phase: 'answering',
       currentQuestion: { entityId: 'r2' },
       saveStatus: 'idle',
       pendingAttempt: null,

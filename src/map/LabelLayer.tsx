@@ -20,7 +20,7 @@ export function LabelLayer({ pack, map, mode, answerEntityId }: LabelLayerProps)
     ...map.places.map(({ entityId, point }) => ({ entityId, point })),
   ];
   return (
-    <g className="map-labels" aria-hidden="true">
+    <g className={mode === 'reveal' ? 'map-labels map-labels--answer' : 'map-labels'} aria-hidden="true">
       {positions.map(({ entityId, point }) => {
         const entity = entities.get(entityId);
         if (entity === undefined || !visibleIds.has(entityId)) return null;

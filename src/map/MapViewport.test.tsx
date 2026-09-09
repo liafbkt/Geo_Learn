@@ -223,6 +223,7 @@ describe('MapViewport pan and zoom', () => {
       pointerType: 'mouse',
       clientX: 10,
       clientY: 20,
+      button: 2,
     });
     fireEvent.pointerMove(map, {
       pointerId: 1,
@@ -241,7 +242,7 @@ describe('MapViewport pan and zoom', () => {
     const { onViewportChange } = renderMap();
     const map = screen.getByRole('listbox');
 
-    fireEvent.pointerDown(map, { pointerId: 1, pointerType: 'mouse', clientX: 10, clientY: 20 });
+    fireEvent.pointerDown(map, { pointerId: 1, pointerType: 'mouse', button: 2, clientX: 10, clientY: 20 });
     fireEvent.pointerMove(map, { pointerId: 1, pointerType: 'mouse', clientX: 30, clientY: 55 });
     fireEvent.pointerUp(map, { pointerId: 1, pointerType: 'mouse', clientX: 30, clientY: 55 });
     expect(onViewportChange).toHaveBeenLastCalledWith({ panX: 20, panY: 35, zoom: 1 });

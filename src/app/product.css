@@ -9,6 +9,7 @@
   --product-grid-faint: rgb(39 78 91 / 8%);
   --product-data-face: "Cascadia Mono", "SFMono-Regular", monospace;
   --product-display-face: "FZKai-Z03", "STKaiti", "KaiTi", serif;
+  --product-learning-face: "YouYuan", "Yuanti SC", "Microsoft YaHei", "PingFang SC", sans-serif;
 }
 
 .product-surface {
@@ -360,6 +361,10 @@
   background: var(--product-paper-raised);
 }
 
+.custom-practice {
+  font-size: 1.125rem;
+}
+
 .start-choice,
 .app-message {
   display: grid;
@@ -430,7 +435,8 @@
 
 .practice-screen {
   display: grid;
-  grid-template-columns: minmax(0, 1.62fr) minmax(22rem, 1fr);
+  grid-template-columns: minmax(0, 1.9fr) minmax(22rem, 1fr);
+  font-size: 1.125rem;
   min-height: 100vh;
   padding: 0;
   overflow: hidden;
@@ -443,7 +449,7 @@
   min-height: 100vh;
   place-items: center;
   border-right: 1px solid var(--product-rule);
-  padding: clamp(var(--space-3), 2.5vw, var(--space-8));
+  padding: var(--space-2);
   background:
     linear-gradient(var(--product-grid-faint) 1px, transparent 1px),
     linear-gradient(90deg, var(--product-grid-faint) 1px, transparent 1px),
@@ -506,8 +512,16 @@
 
 .practice-introduction h1,
 .practice-question h1 {
-  font-family: var(--product-display-face);
-  line-height: 1.25;
+  font-family: var(--product-learning-face);
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  line-height: 1.4;
+}
+
+.practice-question__target {
+  display: inline-block;
+  max-width: 100%;
+  color: var(--color-primary-action);
+  font-size: 1.2em;
 }
 
 .practice-introduction > .product-button {
@@ -648,6 +662,8 @@ kbd {
   grid-template-rows: auto minmax(0, 1fr);
   height: 100vh;
   overflow: hidden;
+  padding: var(--space-4);
+  font-size: 1.125rem;
 }
 
 .explore-screen__header {
@@ -663,7 +679,7 @@ kbd {
 
 .explore-screen__workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.62fr) minmax(19rem, 1fr);
+  grid-template-columns: minmax(0, 2fr) minmax(19rem, 1fr);
   min-height: 0;
   gap: var(--space-4);
 }

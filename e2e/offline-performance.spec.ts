@@ -100,7 +100,8 @@ test('fixed browser fixture meets cold-start, feedback, transition, and map-fram
   await page.keyboard.press('Space');
   await expect(page.getByText('答案已揭示', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: '继续' }).click();
-  await expect(page.getByRole('button', { name: '开始答题' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '检查答案' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /开始答题/ })).toBeHidden();
   const transitionMs = await latestDuration(page, 'geo:continue-requested', 'geo:question-ready');
   expect(transitionMs).not.toBeNull();
   expect(transitionMs!).toBeLessThanOrEqual(PERFORMANCE_THRESHOLDS.questionTransitionMs);

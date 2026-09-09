@@ -428,7 +428,7 @@ function continueToNextQuestion(state: PracticeState, now: string): PracticeStat
   const presentedAt = now;
   return {
     ...state,
-    phase: 'presenting',
+    phase: 'answering',
     currentQuestion: question,
     answerValue: null,
     usedHint: false,

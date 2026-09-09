@@ -124,6 +124,7 @@ export function MapViewport({
   const pointers = useRef(new Map<number, TrackedPointer>());
   const pinch = useRef<Readonly<{ distance: number; zoom: number }> | null>(null);
   const dragged = useRef(false);
+  const [panning, setPanning] = useState(false);
 
   useEffect(() => {
     setActive((current) => {
@@ -195,6 +196,8 @@ export function MapViewport({
   const handlePointerDown = (event: PointerEvent<SVGSVGElement>) => {
     const pointerId = event.pointerId ?? 0;
     if (pointers.current.size === 0) dragged.current = false;
+    if (event.pointerType !== 'touch' && event.button !== 2) return;
+    if (event.pointerType !== 'touch') setPanning(true);
     pointers.current.set(pointerId, {
       x: event.clientX,
       y: event.clientY,
@@ -248,7 +251,7 @@ export function MapViewport({
       updateViewport((current) => ({ ...current, zoom }));
       return;
     }
-    if (!captured) return;
+    if (!captured || previous.type === 'touch') return;
     const deltaX = previous.captured ? event.clientX - previous.x : event.clientX - previous.startX;
     const deltaY = previous.captured ? event.clientY - previous.y : event.clientY - previous.startY;
     updateViewport((current) => ({
@@ -262,6 +265,7 @@ export function MapViewport({
     const pointerId = event.pointerId ?? 0;
     const pointer = pointers.current.get(pointerId);
     pointers.current.delete(pointerId);
+    if (pointers.current.size === 0) setPanning(false);
     if (pointers.current.size < 2) pinch.current = null;
     if (pointer?.captured) event.currentTarget.releasePointerCapture?.(pointerId);
   };
@@ -302,6 +306,9 @@ export function MapViewport({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onLostPointerCapture={handlePointerUp}
+        onContextMenu={(event) => event.preventDefault()}
+        data-panning={panning}
         onWheel={handleWheel}
       >
         <g

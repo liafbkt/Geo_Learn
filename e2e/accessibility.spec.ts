@@ -141,6 +141,28 @@ for (const kind of fiveKinds) {
   });
 }
 
+test('Space submits text, respects IME and continues without another start', async ({ page }) => {
+  await resetE2E(page);
+  await importSolidBeijing(page);
+  await startControlled(page, '中国省级行政区', ['identify_region', 'identify_region']);
+  const input = page.getByLabel('输入答案');
+  await input.fill('New');
+  await input.press('Shift+Space');
+  await expect(input).toHaveValue('New ');
+  await input.fill('北京市');
+  await input.dispatchEvent('keydown', { key: ' ', code: 'Space', isComposing: true });
+  await input.dispatchEvent('keydown', { key: ' ', code: 'Space', repeat: true });
+  expect((await readE2EState(page)).attempts).toHaveLength(0);
+  await input.press('Space');
+  await expect(page.getByText('答对了', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '继续', exact: true })).toBeEnabled();
+  await input.press('Space');
+  await expect(page.getByText('答对了', { exact: true })).toBeHidden();
+  await expect(page.getByText('准备好了', { exact: true })).toBeHidden();
+  await expect(page.getByRole('button', { name: '检查答案' })).toBeVisible();
+  expect((await readE2EState(page)).attempts).toHaveLength(1);
+});
+
 test('IME composition Enter does not submit until composition ends', async ({ page }) => {
   await resetE2E(page);
   await importSolidBeijing(page);

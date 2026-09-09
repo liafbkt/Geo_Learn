@@ -69,13 +69,14 @@ function correctEntity(state: PracticeState, pack: ContentPack): Entity {
   return entityById(pack, entityId);
 }
 
-function prompt(state: PracticeState, pack: ContentPack): string {
+function prompt(state: PracticeState, pack: ContentPack) {
   const subject = entityById(pack, state.currentQuestion.entityId);
+  const target = <strong className="practice-question__target">{primaryName(subject, pack)}</strong>;
   switch (state.currentQuestion.kind) {
-    case 'locate_region': return `在地图上找到 ${primaryName(subject, pack)}`;
+    case 'locate_region': return <>在地图上找到 {target}</>;
     case 'identify_region': return '地图上标出的行政区叫什么？';
-    case 'associate_capital': return `${primaryName(subject, pack)} 的行政中心或首府是哪里？`;
-    case 'locate_place': return `在地图上找到 ${primaryName(subject, pack)}`;
+    case 'associate_capital': return <>{target} 的行政中心或首府是哪里？</>;
+    case 'locate_place': return <>在地图上找到 {target}</>;
     case 'identify_place': return '地图上标出的地点叫什么？';
   }
 }
@@ -213,7 +214,15 @@ export function PracticeScreen(props: PracticeScreenProps) {
         event.preventDefault();
         return;
       }
-      if (paused || state.phase === 'presenting') return;
+      if (paused) return;
+      if ((event.code === 'Space' || event.key === ' ') && !event.shiftKey) {
+        event.preventDefault();
+        if (state.phase === 'presenting') void continueIntroduction();
+        else if (canContinue(state)) continuePractice();
+        else submit();
+        return;
+      }
+      if (state.phase === 'presenting') return;
       const editable = isEditable(event.target);
       if (state.currentQuestion.presentation === 'text') {
         if (event.key === 'Enter' && editable) {
@@ -235,10 +244,6 @@ export function PracticeScreen(props: PracticeScreenProps) {
         event.preventDefault();
       } else if (event.key.toLowerCase() === 'h') {
         requestHint();
-        event.preventDefault();
-      } else if (event.code === 'Space') {
-        if (canContinue(state)) continuePractice();
-        else submit();
         event.preventDefault();
       }
     };
@@ -321,7 +326,7 @@ export function PracticeScreen(props: PracticeScreenProps) {
             )}
             {introSaveError ? <p role="alert" className="practice-error">认识进度未保存，请重试。</p> : null}
             <button type="button" className="product-button product-button--primary" disabled={introSaving} onClick={() => void continueIntroduction()}>
-              {introSaving ? '正在保存…' : introduction === undefined ? '开始答题' : '继续认识'}
+              {introSaving ? '正在保存…' : introduction === undefined ? '开始答题' : '继续认识'} <kbd aria-hidden="true">Space</kbd>
             </button>
           </div>
         ) : (
@@ -338,8 +343,8 @@ export function PracticeScreen(props: PracticeScreenProps) {
                   })}
                 </div>
               ) : question.presentation === 'text' ? (
-                <label className="practice-text-answer"><span>输入答案</span><input autoFocus value={state.answerValue ?? ''} disabled={state.saveStatus === 'saving'} onChange={(event) => dispatch({ type: 'ANSWER_TYPED', value: event.target.value })} onKeyDown={handleTextKeyDown} /></label>
-              ) : <p className="practice-map-instruction">点击地图，或聚焦地图后用方向键移动、Enter 选择。</p>}
+                <><label className="practice-text-answer"><span>输入答案</span><input autoFocus value={state.answerValue ?? ''} disabled={state.saveStatus === 'saving'} onChange={(event) => dispatch({ type: 'ANSWER_TYPED', value: event.target.value })} onKeyDown={handleTextKeyDown} /></label><small className="product-help">Enter / Space 提交；Shift + Space 输入空格。</small></>
+              ) : <p className="practice-map-instruction">左键选择，按住右键拖动，滚轮缩放；方向键移动焦点、Enter 选择。</p>}
             </div>
 
             <div className="practice-feedback" role={state.saveStatus === 'failed' ? 'alert' : 'status'} aria-live="polite">
@@ -353,7 +358,7 @@ export function PracticeScreen(props: PracticeScreenProps) {
             <footer className="practice-actions">
               <button type="button" className="product-button product-button--secondary" disabled={state.hint !== null || state.saveStatus !== 'idle'} onClick={requestHint}>提示 <kbd>H</kbd></button>
               {state.saveStatus === 'failed' ? <button type="button" className="product-button product-button--secondary" disabled={retryingSave} onClick={() => void retrySave()}>{retryingSave ? '正在重试…' : '重试保存'}</button> : null}
-              <button type="button" className="product-button product-button--primary" aria-label={state.saveStatus === 'saving' ? '正在保存' : primaryAction} disabled={state.saveStatus === 'saving' || state.saveStatus === 'failed' || (!canContinue(state) && !canSubmitAnswer(state))} onClick={canContinue(state) ? continuePractice : submit}>{state.saveStatus === 'saving' ? '正在保存…' : primaryAction} <kbd>{question.presentation === 'text' ? 'Enter' : 'Space'}</kbd></button>
+              <button type="button" className="product-button product-button--primary" aria-label={state.saveStatus === 'saving' ? '正在保存' : primaryAction} disabled={state.saveStatus === 'saving' || state.saveStatus === 'failed' || (!canContinue(state) && !canSubmitAnswer(state))} onClick={canContinue(state) ? continuePractice : submit}>{state.saveStatus === 'saving' ? '正在保存…' : primaryAction} <kbd>Space</kbd></button>
             </footer>
           </>
         )}
