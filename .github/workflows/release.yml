@@ -75,6 +75,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
           name: windows-v1-playwright
           path: |
