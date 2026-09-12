@@ -22,3 +22,9 @@
 - Replaced test-only pack IDs with the shipped IDs: `cn-provincial-divisions`, `cn-shanghai-districts`, and `us-states`.
 - Red: the updated test failed because the `us-states` card did not expose the expected `data-pack-variant="us"` silhouette selector.
 - Green: `PackCard` now maps the three shipped IDs to CSS silhouette variants; the focused HomeScreen test passed with the province exploration callback receiving `cn-provincial-divisions`.
+
+## Desktop visual check
+
+- Captured and inspected the live local home screen at 1672 × 941 after the card correction.
+- Evidence: `C:\Users\Kevin\.codex\visualizations\2026\09\12\01a09453-9765-7aa3-872b-f78e23243400\task2-home-1672x941.png`.
+- Confirmed three taller white floating cards with rounded light-blue borders and soft blue shadows, green primary actions and progress treatment, compact pale-blue due/fragile pills, and visible noninteractive map silhouettes in each card's upper-right corner.
