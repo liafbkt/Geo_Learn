@@ -452,11 +452,13 @@
   font-size: 1.125rem;
   min-height: calc(100vh - 6rem);
   padding: clamp(var(--space-4), 3vw, var(--space-8));
+  padding-right: calc(clamp(var(--space-4), 3vw, var(--space-8)) + 4rem);
   isolation: isolate;
   overflow: clip;
 }
 
 .practice-map {
+  grid-area: 1 / 1;
   display: grid;
   min-width: 0;
   min-height: 30rem;
@@ -489,7 +491,9 @@
 }
 
 .practice-panel {
+  grid-area: 1 / 2;
   position: relative;
+  z-index: 1;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto auto;
   min-width: 0;
@@ -537,9 +541,10 @@
 }
 
 .practice-queue {
-  position: absolute;
-  z-index: -1;
-  inset: 3rem 2rem 8rem 62%;
+  grid-area: 1 / 2;
+  position: relative;
+  z-index: 0;
+  min-width: 0;
   pointer-events: none;
 }
 
@@ -549,11 +554,12 @@
   border: 1px solid var(--product-rule);
   border-radius: var(--radius-lg);
   background: var(--product-paper);
-  transform: rotate(3deg);
+  box-shadow: var(--shadow-panel);
+  transform: translate(3rem, 0.4rem) rotate(3deg);
 }
 
 .practice-queue span + span {
-  transform: rotate(-2deg);
+  transform: translate(1.5rem, 0.2rem) rotate(1.5deg);
 }
 
 .practice-panel__header {
@@ -898,6 +904,7 @@ kbd {
     grid-template-columns: 1fr;
     grid-template-rows: auto;
     gap: var(--space-4);
+    padding-right: clamp(var(--space-4), 3vw, var(--space-8));
   }
 
   .practice-queue {
@@ -914,6 +921,7 @@ kbd {
   }
 
   .practice-panel {
+    grid-area: 2 / 1;
     min-height: 0;
   }
 
