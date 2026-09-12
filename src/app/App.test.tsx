@@ -21,8 +21,8 @@ import { InMemoryProgressRepository } from '../persistence/InMemoryProgressRepos
 import type { ProgressRepository } from '../persistence/ProgressRepository';
 import type { PendingAttempt } from '../practice/reducer';
 import type { PracticeSession } from '../practice/session';
-import { UpdateService, type UpdateHandle, type UpdateMetadata } from '../update/UpdateService';
-import { App, type AppDependencies, type PlanSessionInput } from './App';
+import { UpdatePortError, UpdateService, type UpdateHandle, type UpdateMetadata } from '../update/UpdateService';
+import { App, planSession, type AppDependencies, type PlanSessionInput } from './App';
 
 const launchResources: InMemoryContentResources = {
   'cn-provincial-divisions': {
@@ -153,6 +153,19 @@ function withinCard(card: Element, buttonName: string): HTMLButtonElement {
   return button;
 }
 
+it('shows a safe update error code and lets the user recheck', async () => {
+  const user = userEvent.setup();
+  const check = vi.fn()
+    .mockRejectedValueOnce(new UpdatePortError('FEED_UNAVAILABLE'))
+    .mockResolvedValueOnce(null);
+  render(<App dependencies={{ ...dependencies(), createUpdateService: () => new UpdateService({ check }) }} />);
+  await user.click(await screen.findByRole('button', { name: '检查更新' }));
+  expect(await screen.findByText('错误码：FEED_UNAVAILABLE')).toBeVisible();
+  await user.click(screen.getByRole('button', { name: '重新检查' }));
+  expect(await screen.findByText('已是最新版本')).toBeVisible();
+  expect(check).toHaveBeenCalledTimes(2);
+});
+
 async function openUsSmartPractice(user: ReturnType<typeof userEvent.setup>) {
   const usCard = (await screen.findByRole('heading', { name: '美国50州与州府' })).closest('article');
   if (usCard === null) throw new Error('US pack card is missing');
@@ -160,6 +173,72 @@ async function openUsSmartPractice(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: '跳过摸底，开始练习' }));
   await user.click(await screen.findByRole('button', { name: '继续认识' }));
 }
+
+it.each([
+  { targetId: 'cn-430000', selectedName: '河南省 / Henan', direction: '南边' },
+  { targetId: 'cn-210000', selectedName: '黑龙江省 / Heilongjiang', direction: '西南边' },
+])('hints $direction from $selectedName using the real projected province map', async ({ targetId, selectedName, direction }) => {
+  const user = userEvent.setup();
+  render(<App dependencies={dependencies({
+    planSession: (input) => ({
+      ...fixedSession(input),
+      introductions: [],
+      baseQuestionCount: 1,
+      questions: [{ kind: 'locate_region', presentation: 'map', entityId: targetId }],
+    }),
+  })} />);
+  const card = (await screen.findByRole('heading', { name: '中国省级行政区' })).closest('article');
+  if (card === null) throw new Error('China pack card is missing');
+  await user.click(withinCard(card, '智能练习'));
+  await user.click(screen.getByRole('button', { name: '跳过摸底，开始练习' }));
+  await user.click(await screen.findByRole('button', { name: '开始答题' }));
+  await user.click(screen.getByRole('option', { name: selectedName }));
+  await user.click(screen.getByRole('button', { name: '检查答案' }));
+  expect(screen.getByText(`目标大约在所选位置的${direction}。`)).toBeVisible();
+});
+
+it('advances visible progress through a single Hunan weakness and exits to summary', async () => {
+  const user = userEvent.setup();
+  const repository = new InMemoryProgressRepository();
+  render(<App dependencies={dependencies({
+    repository,
+    planSession: (input) => input.request.mode === 'placement' ? {
+      ...fixedSession(input),
+      introductions: [],
+      baseQuestionCount: 1,
+      questions: [{ kind: 'locate_region', presentation: 'map', entityId: 'cn-430000' }],
+    } : planSession(input),
+  })} />);
+  const card = (await screen.findByRole('heading', { name: '中国省级行政区' })).closest('article');
+  if (card === null) throw new Error('China pack card is missing');
+  await user.click(withinCard(card, '智能练习'));
+  await user.click(screen.getByRole('button', { name: '开始摸底' }));
+  await user.click(await screen.findByRole('button', { name: '开始答题' }));
+  await user.click(screen.getByRole('option', { name: '河南省 / Henan' }));
+  await user.click(screen.getByRole('button', { name: '检查答案' }));
+  await user.click(screen.getByRole('option', { name: '河南省 / Henan' }));
+  await user.click(screen.getByRole('button', { name: '检查答案' }));
+  await user.click(screen.getByRole('button', { name: '查看总结' }));
+  await user.click(screen.getByRole('button', { name: '再练薄弱项' }));
+  expect(await screen.findByRole('status', { name: '答题进度' })).toHaveTextContent('0 / 12');
+  await user.click(screen.getByRole('button', { name: '开始答题' }));
+
+  for (let question = 1; question <= 12; question += 1) {
+    expect(screen.getByRole('status', { name: '答题进度' })).toHaveTextContent(`${question} / 12`);
+    expect(screen.getByRole('heading', { name: '在地图上找到 湖南省' })).toBeVisible();
+    await user.click(screen.getByRole('option', { name: '湖南省 / Hunan' }));
+    await user.click(screen.getByRole('button', { name: '检查答案' }));
+    expect(screen.getByRole('status', { name: '答题进度' })).toHaveTextContent(`${question} / 12`);
+    await user.click(screen.getByRole('button', { name: question === 12 ? '查看总结' : '继续' }));
+  }
+
+  expect(screen.getByRole('heading', { name: '本次总结' })).toBeVisible();
+  expect(screen.getByRole('button', { name: '再练薄弱项' })).toBeDisabled();
+  const attempts = await repository.loadAttemptHistory('local-test-user', 'cn-provincial-divisions');
+  expect(attempts.filter((attempt) => attempt.mode === 'custom')).toHaveLength(12);
+  await user.click(screen.getByRole('button', { name: '返回主菜单' }));
+  expect(await screen.findByRole('heading', { name: '选择学习范围' })).toBeVisible();
+}, 15_000);
 
 it('loads all three launch packs, isolates a bad pack, and checks updates only on request', async () => {
   const user = userEvent.setup();
@@ -183,8 +262,11 @@ it('loads all three launch packs, isolates a bad pack, and checks updates only o
   expect(screen.queryByText('发现新版本 0.2.0')).not.toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: '检查更新' }));
   expect(await screen.findByText('发现新版本 0.2.0')).toBeVisible();
+  expect(screen.getByText('离线内容改进')).toBeVisible();
+  expect(screen.getByText(/当前版本/)).toBeVisible();
   await user.click(screen.getByRole('button', { name: '下载更新' }));
   expect(await screen.findByText('更新已下载并通过校验')).toBeVisible();
+  expect(screen.getByText('安装时应用会关闭；完成后请重新打开。')).toBeVisible();
   expect(download).toHaveBeenCalledOnce();
   await user.click(screen.getByRole('button', { name: '安装更新' }));
   expect(await screen.findByText('安装程序已启动')).toBeVisible();
@@ -201,6 +283,7 @@ it('can skip placement, introduces a new place, and keeps feedback locked until 
   })} />);
 
   await openUsSmartPractice(user);
+  expect(screen.getByRole('status', { name: '答题进度' })).toHaveTextContent('1 / 6');
   expect(screen.queryByRole('button', { name: '下载更新' })).not.toBeInTheDocument();
   expect(screen.getByRole('heading', { name: /在地图上找到.*California/i })).toBeVisible();
   await user.click(screen.getByRole('option', { name: /Texas/i }));
@@ -211,11 +294,15 @@ it('can skip placement, introduces a new place, and keeps feedback locked until 
   await user.click(screen.getByRole('option', { name: /Texas/i }));
   await user.click(screen.getByRole('button', { name: '检查答案' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('保存失败');
+  expect(screen.getByRole('status', { name: '答题进度' })).toHaveTextContent('1 / 7');
   expect(screen.getByRole('button', { name: '继续' })).toBeDisabled();
 
   await user.click(screen.getByRole('button', { name: '重试保存' }));
   await waitFor(() => expect(screen.getByRole('button', { name: '继续' })).toBeEnabled());
   expect(repository.saveAttemptCalls).toBe(2);
+  expect(screen.getByRole('status', { name: '答题进度' })).toHaveTextContent('1 / 7');
+  await user.click(screen.getByRole('button', { name: '继续' }));
+  expect(screen.getByRole('status', { name: '答题进度' })).toHaveTextContent('2 / 7');
 });
 
 it('restores carryover retry debts and passes them into the next smart scheduler', async () => {

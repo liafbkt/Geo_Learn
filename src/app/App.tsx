@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import appConfig from '../../src-tauri/tauri.conf.json';
 
 import type { AudioService } from '../audio/AudioService';
 import { loadAvailablePacks, type RejectedPack } from '../content/loadPacks';
@@ -250,15 +251,16 @@ function UpdateBanner({ service, state }: Readonly<{ service: UpdateService; sta
   if (state.status === 'disposed') return null;
   return (
     <aside className="update-banner" aria-live="polite">
+      <span>当前版本 {appConfig.version}</span>
       {state.status === 'idle' ? <button type="button" onClick={() => void service.check()}>检查更新</button> : null}
       {state.status === 'checking' ? <span>正在后台检查更新…</span> : null}
       {state.status === 'upToDate' ? <><span>已是最新版本</span><button type="button" onClick={() => void service.check()}>重新检查</button></> : null}
-      {state.status === 'available' ? <><strong>发现新版本 {state.update.version}</strong><button type="button" onClick={() => void service.download()}>下载更新</button></> : null}
+      {state.status === 'available' ? <><strong>发现新版本 {state.update.version}</strong>{state.update.notes ? <p>{state.update.notes}</p> : null}<button type="button" onClick={() => void service.download()}>下载更新</button></> : null}
       {state.status === 'downloading' ? <span>正在下载更新{state.percent === null ? '…' : ` ${Math.round(state.percent)}%`}</span> : null}
-      {state.status === 'ready' ? <><strong>更新已下载并通过校验</strong><button type="button" onClick={() => void service.install()}>安装更新</button></> : null}
+      {state.status === 'ready' ? <><strong>更新已下载并通过校验</strong><span>安装时应用会关闭；完成后请重新打开。</span><button type="button" onClick={() => void service.install()}>安装更新</button></> : null}
       {state.status === 'installing' ? <span>正在启动安装程序…</span> : null}
       {state.status === 'installationRequested' ? <span>安装程序已启动</span> : null}
-      {state.status === 'error' ? <><span>{state.message} 学习功能不受影响。</span><button type="button" onClick={() => void service.retry()}>重新检查</button></> : null}
+      {state.status === 'error' ? <><span>{state.message} 学习功能不受影响。</span><span>错误码：{state.code}</span><button type="button" onClick={() => void service.retry()}>重新检查</button></> : null}
     </aside>
   );
 }

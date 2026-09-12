@@ -1,5 +1,4 @@
-import type { Coordinate } from '../content/types';
-import { buildHint, type Hint, type HintRequest } from '../learning/hints';
+import { buildHint, type Hint, type HintMapPoint, type HintRequest } from '../learning/hints';
 import { isAcceptedAnswer } from '../learning/normalizeAnswer';
 import type { Question } from '../learning/questions';
 import type { AttemptEvent, AttemptOutcome, MasteryRecord } from '../learning/types';
@@ -35,7 +34,7 @@ export type PendingAttempt = Readonly<{
 
 export type MapCoordinate = Readonly<{
   entityId: string;
-  coordinate: Coordinate;
+  coordinate: HintMapPoint;
 }>;
 
 export type CreatePracticeStateInput = Readonly<{
@@ -172,7 +171,7 @@ function answerIsCorrect(question: Question, answer: string): boolean {
     : answer === correctEntityId(question);
 }
 
-function coordinateFor(state: PracticeState, entityId: string): Coordinate | undefined {
+function coordinateFor(state: PracticeState, entityId: string): HintMapPoint | undefined {
   return state.mapCoordinates.find((item) => item.entityId === entityId)?.coordinate;
 }
 
@@ -197,10 +196,7 @@ function hintRequest(state: PracticeState): HintRequest | null {
     return null;
   }
   const selectedCoordinate = coordinateFor(state, state.answerValue);
-  const targetCoordinate =
-    question.kind === 'locate_place'
-      ? question.coordinate
-      : coordinateFor(state, question.entityId);
+  const targetCoordinate = coordinateFor(state, question.entityId);
   if (selectedCoordinate === undefined || targetCoordinate === undefined) {
     throw new Error('Map hint coordinates are unavailable');
   }

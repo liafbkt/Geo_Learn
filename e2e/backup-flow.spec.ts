@@ -46,7 +46,7 @@ async function inspect(page: Page): Promise<void> {
 
 test('exports, merges settings selectively, replaces, and rejects corrupt backups', async ({ page }) => {
   await resetE2E(page);
-  await page.getByRole('button', { name: '数据管理' }).click();
+  await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: '数据管理' }).click();
   await page.getByRole('button', { name: '导出备份' }).click();
   await expect(page.getByRole('status')).toContainText('空间记忆教练备份.geolearn-backup');
 
@@ -82,7 +82,7 @@ test('exports, merges settings selectively, replaces, and rejects corrupt backup
 
 test('post-import refresh failure locks navigation until retry succeeds', async ({ page }) => {
   await resetE2E(page);
-  await page.getByRole('button', { name: '数据管理' }).click();
+  await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: '数据管理' }).click();
   await setBackup(page, {
     kind: 'valid',
     records: records('refresh-retry', 'soft'),
@@ -92,11 +92,11 @@ test('post-import refresh failure locks navigation until retry succeeds', async 
   await page.getByRole('button', { name: '导入备份' }).click();
 
   await expect(page.getByRole('alert')).toContainText('备份已导入，但学习数据刷新失败');
-  await expect(page.getByRole('button', { name: '返回首页' })).toBeDisabled();
+  await expect(page.getByRole('main').getByRole('button', { name: '返回首页' })).toBeDisabled();
   expect((await readE2EState(page)).sessions.map(({ sessionId }) => sessionId)).toEqual([
     'refresh-retry',
   ]);
   await page.getByRole('button', { name: '重试刷新学习数据' }).click();
   await expect(page.getByRole('status')).toHaveText('备份已导入，学习数据已刷新');
-  await expect(page.getByRole('button', { name: '返回首页' })).toBeEnabled();
+  await expect(page.getByRole('main').getByRole('button', { name: '返回首页' })).toBeEnabled();
 });

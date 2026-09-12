@@ -4,14 +4,14 @@ import { buildHint } from './hints';
 
 describe('buildHint', () => {
   it.each([
-    [[0, 1], 'north'],
-    [[1, 1], 'north-east'],
+    [[0, -1], 'north'],
+    [[1, -1], 'north-east'],
     [[1, 0], 'east'],
-    [[1, -1], 'south-east'],
-    [[0, -1], 'south'],
-    [[-1, -1], 'south-west'],
+    [[1, 1], 'south-east'],
+    [[0, 1], 'south'],
+    [[-1, 1], 'south-west'],
     [[-1, 0], 'west'],
-    [[-1, 1], 'north-west'],
+    [[-1, -1], 'north-west'],
   ] as const)('returns the %s compass sector without revealing the target', (target, sector) => {
     expect(
       buildHint({ kind: 'map', selectedCoordinate: [0, 0], targetCoordinate: target }),
@@ -20,7 +20,7 @@ describe('buildHint', () => {
 
   it('assigns an exact north/east boundary clockwise to north-east', () => {
     const angle = (Math.PI * 3) / 8;
-    const target = [Math.cos(angle), Math.sin(angle)] as const;
+    const target = [Math.cos(angle), -Math.sin(angle)] as const;
 
     expect(
       buildHint({ kind: 'map', selectedCoordinate: [0, 0], targetCoordinate: target }),

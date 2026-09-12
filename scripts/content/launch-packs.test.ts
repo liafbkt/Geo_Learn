@@ -59,6 +59,36 @@ async function hashes(id: string): Promise<Record<string, string>> {
   ])));
 }
 
+it.each([{ width: 1200, height: 800 }, { width: 640, height: 360 }])(
+  'fits the US mainland prominently with Alaska and Hawaii insets at $width x $height',
+  async size => {
+    const pack = await readPack('us-states');
+    const topology = JSON.parse(await readFile(join(contentRoot, 'us-states/map.topojson'), 'utf8'));
+    const result = projectMap(pack, topology, size);
+    if (!result.ok) throw new Error(result.error.message);
+    const { regions, places } = result.map;
+    const mainland = regions.filter(({ entityId }) => !['us-ak', 'us-hi'].includes(entityId));
+    const xs = mainland.map(({ centroid }) => centroid[0]);
+    const ys = mainland.map(({ centroid }) => centroid[1]);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeGreaterThan(size.width * 0.65);
+    expect(Math.max(...ys) - Math.min(...ys)).toBeGreaterThan(size.height * 0.45);
+    const california = regions.find(({ entityId }) => entityId === 'us-ca')!;
+    const alaska = regions.find(({ entityId }) => entityId === 'us-ak')!;
+    const hawaii = regions.find(({ entityId }) => entityId === 'us-hi')!;
+    expect(alaska.centroid[1]).toBeGreaterThan(california.centroid[1]);
+    expect(hawaii.centroid[1]).toBeGreaterThan(california.centroid[1]);
+    expect(alaska.centroid[0]).toBeLessThan(hawaii.centroid[0]);
+    expect(regions).toHaveLength(50);
+    expect(places).toHaveLength(50);
+    for (const { entityId, point } of places) {
+      expect(point[0], entityId).toBeGreaterThanOrEqual(16);
+      expect(point[0], entityId).toBeLessThanOrEqual(size.width - 16);
+      expect(point[1], entityId).toBeGreaterThanOrEqual(16);
+      expect(point[1], entityId).toBeLessThanOrEqual(size.height - 16);
+    }
+  },
+);
+
 describe.each(specifications)('$id launch content', spec => {
   it('contains all four immutable resources', async () => {
     for (const file of files) {

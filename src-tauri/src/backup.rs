@@ -939,6 +939,18 @@ fn attempt_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<AttemptRecord> 
     })
 }
 
+// Native progress DTOs persist unused Option fields as null. Normalize only
+// those known fields when reading SQLite; backup archive validation stays strict.
+fn remove_stored_null_fields(value: &mut serde_json::Value, fields: &[&str]) {
+    if let Some(object) = value.as_object_mut() {
+        for field in fields {
+            if object.get(*field).is_some_and(serde_json::Value::is_null) {
+                object.remove(*field);
+            }
+        }
+    }
+}
+
 fn read_sessions(
     connection: &Connection,
     learner_id: &str,
@@ -953,12 +965,29 @@ fn read_sessions(
         .map_err(|_| BackupError::export_failed())?;
     let rows = statement
         .query_map([learner_id], |row| {
-            let request: SessionRequest = serde_json::from_str(&row.get::<_, String>(2)?)
+            let mut request_value: serde_json::Value =
+                serde_json::from_str(&row.get::<_, String>(2)?)
+                    .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
+            remove_stored_null_fields(
+                &mut request_value,
+                &["questionCount", "entityIds", "skills", "statuses"],
+            );
+            let request: SessionRequest = serde_json::from_value(request_value)
                 .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
             let introductions: Vec<String> = serde_json::from_str(&row.get::<_, String>(4)?)
                 .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
-            let questions: Vec<Question> = serde_json::from_str(&row.get::<_, String>(6)?)
-                .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
+            let mut question_values: Vec<serde_json::Value> =
+                serde_json::from_str(&row.get::<_, String>(6)?)
+                    .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
+            for question in &mut question_values {
+                remove_stored_null_fields(
+                    question,
+                    &["capitalId", "candidateEntityIds", "answer", "coordinate"],
+                );
+            }
+            let questions: Vec<Question> =
+                serde_json::from_value(serde_json::Value::Array(question_values))
+                    .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
             let debts: Vec<RetryDebt> = serde_json::from_str(&row.get::<_, String>(8)?)
                 .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
             Ok(SessionRecord {
@@ -1659,4 +1688,101 @@ pub fn import_staged_backup(
         &versions,
         |bytes| write_safety_backup(&app, bytes),
     )
+}
+
+#[cfg(test)]
+mod stored_session_tests {
+    use super::*;
+    use serde_json::json;
+
+    fn stored_connection(mode: &str) -> Connection {
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(include_str!("../migrations/0001_initial.sql"))
+            .unwrap();
+        let now = "2026-09-10T00:00:00Z";
+        connection
+            .execute("INSERT INTO learner VALUES ('learner-1', ?1)", [now])
+            .unwrap();
+        let request = json!({"mode": mode, "packId": "china-provinces", "questionCount": null,
+            "entityIds": null, "skills": null, "statuses": null});
+        let questions = json!([
+            {"kind":"locate_region","presentation":"map","entityId":"anhui",
+             "capitalId":null,"candidateEntityIds":null,"answer":null,"coordinate":null},
+            {"kind":"identify_region","presentation":"text","entityId":"anhui",
+             "capitalId":null,"candidateEntityIds":null,"answer":{"acceptedDisplayValues":["安徽"]},"coordinate":null}
+        ]);
+        connection.execute(
+            "INSERT INTO practice_session VALUES ('session-1','learner-1','china-provinces',?1,2,'[]',0,?2,2,'[]',?3,0,?3)",
+            params![request.to_string(), questions.to_string(), now],
+        ).unwrap();
+        connection
+    }
+
+    #[test]
+    fn exports_completed_native_sessions_without_changing_stored_data() {
+        for mode in ["placement", "smart"] {
+            let connection = stored_connection(mode);
+            let before: (String, String) = connection
+                .query_row(
+                    "SELECT request_json, questions_json FROM practice_session",
+                    [],
+                    |row| Ok((row.get(0)?, row.get(1)?)),
+                )
+                .unwrap();
+            let versions = BTreeMap::from([("china-provinces".to_owned(), "1.0.0".to_owned())]);
+            let bytes = archive_from_connection(
+                &connection,
+                "learner-1",
+                &versions,
+                "2026-09-10T01:00:00Z",
+            )
+            .unwrap();
+            let inspected = inspect_archive_bytes(&bytes).unwrap();
+            assert_eq!(inspected.sessions.len(), 1);
+            assert_eq!(inspected.sessions[0].session.question_cursor, 2);
+            assert_eq!(inspected.sessions[0].session.questions.len(), 2);
+            let after: (String, String) = connection
+                .query_row(
+                    "SELECT request_json, questions_json FROM practice_session",
+                    [],
+                    |row| Ok((row.get(0)?, row.get(1)?)),
+                )
+                .unwrap();
+            assert_eq!(before, after);
+        }
+    }
+
+    #[test]
+    fn stored_session_compatibility_keeps_strict_validation() {
+        for (column, field, value) in [
+            ("request_json", "questionCount", json!(12)),
+            ("request_json", "unexpected", json!(null)),
+            ("questions_json", "capitalId", json!("unexpected-capital")),
+            ("questions_json", "unexpected", json!(null)),
+        ] {
+            let connection = stored_connection("placement");
+            let encoded: String = connection
+                .query_row(
+                    &format!("SELECT {column} FROM practice_session"),
+                    [],
+                    |row| row.get(0),
+                )
+                .unwrap();
+            let mut document: serde_json::Value = serde_json::from_str(&encoded).unwrap();
+            if column == "questions_json" {
+                document[0][field] = value;
+            } else {
+                document[field] = value;
+            }
+            connection
+                .execute(
+                    &format!("UPDATE practice_session SET {column}=?1"),
+                    [document.to_string()],
+                )
+                .unwrap();
+            assert!(read_sessions(&connection, "learner-1").is_err());
+        }
+        assert!(read_sessions(&stored_connection("custom"), "learner-1").is_err());
+    }
 }

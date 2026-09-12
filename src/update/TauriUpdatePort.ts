@@ -11,7 +11,15 @@ export function createTauriUpdatePort(): UpdatePort {
     async check() {
       if (!isTauri()) throw new UpdatePortError('UNSUPPORTED');
       if (!config.plugins.updater.pubkey.trim()) throw new UpdatePortError('NOT_CONFIGURED');
-      const metadata = await invoke<ConstructorParameters<typeof Update>[0] | null>('plugin:app-update|check');
+      const metadata = await invoke<ConstructorParameters<typeof Update>[0] | null>('plugin:app-update|check').catch((error: unknown) => {
+        switch (error) {
+          case 'UPDATE_NOT_CONFIGURED': throw new UpdatePortError('NOT_CONFIGURED');
+          case 'UPDATE_FEED_UNAVAILABLE': throw new UpdatePortError('FEED_UNAVAILABLE');
+          case 'UPDATE_NETWORK_FAILED': throw new UpdatePortError('NETWORK_FAILED');
+          case 'UPDATE_METADATA_INVALID': throw new UpdatePortError('METADATA_INVALID');
+          default: throw error;
+        }
+      });
       if (!metadata) return null;
       const update = new Update(metadata);
       return {

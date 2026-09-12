@@ -1,4 +1,4 @@
-import { geoMercator, geoPath } from 'd3-geo';
+import { geoAlbersUsa, geoMercator, geoPath } from 'd3-geo';
 import { feature, mesh } from 'topojson-client';
 import type { ContentPack } from '../content/types';
 import type {
@@ -202,7 +202,8 @@ function projectUncached(
       geometries: regionGeometries,
     };
     const regionFeatures = feature(topology, collection);
-    const projection = geoMercator().fitExtent(
+    // US insets keep Alaska's antimeridian islands from shrinking the mainland.
+    const projection = (pack.manifest.packId === 'us-states' ? geoAlbersUsa() : geoMercator()).fitExtent(
       [
         [padding, padding],
         [size.width - padding, size.height - padding],

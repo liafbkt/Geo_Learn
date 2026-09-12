@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 // This checks the built browser shell only. Native updater/install and learning
 // flows require separate desktop acceptance once their prerequisites exist.
 for (const viewport of [{ width: 800, height: 600 }, { width: 1280, height: 800 }]) {
-  test(`built shell loads and reloads without external requests at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+  test(`built shell loads and reloads without external requests at ${viewport.width}x${viewport.height}`, async ({ page, baseURL }) => {
     const pageErrors: string[] = [];
     const externalRequests: string[] = [];
     page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -11,7 +11,7 @@ for (const viewport of [{ width: 800, height: 600 }, { width: 1280, height: 800 
       if (message.type() === 'error') pageErrors.push(message.text());
     });
     await page.route('**/*', async (route) => {
-      if (new URL(route.request().url()).origin !== 'http://127.0.0.1:4173') {
+      if (new URL(route.request().url()).origin !== new URL(baseURL!).origin) {
         externalRequests.push(route.request().url());
         await route.abort();
         return;

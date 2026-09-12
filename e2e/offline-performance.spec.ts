@@ -23,11 +23,11 @@ async function latestDuration(page: import('@playwright/test').Page, start: stri
   }, { start, end });
 }
 
-test('denied public network still permits learning, save, and backup export', async ({ page }) => {
+test('denied public network still permits learning, save, and backup export', async ({ page, baseURL }) => {
   const externalRequests: string[] = [];
   await page.route('**/*', async (route) => {
     const url = new URL(route.request().url());
-    if (url.origin !== 'http://127.0.0.1:4173') {
+    if (url.origin !== new URL(baseURL!).origin) {
       externalRequests.push(url.href);
       await route.abort();
       return;
@@ -48,7 +48,7 @@ test('denied public network still permits learning, save, and backup export', as
   expect((await readE2EState(page)).attempts).toHaveLength(1);
   await page.getByRole('button', { name: '查看总结' }).click();
   await page.getByRole('button', { name: '返回主菜单' }).click();
-  await page.getByRole('button', { name: '数据管理' }).click();
+  await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: '数据管理' }).click();
   await page.getByRole('button', { name: '导出备份' }).click();
   await expect(page.getByRole('status')).toContainText('空间记忆教练备份.geolearn-backup');
   expect(externalRequests).toEqual([]);

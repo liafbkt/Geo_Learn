@@ -24,7 +24,10 @@ export interface UpdatePort {
 export const UPDATE_ERROR_MESSAGES = Object.freeze({
   UNSUPPORTED: '请在桌面应用中检查更新。',
   NOT_CONFIGURED: '更新尚未配置完成，请稍后重试。',
-  CHECK_FAILED: '检查更新失败，请检查网络后重试。',
+  FEED_UNAVAILABLE: '更新服务暂不可用，可能尚未发布稳定版本，请稍后重试。',
+  NETWORK_FAILED: '无法连接更新服务，请检查网络或代理后重试。',
+  METADATA_INVALID: '更新清单无效或不支持当前平台，请等待发布修复。',
+  CHECK_FAILED: '检查更新失败，请稍后重试。',
   DOWNLOAD_FAILED: '下载或校验更新失败，请重新检查更新后下载。',
   INSTALL_FAILED: '未能启动更新安装，请重新检查更新并下载。',
 });
@@ -33,7 +36,7 @@ export type UpdateErrorCode = keyof typeof UPDATE_ERROR_MESSAGES;
 export type UpdatePhase = 'check' | 'download' | 'install';
 
 export class UpdatePortError extends Error {
-  constructor(readonly code: 'UNSUPPORTED' | 'NOT_CONFIGURED') {
+  constructor(readonly code: 'UNSUPPORTED' | 'NOT_CONFIGURED' | 'FEED_UNAVAILABLE' | 'NETWORK_FAILED' | 'METADATA_INVALID') {
     super(UPDATE_ERROR_MESSAGES[code]);
   }
 }

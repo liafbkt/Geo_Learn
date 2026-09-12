@@ -48,6 +48,22 @@ function nativeFixture(options: { installFails?: boolean; bytesAlreadyConsumed?:
 }
 
 describe('Tauri updater adapter with real JS plugin and mocked native IPC', () => {
+  it.each([
+    ['UPDATE_FEED_UNAVAILABLE', 'FEED_UNAVAILABLE'],
+    ['UPDATE_NETWORK_FAILED', 'NETWORK_FAILED'],
+    ['UPDATE_METADATA_INVALID', 'METADATA_INVALID'],
+    ['UPDATE_NOT_CONFIGURED', 'NOT_CONFIGURED'],
+    ['unexpected native failure', 'CHECK_FAILED'],
+  ])('preserves safe check failure %s and permits retry', async (nativeCode, code) => {
+    mockIPC(() => { throw nativeCode; });
+    const service = new UpdateService(createTauriUpdatePort());
+    await service.check();
+    expect(service.getState()).toMatchObject({ status: 'error', phase: 'check', code });
+    mockIPC(() => null);
+    await service.retry();
+    expect(service.getState().status).toBe('upToDate');
+  });
+
   it('does not invoke native APIs in browser, and allows a later retry', async () => {
     const native = nativeFixture();
     vi.stubGlobal('isTauri', false);

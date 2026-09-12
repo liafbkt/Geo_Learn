@@ -1,4 +1,5 @@
-import type { Coordinate } from '../content/types';
+// Projected map coordinates: x increases eastward, y increases southward.
+export type HintMapPoint = readonly [x: number, y: number];
 
 export type CompassSector =
   | 'north'
@@ -21,7 +22,7 @@ export type Hint =
   | Readonly<{ kind: 'choice-elimination'; eliminatedEntityId: string }>;
 
 export type HintRequest =
-  | Readonly<{ kind: 'map'; selectedCoordinate: Coordinate; targetCoordinate: Coordinate }>
+  | Readonly<{ kind: 'map'; selectedCoordinate: HintMapPoint; targetCoordinate: HintMapPoint }>
   | Readonly<{ kind: 'text'; acceptedDisplayValue: string }>
   | Readonly<{
       kind: 'choice';
@@ -40,14 +41,14 @@ const sectors = [
   'south-east',
 ] as const satisfies readonly CompassSector[];
 
-function directionSector(selected: Coordinate, target: Coordinate): CompassSector {
-  const longitudeDelta = target[0] - selected[0];
-  const latitudeDelta = target[1] - selected[1];
-  if (longitudeDelta === 0 && latitudeDelta === 0) {
+function directionSector(selected: HintMapPoint, target: HintMapPoint): CompassSector {
+  const eastDelta = target[0] - selected[0];
+  const northDelta = selected[1] - target[1];
+  if (eastDelta === 0 && northDelta === 0) {
     throw new Error('Map hints require different coordinates');
   }
 
-  const angle = ((Math.atan2(latitudeDelta, longitudeDelta) * 180) / Math.PI + 360) % 360;
+  const angle = ((Math.atan2(northDelta, eastDelta) * 180) / Math.PI + 360) % 360;
   const clockwiseBoundaryIndex = Math.ceil((angle - 22.5) / 45);
   return sectors[(clockwiseBoundaryIndex + sectors.length) % sectors.length] as CompassSector;
 }

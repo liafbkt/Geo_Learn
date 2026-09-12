@@ -64,6 +64,22 @@ test('explore selection starts focused practice for that entity', async ({ page 
   expect(request).toMatchObject({ mode: 'custom', packId: 'us-states', entityIds: ['us-ak'] });
 });
 
+test('changing sound pack still allows returning to the main menu', async ({ page }) => {
+  await resetE2E(page);
+  await setQuestionKinds(page, ['locate_region']);
+  await openSmartPractice(page, '美国50州与州府');
+  await page.getByRole('button', { name: '跳过摸底，开始练习' }).click();
+  await continueIntroduction(page);
+  await page.getByRole('button', { name: '暂停', exact: true }).click();
+  await page.getByRole('button', { name: '选项', exact: true }).click();
+  await page.getByRole('radio', { name: '柔和', exact: true }).check();
+  await expect(page.getByText('设置已保存', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '返回暂停', exact: true }).click();
+  await page.getByRole('button', { name: '返回主菜单', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '选择学习范围' })).toBeVisible();
+  await expect(page.getByRole('dialog')).toBeHidden();
+});
+
 test('Escape unwinds options to pause to practice and restores focus', async ({ page }) => {
   await resetE2E(page);
   await setQuestionKinds(page, ['locate_region']);

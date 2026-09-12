@@ -341,7 +341,7 @@ describe('practiceReducer', () => {
       kind: 'locate_place',
       presentation: 'map',
       entityId: 'target',
-      coordinate: [10, 10],
+      coordinate: [-10, -10],
     };
     const currentSession = {
       ...session(),
@@ -349,6 +349,7 @@ describe('practiceReducer', () => {
     };
     const coordinates: readonly Readonly<{ entityId: string; coordinate: Coordinate }>[] = [
       { entityId: 'wrong', coordinate: [0, 0] },
+      { entityId: 'target', coordinate: [10, -10] },
     ];
     const state = startAnswering(makeState({
       session: currentSession,

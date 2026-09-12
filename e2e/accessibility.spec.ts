@@ -113,13 +113,13 @@ async function importSolidBeijing(page: Page): Promise<void> {
     kind: 'valid',
     records,
   }), solidBeijingRecords());
-  await page.getByRole('button', { name: '数据管理' }).click();
+  await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: '数据管理' }).click();
   await page.getByRole('button', { name: '选择备份并检查' }).click();
   await page.getByRole('radio', { name: '完全替换' }).check();
   await page.getByRole('checkbox', { name: '我确认完全替换当前数据' }).check();
   await page.getByRole('button', { name: '导入备份' }).click();
   await expect(page.getByRole('status')).toHaveText('备份已导入');
-  await page.getByRole('button', { name: '返回首页' }).click();
+  await page.getByRole('main').getByRole('button', { name: '返回首页' }).click();
 }
 
 for (const kind of fiveKinds) {
