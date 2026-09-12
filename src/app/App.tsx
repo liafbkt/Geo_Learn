@@ -19,6 +19,7 @@ import { SessionSummary } from '../practice/SessionSummary';
 import type { PracticeSession, RetryDebt, SessionRequest } from '../practice/session';
 import type { UpdateService, UpdateState } from '../update/UpdateService';
 import { DataManagementScreen, type BackupCommands } from './DataManagementScreen';
+import { AppHeader } from './AppHeader';
 import { HomeScreen } from './HomeScreen';
 import { DEFAULT_APP_SETTINGS, type AppSettings } from './settings';
 import { markGeoPerformance } from './performance';
@@ -441,5 +442,5 @@ export function App({ dependencies }: Readonly<{ dependencies: AppDependencies }
   else content = <SessionSummary packId={route.runtime.pack.manifest.packId} attempts={route.attempts} masteryBefore={route.masteryBefore} masteryAfter={route.masteryAfter} introducedEntityIds={route.introducedEntityIds} fragileKeysBefore={route.fragileKeysBefore} fragileKeysAfter={route.runtime.fragileKeys} onPracticeWeaknesses={(request) => void beginSession(request)} onHome={() => void refreshHome()} />;
 
   const updateActionsVisible = route.kind === 'home' || route.kind === 'summary';
-  return <>{content}{route.kind === 'home' && rejected.length > 0 ? <p className="pack-warning" role="status">{rejected.length} 个内容包未加载，其他内容仍可使用。</p> : null}{actionError === null ? null : <p className="app-action-error" role="alert">{actionError}</p>}{updateActionsVisible ? <UpdateBanner service={updateService} state={updateState} /> : null}</>;
+  return <div className="app-shell"><AppHeader active={route.kind === 'practice' ? 'practice' : 'learn'} onHome={() => setRoute({ kind: 'home' })} onDataManagement={() => setRoute({ kind: 'data' })} />{content}{route.kind === 'home' && rejected.length > 0 ? <p className="pack-warning" role="status">{rejected.length} 个内容包未加载，其他内容仍可使用。</p> : null}{actionError === null ? null : <p className="app-action-error" role="alert">{actionError}</p>}{updateActionsVisible ? <UpdateBanner service={updateService} state={updateState} /> : null}</div>;
 }

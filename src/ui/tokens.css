@@ -19,6 +19,7 @@
   --shadow-panel: 0 12px 30px rgb(23 49 45 / 14%);
   --motion-fast: 140ms;
   --motion-standard: 220ms;
+  --app-header-height: 4.5rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
