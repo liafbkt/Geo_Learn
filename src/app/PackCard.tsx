@@ -23,6 +23,13 @@ function percent(value: number): number {
   return Math.round(Math.min(100, Math.max(0, value)));
 }
 
+function silhouetteVariant(packId: string): 'china' | 'shanghai' | 'us' | undefined {
+  if (packId === 'cn-provincial-divisions') return 'china';
+  if (packId === 'cn-shanghai-districts') return 'shanghai';
+  if (packId === 'us-states') return 'us';
+  return undefined;
+}
+
 export function PackCard({
   pack,
   onResume,
@@ -32,9 +39,15 @@ export function PackCard({
 }: PackCardProps) {
   const headingId = `pack-${pack.packId}-title`;
   const mastery = percent(pack.overallMastery);
+  const variant = silhouetteVariant(pack.packId);
 
   return (
-    <article className="pack-card" data-pack-id={pack.packId} aria-labelledby={headingId}>
+    <article
+      className="pack-card"
+      data-pack-id={pack.packId}
+      data-pack-variant={variant}
+      aria-labelledby={headingId}
+    >
       <header className="pack-card__header">
         <p className="product-kicker">学习区域</p>
         <h2 id={headingId}>{pack.title.zh}</h2>

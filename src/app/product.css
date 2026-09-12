@@ -144,12 +144,11 @@
   opacity: 0.45;
 }
 
-.pack-card[data-pack-id*="shanghai"]::after {
+.pack-card[data-pack-variant="shanghai"]::after {
   clip-path: polygon(12% 14%, 90% 8%, 78% 35%, 100% 65%, 62% 100%, 18% 78%, 0 42%);
 }
 
-.pack-card[data-pack-id*="us-"]::after,
-.pack-card[data-pack-id*="usa"]::after {
+.pack-card[data-pack-variant="us"]::after {
   clip-path: polygon(0 30%, 26% 8%, 54% 20%, 100% 4%, 92% 60%, 58% 82%, 25% 100%, 8% 68%);
 }
 

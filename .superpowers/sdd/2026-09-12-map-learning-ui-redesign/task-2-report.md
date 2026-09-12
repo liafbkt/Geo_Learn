@@ -16,3 +16,9 @@
 - `AppHeader` was not changed.
 - Resume still receives the existing session; smart, custom, and explore still receive `pack.packId`; data management remains on its existing callback.
 - No content data, dependencies, network requests, map geometry, persistence, reducer, or application wiring changed.
+
+## Acceptance correction
+
+- Replaced test-only pack IDs with the shipped IDs: `cn-provincial-divisions`, `cn-shanghai-districts`, and `us-states`.
+- Red: the updated test failed because the `us-states` card did not expose the expected `data-pack-variant="us"` silhouette selector.
+- Green: `PackCard` now maps the three shipped IDs to CSS silhouette variants; the focused HomeScreen test passed with the province exploration callback receiving `cn-provincial-divisions`.

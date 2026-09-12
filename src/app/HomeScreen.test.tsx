@@ -29,15 +29,15 @@ describe('HomeScreen', () => {
     const onExplore = vi.fn();
     const packs = [
       {
-        packId: 'china',
+        packId: 'cn-provincial-divisions',
         title: { zh: '中国省级行政区', en: 'China Provinces' },
         overallMastery: 68,
         dueCount: 7,
         fragileCount: 2,
-        resumableSession: resumableSession('china'),
+        resumableSession: resumableSession('cn-provincial-divisions'),
       },
       {
-        packId: 'shanghai',
+        packId: 'cn-shanghai-districts',
         title: { zh: '上海行政区', en: 'Shanghai Districts' },
         overallMastery: 42,
         dueCount: 3,
@@ -45,7 +45,7 @@ describe('HomeScreen', () => {
         resumableSession: null,
       },
       {
-        packId: 'usa',
+        packId: 'us-states',
         title: { zh: '美国州与州府', en: 'US States and Capitals' },
         overallMastery: 81,
         dueCount: 4,
@@ -67,12 +67,12 @@ describe('HomeScreen', () => {
 
     expect(screen.getAllByRole('article')).toHaveLength(3);
     expect(screen.getByRole('heading', { name: '中国省级行政区' })).toBeInTheDocument();
-    const chinaCard = screen.getByRole('heading', { name: '中国省级行政区' }).closest('article');
-    expect(chinaCard).not.toBeNull();
-    const china = within(chinaCard!);
-    expect(china.getByText('总掌握度 68%')).toBeInTheDocument();
-    expect(china.getByText('待复习').nextElementSibling).toHaveTextContent('7');
-    expect(china.getByText('易忘').nextElementSibling).toHaveTextContent('2');
+    const provincesCard = screen.getByRole('heading', { name: '中国省级行政区' }).closest('article');
+    expect(provincesCard).not.toBeNull();
+    const provinces = within(provincesCard!);
+    expect(provinces.getByText('总掌握度 68%')).toBeInTheDocument();
+    expect(provinces.getByText('待复习').nextElementSibling).toHaveTextContent('7');
+    expect(provinces.getByText('易忘').nextElementSibling).toHaveTextContent('2');
     expect(screen.getByRole('button', { name: '继续上次练习' })).toHaveAttribute(
       'data-priority',
       'primary',
@@ -81,10 +81,14 @@ describe('HomeScreen', () => {
     expect(screen.getAllByRole('button', { name: '自定义练习' })).toHaveLength(3);
     expect(screen.getAllByRole('button', { name: '探索地图' })).toHaveLength(3);
     expect(screen.getByRole('button', { name: '数据管理' })).toBeInTheDocument();
-    expect(chinaCard).toHaveAttribute('data-pack-id', 'china');
+    expect(provincesCard).toHaveAttribute('data-pack-id', 'cn-provincial-divisions');
 
-    fireEvent.click(china.getByRole('button', { name: '探索地图' }));
-    expect(onExplore).toHaveBeenCalledWith('china');
+    const usCard = screen.getByRole('heading', { name: '美国州与州府' }).closest('article');
+    expect(usCard).toHaveAttribute('data-pack-id', 'us-states');
+    expect(usCard).toHaveAttribute('data-pack-variant', 'us');
+
+    fireEvent.click(provinces.getByRole('button', { name: '探索地图' }));
+    expect(onExplore).toHaveBeenCalledWith('cn-provincial-divisions');
   });
 });
 
