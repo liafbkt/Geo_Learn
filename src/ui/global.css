@@ -82,7 +82,9 @@ body {
   font-weight: 700;
 }
 
-.app-header__item:disabled {
+.app-header__item:disabled,
+.app-header__home:disabled,
+.app-header__data:disabled {
   cursor: not-allowed;
   opacity: 0.52;
 }

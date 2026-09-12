@@ -25,3 +25,12 @@
 ## Build repair note
 
 The first production build identified an extra closing brace at `src/ui/global.css:111` in this task's newly added header CSS. Removing that single brace restored CSS parsing; the focused test and production build both passed after the repair.
+
+## Practice navigation guard fix
+
+Review identified that the header previously passed home and data-management callbacks through while `active="practice"`, allowing those controls to unmount `PracticeScreen` during a save and bypass its existing `canLeavePractice`/pause guard.
+
+- The header now disables `返回首页` and `数据管理` during active practice, and renders `学习` as non-interactive text in that state, so no header route can leave an active session.
+- Added the regression test `keeps home and data management unavailable while a practice session is active`. It asserts the two buttons are disabled, learning is no longer a link, and clicks cannot invoke either route callback.
+- Red command: `node node_modules/vitest/vitest.mjs run src/app/AppHeader.test.tsx`; expected failure: `返回首页` was not disabled.
+- Green result: the focused suite passed 3 tests. `pnpm typecheck` also passed.

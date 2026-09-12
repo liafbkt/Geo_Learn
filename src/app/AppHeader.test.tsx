@@ -31,4 +31,20 @@ describe('AppHeader', () => {
     await user.click(screen.getByRole('button', { name: '返回首页' }));
     expect(onHome).toHaveBeenCalledOnce();
   });
+
+  it('keeps home and data management unavailable while a practice session is active', async () => {
+    const user = userEvent.setup();
+    const onHome = vi.fn();
+    const onDataManagement = vi.fn();
+
+    render(<AppHeader active="practice" onHome={onHome} onDataManagement={onDataManagement} />);
+
+    expect(screen.getByRole('button', { name: '返回首页' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '数据管理' })).toBeDisabled();
+    expect(screen.queryByRole('link', { name: '学习' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '返回首页' }));
+    await user.click(screen.getByRole('button', { name: '数据管理' }));
+    expect(onHome).not.toHaveBeenCalled();
+    expect(onDataManagement).not.toHaveBeenCalled();
+  });
 });

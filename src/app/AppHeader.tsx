@@ -31,22 +31,23 @@ function PracticeIcon() {
 }
 
 export function AppHeader({ active, onHome, onDataManagement }: AppHeaderProps) {
+  const practiceActive = active === 'practice';
   return (
     <header className="app-header">
       <nav aria-label="主导航">
-        <button className="app-header__home" type="button" aria-label="返回首页" onClick={onHome}>
+        <button className="app-header__home" type="button" aria-label="返回首页" disabled={practiceActive} onClick={onHome}>
           <HomeIcon />
         </button>
-        <a className={active === 'learn' ? 'app-header__item app-header__item--active' : 'app-header__item'} aria-current={active === 'learn' ? 'page' : undefined} href="#learn" onClick={(event) => { event.preventDefault(); onHome(); }}>
-          <LearnIcon />学习
-        </a>
+        {practiceActive
+          ? <span className="app-header__item"><LearnIcon />学习</span>
+          : <a className="app-header__item app-header__item--active" aria-current="page" href="#learn" onClick={(event) => { event.preventDefault(); onHome(); }}><LearnIcon />学习</a>}
         <span className={active === 'practice' ? 'app-header__item app-header__item--active' : 'app-header__item'} aria-current={active === 'practice' ? 'page' : undefined}>
           <PracticeIcon />练习
         </span>
         <button className="app-header__item" type="button" disabled>统计</button>
         <button className="app-header__item" type="button" disabled>知识库</button>
         <span className="app-header__spacer" />
-        <button className="app-header__data" type="button" onClick={onDataManagement}>数据管理</button>
+        <button className="app-header__data" type="button" disabled={practiceActive} onClick={onDataManagement}>数据管理</button>
       </nav>
     </header>
   );
