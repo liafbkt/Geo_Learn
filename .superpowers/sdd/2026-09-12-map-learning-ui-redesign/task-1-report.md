@@ -34,3 +34,14 @@ Review identified that the header previously passed home and data-management cal
 - Added the regression test `keeps home and data management unavailable while a practice session is active`. It asserts the two buttons are disabled, learning is no longer a link, and clicks cannot invoke either route callback.
 - Red command: `node node_modules/vitest/vitest.mjs run src/app/AppHeader.test.tsx`; expected failure: `返回首页` was not disabled.
 - Green result: the focused suite passed 3 tests. `pnpm typecheck` also passed.
+
+## Desktop shell visual correction
+
+The desktop inspection found that the earlier grid-backed main surface obscured the scenic asset and that the header rendered as a full-width dark strip. The global shell now:
+
+- keeps the scenic image visible behind the viewport through a translucent blue/white content veil;
+- replaces the strip with a centered, rounded translucent-white navigation pill using navy text, glass blur, and a green active-item indicator;
+- leaves product, card, and practice styles untouched;
+- preserves the existing header structure and the active-practice navigation guard, so no behavioral test changes were needed.
+
+The attempted local screenshot server did not remain reachable from this isolated worktree. Production build verification remains the artifact-level check for the local image and revised CSS.
