@@ -34,7 +34,7 @@ export function PackCard({
   const mastery = percent(pack.overallMastery);
 
   return (
-    <article className="pack-card" aria-labelledby={headingId}>
+    <article className="pack-card" data-pack-id={pack.packId} aria-labelledby={headingId}>
       <header className="pack-card__header">
         <p className="product-kicker">学习区域</p>
         <h2 id={headingId}>{pack.title.zh}</h2>

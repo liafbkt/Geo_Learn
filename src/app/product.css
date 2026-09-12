@@ -136,12 +136,21 @@
   position: absolute;
   right: -1rem;
   bottom: -1rem;
-  width: 4rem;
-  height: 4rem;
-  border: 1px solid var(--product-rule);
-  border-radius: 50%;
+  width: 7rem;
+  height: 7rem;
+  background: var(--product-grid-faint);
+  clip-path: polygon(12% 18%, 75% 0, 100% 40%, 78% 100%, 20% 82%, 0 48%);
   content: "";
   opacity: 0.45;
+}
+
+.pack-card[data-pack-id*="shanghai"]::after {
+  clip-path: polygon(12% 14%, 90% 8%, 78% 35%, 100% 65%, 62% 100%, 18% 78%, 0 42%);
+}
+
+.pack-card[data-pack-id*="us-"]::after,
+.pack-card[data-pack-id*="usa"]::after {
+  clip-path: polygon(0 30%, 26% 8%, 54% 20%, 100% 4%, 92% 60%, 58% 82%, 25% 100%, 8% 68%);
 }
 
 .pack-card__header h2 {

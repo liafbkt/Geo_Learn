@@ -26,6 +26,7 @@ function resumableSession(packId: string): PracticeSession {
 
 describe('HomeScreen', () => {
   it('shows three pack summaries and promotes the resumable session action', () => {
+    const onExplore = vi.fn();
     const packs = [
       {
         packId: 'china',
@@ -59,7 +60,7 @@ describe('HomeScreen', () => {
         onResume={vi.fn()}
         onStartSmart={vi.fn()}
         onStartCustom={vi.fn()}
-        onExplore={vi.fn()}
+        onExplore={onExplore}
         onOpenDataManagement={vi.fn()}
       />,
     );
@@ -80,6 +81,10 @@ describe('HomeScreen', () => {
     expect(screen.getAllByRole('button', { name: '自定义练习' })).toHaveLength(3);
     expect(screen.getAllByRole('button', { name: '探索地图' })).toHaveLength(3);
     expect(screen.getByRole('button', { name: '数据管理' })).toBeInTheDocument();
+    expect(chinaCard).toHaveAttribute('data-pack-id', 'china');
+
+    fireEvent.click(china.getByRole('button', { name: '探索地图' }));
+    expect(onExplore).toHaveBeenCalledWith('china');
   });
 });
 
