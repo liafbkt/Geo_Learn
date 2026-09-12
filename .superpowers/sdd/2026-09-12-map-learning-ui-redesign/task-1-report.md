@@ -45,3 +45,7 @@ The desktop inspection found that the earlier grid-backed main surface obscured 
 - preserves the existing header structure and the active-practice navigation guard, so no behavioral test changes were needed.
 
 The attempted local screenshot server did not remain reachable from this isolated worktree. Production build verification remains the artifact-level check for the local image and revised CSS.
+
+## Background clarity correction
+
+Visual recheck found that the content veil's `backdrop-filter: blur(8px)` made the supplied pixel-art landscape indistinct. The global `main` veil now remains translucent blue/white without backdrop blur, leaving the landscape recognizable behind content. The header's own local blur, its floating appearance, and all navigation guard behavior remain unchanged.

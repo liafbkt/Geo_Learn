@@ -152,7 +152,6 @@ main {
   min-height: calc(100vh - var(--app-header-height));
   padding: var(--space-8);
   background: linear-gradient(135deg, rgb(246 251 255 / 82%), rgb(214 234 246 / 70%));
-  backdrop-filter: blur(8px);
 }
 
 .app-shell > main {
