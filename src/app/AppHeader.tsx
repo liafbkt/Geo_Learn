@@ -30,11 +30,21 @@ function PracticeIcon() {
   );
 }
 
+function BrandIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M16 28s9-7.3 9-15a9 9 0 1 0-18 0c0 7.7 9 15 9 15Z" />
+      <path d="M12 16v-4l4-3 4 3v4m-10 0h12m-10 0v5m4-5v5m4-5v5" />
+    </svg>
+  );
+}
+
 export function AppHeader({ active, onHome, onDataManagement }: AppHeaderProps) {
   const practiceActive = active === 'practice';
   return (
     <header className="app-header">
       <nav aria-label="主导航">
+        <span className="app-header__brand" aria-label="中国地理小课堂"><BrandIcon /><strong>中国地理小课堂</strong></span>
         <button className="app-header__home" type="button" aria-label="返回首页" disabled={practiceActive} onClick={onHome}>
           <HomeIcon />
         </button>

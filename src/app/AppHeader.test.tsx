@@ -19,6 +19,12 @@ describe('AppHeader', () => {
     expect(screen.getByRole('navigation', { name: '主导航' })).toBeInTheDocument();
   });
 
+  it('exposes the classroom brand to assistive technology', () => {
+    render(<AppHeader active="learn" onHome={vi.fn()} onDataManagement={vi.fn()} />);
+
+    expect(screen.getByLabelText('中国地理小课堂')).toBeInTheDocument();
+  });
+
   it('marks learning as active, keeps future destinations unavailable, and returns home', async () => {
     const user = userEvent.setup();
     const onHome = vi.fn();
