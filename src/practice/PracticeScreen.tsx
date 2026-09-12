@@ -116,6 +116,7 @@ export function PracticeScreen(props: PracticeScreenProps) {
   const [introSaving, setIntroSaving] = useState(false);
   const [introSaveError, setIntroSaveError] = useState(false);
   const [retryingSave, setRetryingSave] = useState(false);
+  const [departingState, setDepartingState] = useState<PracticeState | null>(null);
   const attempts = useRef<AttemptEvent[]>([...(props.initialAttempts ?? [])]);
   const savingAttempt = useRef<string | null>(null);
   const latestState = useRef(state);
@@ -180,8 +181,17 @@ export function PracticeScreen(props: PracticeScreenProps) {
       props.onComplete({ attempts: attempts.current, masteryAfter: state.masteryRecords, session: state.session });
       return;
     }
+    if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setDepartingState(state);
+    }
     dispatch({ type: 'CONTINUED', now: props.now() });
   };
+
+  useEffect(() => {
+    if (departingState === null) return;
+    const timer = window.setTimeout(() => setDepartingState(null), 180);
+    return () => window.clearTimeout(timer);
+  }, [departingState]);
 
   const continueIntroduction = async () => {
     if (introSaving) return;
@@ -281,6 +291,9 @@ export function PracticeScreen(props: PracticeScreenProps) {
     state.pendingAttempt === null ? state.session.questionCursor + 1 : state.session.questionCursor,
     state.session.questions.length,
   );
+  const visibleQuestionNumber = state.phase === 'presenting' ? 0 : questionNumber;
+  const remainingQuestions = state.session.questions.length - visibleQuestionNumber;
+  const deckCount = remainingQuestions < 2 ? 0 : Math.min(remainingQuestions, 2);
 
   const selectChoice = (entityId: string) => dispatch({ type: 'ANSWER_SELECTED', value: entityId });
   const handleTextKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -307,9 +320,16 @@ export function PracticeScreen(props: PracticeScreenProps) {
         />
       </section>
 
+      {deckCount > 0 ? <div className="practice-queue" aria-hidden="true">
+        {Array.from({ length: deckCount }, (_, index) => <span key={index} />)}
+      </div> : null}
       <section className="practice-panel" aria-label="题目与操作">
+        {departingState === null ? null : <div className="practice-card-departure" aria-hidden="true">
+          <span className="product-kicker">{props.pack.manifest.title.zh}</span>
+          <div className="practice-card-departure__prompt">{prompt(departingState, props.pack)}</div>
+        </div>}
         <header className="practice-panel__header">
-          <div><span className="product-kicker">{props.pack.manifest.title.zh}</span><strong>{questionNumber}/{state.session.questions.length}</strong></div>
+          <div><span className="product-kicker">{props.pack.manifest.title.zh}</span></div>
           <button type="button" className="product-button product-button--quiet" disabled={!canLeavePractice(state)} onClick={requestPause}>暂停</button>
         </header>
 
@@ -363,6 +383,12 @@ export function PracticeScreen(props: PracticeScreenProps) {
           </>
         )}
       </section>
+
+      <div className="practice-progress" role="status" aria-label="答题进度" aria-live="polite" aria-atomic="true">
+        <strong>{visibleQuestionNumber} / {state.session.questions.length}</strong>
+        <progress aria-label="本次练习进度" max={state.session.questions.length} value={visibleQuestionNumber} />
+        <span>剩余 {remainingQuestions} 题</span>
+      </div>
 
       {paused && !optionsOpen ? <PauseDialog onResume={resume} onOpenOptions={() => setOptionsOpen(true)} onReturnHome={props.onHome} waitingForSave={!canLeavePractice(state)} /> : null}
       {paused && optionsOpen ? <OptionsPanel value={props.settings.audio} repository={props.repository} onChange={(audio) => props.onSettingsChange({ audio })} onPreview={(packId, volume) => { void props.audio.preview(packId, volume); }} onBack={() => setOptionsOpen(false)} onSavingChange={setSettingsSaving} unavailablePacks={(['crisp', 'soft', 'minimal'] as const).filter((packId) => !props.audio.isAvailable(packId))} /> : null}

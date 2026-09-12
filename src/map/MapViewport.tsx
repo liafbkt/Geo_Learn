@@ -270,15 +270,19 @@ export function MapViewport({
     if (pointer?.captured) event.currentTarget.releasePointerCapture?.(pointerId);
   };
 
-  const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
-    event.preventDefault();
+  const zoomBy = (factor: number) => {
     updateViewport((current) => {
-      const requested = current.zoom * (event.deltaY < 0 ? 1.2 : 1 / 1.2);
+      const requested = current.zoom * factor;
       return {
         ...current,
         zoom: Math.min(map.zoomLimits.max, Math.max(map.zoomLimits.min, requested)),
       };
     });
+  };
+
+  const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
+    event.preventDefault();
+    zoomBy(event.deltaY < 0 ? 1.2 : 1 / 1.2);
   };
 
   const selectedEntity = selection === null ? undefined : entities.get(selection.entityId);
@@ -359,6 +363,13 @@ export function MapViewport({
           />
         </g>
       </svg>
+      <div className="map-controls" role="group" aria-label="地图视图控制" onKeyDown={(event) => {
+        if (event.key === ' ' || event.code === 'Space') event.stopPropagation();
+      }}>
+        <button type="button" aria-label="放大地图" onClick={() => zoomBy(1.2)}>+</button>
+        <button type="button" aria-label="缩小地图" onClick={() => zoomBy(1 / 1.2)}>−</button>
+        <button type="button" aria-label="复位地图" onClick={() => updateViewport(() => initialViewport)}>复位</button>
+      </div>
       {interactive ? <span id={statusId} role="status" className="map-sr-only">{status}</span> : null}
     </div>
   );

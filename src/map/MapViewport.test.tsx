@@ -186,6 +186,27 @@ describe('MapViewport accessibility and labels', () => {
 });
 
 describe('MapViewport pan and zoom', () => {
+  it('zooms within the pack limits and resets pan and zoom with accessible buttons', () => {
+    renderMap();
+    const transform = screen.getByTestId('map-transform');
+    const zoomIn = screen.getByRole('button', { name: '放大地图' });
+    const zoomOut = screen.getByRole('button', { name: '缩小地图' });
+    fireEvent.click(zoomIn);
+    expect(transform).toHaveAttribute('transform', 'translate(0 0) scale(1.2)');
+    fireEvent.click(zoomOut);
+    expect(transform).toHaveAttribute('transform', 'translate(0 0) scale(1)');
+    for (let index = 0; index < 30; index += 1) fireEvent.click(zoomIn);
+    expect(transform).toHaveAttribute('transform', `translate(0 0) scale(${projectedMap.zoomLimits.max})`);
+    for (let index = 0; index < 30; index += 1) fireEvent.click(zoomOut);
+    expect(transform).toHaveAttribute('transform', `translate(0 0) scale(${projectedMap.zoomLimits.min})`);
+    const map = screen.getByRole('listbox');
+    fireEvent.pointerDown(map, { pointerId: 1, pointerType: 'mouse', button: 2, clientX: 10, clientY: 20 });
+    fireEvent.pointerMove(map, { pointerId: 1, pointerType: 'mouse', clientX: 30, clientY: 55 });
+    fireEvent.pointerUp(map, { pointerId: 1, pointerType: 'mouse' });
+    fireEvent.click(screen.getByRole('button', { name: '复位地图' }));
+    expect(transform).toHaveAttribute('transform', 'translate(0 0) scale(1)');
+  });
+
   it('keeps a click on a selectable region targeted at the region', () => {
     const { onRegionSelect } = renderMap({ selectableKind: 'region' });
     const map = screen.getByRole('listbox');
