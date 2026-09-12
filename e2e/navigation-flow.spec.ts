@@ -8,6 +8,16 @@ import {
   setQuestionKinds,
 } from './helpers/app';
 
+test('home exposes main navigation and learning scope at desktop and narrow viewports', async ({ page }) => {
+  for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await resetE2E(page);
+    await expect(page.getByRole('navigation', { name: '主导航' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '选择学习范围' })).toBeVisible();
+    await expect(page.getByRole('main')).toBeVisible();
+  }
+});
+
 test('placement and custom entries persist the selected request', async ({ page }) => {
   await resetE2E(page);
   await setQuestionKinds(page, ['locate_region']);

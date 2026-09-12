@@ -10,6 +10,20 @@ import {
   setQuestionKinds,
 } from './helpers/app';
 
+test('map practice exposes semantic answer progress and map controls', async ({ page }) => {
+  await resetE2E(page);
+  await setQuestionKinds(page, ['locate_region']);
+  await openSmartPractice(page, '美国50州与州府');
+  await page.getByRole('button', { name: '跳过摸底，开始练习' }).click();
+  await continueIntroduction(page);
+
+  await expect(page.getByRole('status', { name: '答题进度' })).toContainText(/1 \/ \d+/);
+  const controls = page.getByRole('group', { name: '地图视图控制' });
+  await expect(controls.getByRole('button', { name: '放大地图' })).toBeEnabled();
+  await expect(controls.getByRole('button', { name: '缩小地图' })).toBeEnabled();
+  await expect(controls.getByRole('button', { name: '复位地图' })).toBeEnabled();
+});
+
 test('smart practice introduces, corrects, delays a retry, and summarizes', async ({ page }) => {
   await resetE2E(page);
   await setQuestionKinds(page, [
